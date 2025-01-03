@@ -5,6 +5,8 @@ int	main(int argc, char **argv, char **envp)
 	char *input;
 	t_data *data;
 
+	main_test(); // TEST
+
   signal(SIGINT, signal_handler);
   signal(SIGQUIT, signal_handler);
 
@@ -26,6 +28,23 @@ int	main(int argc, char **argv, char **envp)
 		input = display_prompt();
 		if (*input == '\0')
 			continue;
+		/*
+		t_cmd_table *table = cmd_table(input);
+		if (!table)
+			exit(1);
+
+		example ls -l
+		char * table.cmd = "ls"
+		char ** table.args = {ls, -l, NULL};
+		char *table.cmd_path = "bin/etc/ls";
+
+
+		//	
+		
+		//after executing
+		free_table(table);
+		table = NULL;
+		*/
 		add_history(input);
 		if(!builtin_check(input)) // not a builtin -> execve
 			test_execute(input, data->env_paths, envp);

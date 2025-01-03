@@ -21,7 +21,10 @@ t_data *init_data(char **envp)
 	data->prompt_str = NULL;
 	data->env_paths = NULL;
 	data->home_path = NULL;
-	data->envp = NULL;
+	data->original_envp = NULL;
+	data->mini_envp = NULL;
+
+	data->mini_envp = copy_array(envp);
 
 	data->env_paths = get_envp_path(envp);
 	if (data->env_paths == NULL)
@@ -38,7 +41,7 @@ t_data *init_data(char **envp)
 		return (0);
 	}
 
-	data->envp = envp;
+	data->original_envp = envp;
 
 	return (data);
 }
@@ -51,13 +54,13 @@ void free_data()
 	if(data->prompt_str)
 		free(data->prompt_str);
 	if(data->env_paths)
-		free_array(data->env_paths);
+		MAK_free_array(data->env_paths);
 	// if(data->home_path)
 	// 	free(data->home_path);
 	free(data);
 }
 
-int	free_array(char **arr)
+int	MAK_free_array(char **arr)
 {
 	size_t	i;
 
@@ -195,7 +198,7 @@ void signal_handler(int signum)
 	}
 }
 
-int	arr_size(char **arr)
+int	MAK_arr_size(char **arr)
 {
 	int i;
 
@@ -433,25 +436,30 @@ int builtin_check(char *input)
 	if (split == NULL)
 		exit_error("test_execute split"); // TODO how to handle?
 
+	/* DEBUG_print_strings(split); */
+	/* printf("\n"); */
+
 	// TODO Refactor!
-	if (ft_strncmp(split[0], "cd", 2) == 0)
+	if (ft_strncmp(split[0], "cd", 2) == 0 && split[0][2] == '\0')
 		builtin_chdir(split);
-	else if (ft_strncmp(split[0], "echo", 4) == 0)
+	else if (ft_strncmp(split[0], "echo", 4) == 0 && split[0][4] == '\0')
 		builtin_echo(input + 4);
-	else if (ft_strncmp(split[0], "pwd", 3) == 0)
+	else if (ft_strncmp(split[0], "pwd", 3) == 0 && split[0][3] == '\0')
 		builtin_pwd(split);
-	else if (ft_strncmp(split[0], "env", 3) == 0)
+	else if (ft_strncmp(split[0], "env", 3) == 0 && split[0][3] == '\0')
 		builtin_env();
+	else if (ft_strncmp(split[0], "export", 6) == 0 && split[0][6] == '\0')
+		builtin_export("test");
 	/* else if (ft_strncmp(split[0], "exit", x) == 0) */
 	/* else if (ft_strncmp(split[0], "export", x) == 0) */
 	/* else if (ft_strncmp(split[0], "unset", x) == 0) */
 	else // TODO else statement needed?
 	{
-		free_array(split);
+		MAK_free_array(split);
 		return (0);
 	}
 
-	free_array(split);
+	MAK_free_array(split);
 	return (1);
 }
 
@@ -465,13 +473,13 @@ int builtin_chdir(char **split)
 	if (split == NULL)
 		return(DEBUG_0("builtin_chdir split == NULL"));
 
-	if (arr_size(split) > 2)
+	if (MAK_arr_size(split) > 2)
 	{
 		printf("minishell: cd: too many arguments\n");
 		return (0);
 	}
 
-	if (arr_size(split) == 1)
+	if (MAK_arr_size(split) == 1)
 		path = get_data(NULL)->home_path;
 	else if (ft_strlen(split[1]) == 1 && split[1][0] == '~')
 		path = get_data(NULL)->home_path;
@@ -491,7 +499,7 @@ int builtin_pwd(char **split)
 	char *cwd_path;
 
 	DEBUG_printf("bultin_pwd");
-	if (arr_size(split) > 1)
+	if (MAK_arr_size(split) > 1)
 	{
 		printf("pwd: too many arguments\n");
 		return (1);
@@ -507,7 +515,7 @@ int builtin_pwd(char **split)
 void builtin_env()
 {
 	char **env;
-	env = get_data(NULL)->envp;
+	env = get_data(NULL)->original_envp; // TODO change to mini_envp
 	while(*env != NULL)
 	{
 		printf("%s\n", *env);
@@ -553,7 +561,7 @@ int builtin_echo(char *input)
 		printf("\n");
 
 	/* (void)split; */
-	free_array(split);
+	MAK_free_array(split);
 	return (0);
 }
 
@@ -581,6 +589,130 @@ char *builtin_echo_parse_option(char *str)
 	return (str);
 }
 
+// Does not free input arr !
+// TODO input entry should be malloced/freed or not?
+// TODO handle strdup fail
+// TODO use ft_calloc?
+// TODO what if *arr / arr[0] is NULL or size 0?
+char **add_to_array(char **arr, char *new_value)
+{
+	char **new_arr;
+	int size;
+	int i;
+
+	if (!arr)
+	{
+		DEBUG_printf("no arr");
+		return(NULL);
+	}
+	// if !new_value
+	if (!new_value)
+	{
+		DEBUG_printf("no new_value");
+		return(arr);
+	}
+
+
+	size = MAK_arr_size(arr);
+	new_arr = malloc(sizeof(char *) * (size + 2));
+	if (!new_arr)
+		exit_error("copy_array malloc");
+
+	i = 0;
+	while(arr[i])
+	{
+		new_arr[i] = ft_strdup(arr[i]);
+		if (!new_arr[i])
+		{
+    	while (--i >= 0)
+    		free(new_arr[i]);
+    	free(new_arr);
+    	exit_error("add_to_array ft_strdup");
+    }
+		i++;
+	}
+	new_arr[i] = ft_strdup(new_value); // TODO refactor "free_failed_malloc"
+	if (!new_arr[i])
+	{
+  	while (--i >= 0)
+  		free(new_arr[i]);
+  	free(new_arr);
+  	exit_error("add_to_array ft_strdup");
+  }
+
+	new_arr[++i] = NULL;
+
+	/* free(arr); */
+	return (new_arr);
+}
+
+// TODO handle strdup fail
+// TODO use ft_calloc?
+// TODO what if *arr / arr[0] is NULL or size 0?
+char **copy_array(char **arr)
+{
+	char **new_arr;
+	int size;
+	int i;
+
+	if (!arr)
+	{
+		DEBUG_printf("no arr");
+		return(NULL);
+	}
+
+	size = MAK_arr_size(arr);
+
+	new_arr = malloc(sizeof(char *) * (size + 1));
+	if (!new_arr)
+		exit_error("copy_array malloc");
+
+	i = 0;
+	while(arr[i])
+	{
+		new_arr[i] = ft_strdup(arr[i]);
+		if (!new_arr[i])
+		{
+    	while (--i >= 0)
+    		free(new_arr[i]);
+    	free(new_arr);
+    	exit_error("copy_array ft_strdup");
+    }
+		i++;
+	}
+	new_arr[i] = NULL;
+	return (new_arr);
+}
+
+/*
+ *char **envp_copy = malloc((count + 1) * sizeof(char *));
+    if (!envp_copy) {
+        perror("malloc");
+        exit(EXIT_FAILURE);
+    }
+
+    // Copy each string
+    for (int i = 0; i < count; i++) {
+        envp_copy[i] = strdup(envp[i]);
+        if (!envp_copy[i]) {
+            perror("strdup");
+            exit(EXIT_FAILURE);
+        }
+    }
+    envp_copy[count] = NULL;  // Null-terminate the array
+
+    return envp_copy;
+ *
+ * */
+
+
+char *builtin_export(char *str)
+{
+	DEBUG_printf("bultin_echo");
+	(void)str;
+	return 0;
+}
+
 // path, arguments usage:
   /* char *const path = "/usr/bin/cat"; */
   /* char *const argv[] = {"/usr/bin/cat", "file.md", NULL}; */
@@ -604,8 +736,9 @@ void test_execute(char* input, char **env_paths, char **envp)
 	if (exec_path == NULL)
 	{
 		free(exec_path);
-		free_array(input_split);
-		DEBUG_printf("command not found");
+		MAK_free_array(input_split);
+		/* DEBUG_printf("command not found"); */
+		perror("minishell: command not found");
 		return ;
 	}
 	free(input_split[0]);
@@ -613,10 +746,10 @@ void test_execute(char* input, char **env_paths, char **envp)
 	/* input_split[0] = exec_path; */
 
 	// TODO test_fork test
-	test_fork(exec_path, input_split, envp);
+	test_fork(exec_path, input_split, envp); // TODO change to mini_envp
 
 	free(exec_path);
-	free_array(input_split);
+	MAK_free_array(input_split);
 
   /* if (execve(exec_path, input_split, envp) == -1) { */
   /*     perror("execve failed"); */
@@ -681,7 +814,7 @@ void DEBUG_print_strings(char **arr)
 	if (arr == NULL) return;
 	
 	for (int i = 0; arr[i] != NULL; i++)
-		printf("%s\n", arr[i]);
+		printf("_%s_\n", arr[i]);
 }
 
 //////////////////// TEMP ////////////////////
