@@ -54,7 +54,7 @@ int	main(int argc, char **argv, char **envp)
 		if (!table)
 			exit(1); // TODO free_data + free_table
 
-		DEBUG_print_strings(table->args);
+		/* DEBUG_print_strings(table->args); */
 		DEBUG_printf("table->cmd: %s\n", table->cmd);
 
 		/* free_table(table); */

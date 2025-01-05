@@ -582,8 +582,6 @@ int builtin_echo_table(char **args)
 	/* 	return (1); */
 	/* } */
 
-	asdf
-
 	i = 1;
 	while(args[i])
 	{
