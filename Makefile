@@ -13,6 +13,9 @@ INPUT_CHCK = ./domagoj/parser/validate_input
 TOKEN_DIR = ./domagoj/parser/tokenisation
 TABLE_DIR = ./domagoj/parser/table_fill
 EXPANDER_DIR = ./domagoj/parser/expansion
+HEREDOC_DIR = ./domagoj/execution/heredoc_program
+PIPE_DIR = ./domagoj/execution/pipe_redir
+
 
 
 SOURCE = minishell.c \
@@ -26,6 +29,8 @@ SOURCE = minishell.c \
           $(UTILS_DIR)/ft_strexpel.c \
           $(UTILS_DIR)/ft_insert_str.c \
           $(UTILS_DIR)/ft_find_indexes.c \
+		  $(UTILS_DIR)/ft_append.c \
+		  $(UTILS_DIR)/ft_create_file.c \
 		  $(UTILS_DIR)/print_or_free.c \
           $(UTILS_DIR)/ft_iswhitespace.c \
           $(TABLE_DIR)/fill_table.c \
@@ -37,7 +42,10 @@ SOURCE = minishell.c \
 		  $(EXPANDER_DIR)/exit_status.c \
 		  $(EXPANDER_DIR)/env_var.c \
 		  $(INPUT_CHCK)/input_check.c \
+		  $(HEREDOC_DIR)/heredoc_program.c \
+		  $(PIPE_DIR)/pipe_redir.c \
 		  ./domagoj/main-test.c \
+		  ./domagoj/execution/execute.c \
 
 
 CFLAGS = -Wall -Wextra -Werror -g # TODO -g

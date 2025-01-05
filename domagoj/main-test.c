@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/02 13:50:08 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/04 22:52:39 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/05 19:13:52 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,16 +30,16 @@ int	main_test(void)
 		"< 'input.txy' echo 'hi' > 1.out > 2.out",
 		"touch file.txt && rm -i file.txt",
 		"ls &&",
-		"cat << EOF\nNested << redirection\nEOF",
-			"cat << EOF\nHello, EOF\n",
+	//	"cat << EOF\nNested << redirection\nEOF",
+	//		"cat << EOF\nHello, EOF\n",
 		"echo$HOME$$",
 		"ls > out.txt && cat $?out.txt",
 		"echo hello$HOME$",
 		"echo hello$HOME duh",
 		"echo$HOME$",
-		"cat << END\nHello\nWorld\nEND",
+	//	"cat << END\nHello\nWorld\nEND",
 		"cat << EOF | wc -l$?",
-		"cat << EOF | grep pattern\npattern\nEOF",
+		"cat << EOF | grep pattern\npattern",
 		"cat << EOF | grep 'data' | wc -l",
 		"echo 'new line' >> output1.txt >> output2.txt",
 		"ls -l > output.txt 2> error.txt",
@@ -187,6 +187,8 @@ int	main_test(void)
 		if (table)
 		{
 			cmd_print(table);
+			if (execute(table) == ERROR)
+				printf("ERROR DURING EXECUTION PROCESS!\n");
 			free_table(table);
 			table = NULL;
 		}

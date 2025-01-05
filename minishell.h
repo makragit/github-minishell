@@ -39,7 +39,10 @@ typedef enum t_err
 {
 	OK,
 	ERROR,
+	FAIL,
+	SINGLE_CMD,
 	NO,
+	EQUAL,
 	S_QUOTE,
 }	t_err;
 
@@ -71,11 +74,10 @@ typedef struct t_redir_data
 	char					*append;
 	char					*heredoc_delimiter;
 	bool					heredoc_quotes;
-	int						fd_in;
-	int						fd_out;
+	int						heredoc_fd;
 	struct t_redir_data		*next;
 	struct t_redir_data		*prev;
-	//int		stdin_backup;
+	//int		stdin_backup;//to return to original input and output I think (after execuition or smth)
 	//int		stdout_backup;
 }	t_redir_data;
 
@@ -86,8 +88,10 @@ typedef struct t_cmd_table
 	char				*cmd;
 	char				**args;
 	t_redir_data		*redir_data;
-	bool				pipe_output;
-	int					*pipe_fd;
+//	bool				pipe_output;
+	int					p_input_fd;
+	int					p_output_fd;
+	int					heredoc_fd;
 	struct t_cmd_table	*next;
 }	t_cmd_table;
 
@@ -124,26 +128,14 @@ char *is_relative_path(const char *str); // TODO not needed
 int is_executable(const char *str, char **paths); // TODO not needed
 char *return_executable_path(const char *str, char **paths);
 
-int builtin_check(char *input); // TODO switch to table variant
-int builtin_check_table(t_cmd_table *table);
+int builtin_check(char *input);
 int builtin_chdir(char **split);
 int builtin_pwd(char **split);
 void builtin_env();
 int builtin_echo(char *input);
-int builtin_echo_table(char **args);
 char *builtin_echo_parse_option(char *str); // TODO use parser/lexer instead
-											//
-/* char *builtin_export(char *str); */
-/* int builtin_export(char *str); */
-int builtin_export(char **split); // TODO not finished
+char *builtin_export(char *str); // TODO not finished
 char **copy_array(char **arr);
-/* char **add_to_array(char **arr, char *new_value); // TODO not needed -> array_free_and_add */
-int search_array(char **arr, char *search);
-int array_free_and_add(char ***arr, char *new_value);
-int array_free_and_remove(char ***arr, char *remove_value);
-/* int array_free_and_remove_2(char ***arr, char *remove_value); */
-
-int builtin_unset(char **split);
 
 void test_execute(char* input, char **paths, char **envp);
 int test_fork(char* exec_path, char **input_split, char **envp);
@@ -151,7 +143,6 @@ int test_fork(char* exec_path, char **input_split, char **envp);
 // temp.c DEBUG
 void DEBUG_print_strings(char **arr);
 void DEBUG_is_executable(char **paths);
-
 
 
 // DOMAGOJ
@@ -183,6 +174,13 @@ int				input_check(const char *input);
 t_redir_data	*add_redir_entry(t_redir_data *data, t_token *token);
 char			*getenv_local(char *name);
 
+//exec starting - domi
+t_err execute(t_cmd_table *table);
+int	pipe_setup(t_cmd_table *table);
+int close_pipes(t_cmd_table *table);
+int heredoc(t_cmd_table *table);
+int ft_create_file(void);
+int ft_append(const char *str, int fd);
 // Main-test
 int main_test(void);
 

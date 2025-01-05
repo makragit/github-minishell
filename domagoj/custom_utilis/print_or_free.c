@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:39:10 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/04 22:52:29 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/05 19:09:39 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,12 @@ void	free_table(t_cmd_table *table)
 
 	free_lst(table->tokens);
 	table->tokens = NULL;
+	if (table)
+		close_pipes(table);
 	while (table)
 	{
+		if (table->heredoc_fd != -1)
+			close(table->heredoc_fd);
 		while (table->redir_data)
 		{
 			redir_tmp = table->redir_data;
