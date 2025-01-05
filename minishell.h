@@ -1,3 +1,18 @@
+//fix
+/*
+replace my minishell.c with his
+return -Werror to makefile
+
+*/
+
+
+
+
+
+
+
+
+
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
@@ -17,11 +32,20 @@
 
 # include <string.h>
 # include <ctype.h>
+# include <stdbool.h>
 
 extern int	last_executed_cmd;
-typedef enum token_type
+typedef enum t_err
 {
-	CMD_TOKEN,
+	OK,
+	ERROR,
+	NO,
+	S_QUOTE,
+}	t_err;
+
+typedef enum t_token_type
+{
+	CMD_t,
 	ARG_TOKEN,
 	APPEND,
 	HEREDOC,
@@ -30,30 +54,40 @@ typedef enum token_type
 	OUTPUT,
 	WORD,
 	PIPE_TOKEN,
-	ENV_VAR_TOKEN,
-	S_QUOTED_STR_TOKEN,
-	D_QUOTED_STR_TOKEN,
-}	token_type;
+}	t_token_type;
 
 typedef struct t_token
 {
 	char			*value;
-	token_type		type;
+	t_token_type		type;
 	struct t_token	*next;
-	struct t_token	*previous;
+	struct t_token	*prev;
 }	t_token;
+
+typedef struct t_redir_data
+{
+	char					*input;
+	char					*output;
+	char					*append;
+	char					*heredoc_delimiter;
+	bool					heredoc_quotes;
+	int						fd_in;
+	int						fd_out;
+	struct t_redir_data		*next;
+	struct t_redir_data		*prev;
+	//int		stdin_backup;
+	//int		stdout_backup;
+}	t_redir_data;
 
 typedef struct t_cmd_table
 {
-	int					index;//good
-	char				*cmd;//good
-	//char				**env;
-	char				*cmd_path;//good
-	char				**args;//good
-	char				*input_redir;//not
-	char				*output_redir;//not
-	char				*append_redir;//not
-	char				*heredoc_delim;//not
+	int					index;
+	t_token				*tokens;
+	char				*cmd;
+	char				**args;
+	t_redir_data		*redir_data;
+	bool				pipe_output;
+	int					*pipe_fd;
 	struct t_cmd_table	*next;
 }	t_cmd_table;
 
@@ -108,32 +142,33 @@ void DEBUG_is_executable(char **paths);
 
 
 // DOMAGOJ
-t_token		*cut_token(t_token *token);
-t_cmd_table	*parse(const char *input);
-t_token		*tokenize(char *input_string);
-size_t		token_len(char *str);
-void		token_categorisation(t_token *tokens);
-int			make_token_entry(t_token **tokens, char *str_token);
-t_cmd_table	*table_init(size_t of_size);
-void		token_distribution(t_cmd_table *table, t_token *token);
-int			arr_create(t_cmd_table *table, t_token *token);
-int			expander(t_cmd_table **table);
-int			expand_exit_status(char **str);
-int			expand_env(char **arg);
-int			is_whitespace(char c);
-int			skip_whitespace(char **str);
-void		free_table(t_cmd_table *table);
-void		cmd_print(t_cmd_table *table);
-void		fully_free(t_token *lst);
-char		*ft_strexpel(char *haystack, const char *needle);
-int			*find_indexes(char *haystack, char *needle);
-int			ft_str_insert(char **src, char *insert, size_t place);
-int			ft_trim_quotes(char **str);
-void		cmd_print(t_cmd_table *table);
-t_token		*reverse_lst(t_token *lst);
-void		free_lst(t_token *lst);
-void		add_previous(t_token *lst);
-int			input_check(const char *input);
+t_token			*cut_token(t_token *token);
+t_cmd_table		*parse(const char *input);
+t_token			*tokenize(char *input_string);
+size_t			token_len(char *str);
+void			token_categorisation(t_token **tokens);
+int				make_token_entry(t_token **tokens, char *str_token);
+t_cmd_table		*table_init(size_t of_size);
+int				token_distribution(t_cmd_table *table, t_token *token);
+int				arr_create(t_cmd_table *table, t_token *token);
+int				expander(t_token *tokens);
+int				expand_exit_status(char **str);
+int				expand_env(char **arg);
+int				is_whitespace(char c);
+int				skip_whitespace(char **str);
+void			free_table(t_cmd_table *table);
+void			cmd_print(t_cmd_table *table);
+char			*ft_strexpel(char *haystack, const char *needle);
+int				*find_indexes(char *haystack, char *needle);
+int				ft_str_insert(char **src, char *insert, size_t place);
+int				ft_trim_quotes(char **str);
+void			cmd_print(t_cmd_table *table);
+t_token			*reverse_lst(t_token *lst);
+void			free_lst(t_token *lst);
+void			add_previous(t_token *lst);
+int				input_check(const char *input);
+t_redir_data	*add_redir_entry(t_redir_data *data, t_token *token);
+char			*getenv_local(char *name);
 
 // Main-test
 int main_test(void);
