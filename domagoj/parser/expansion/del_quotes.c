@@ -1,36 +1,40 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_iswhitespace.c                                  :+:      :+:    :+:   */
+/*   del_quotes.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/15 22:10:55 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/04 22:52:15 by dbogovic         ###   ########.fr       */
+/*   Created: 2024/12/12 20:32:28 by domagoj           #+#    #+#             */
+/*   Updated: 2025/01/04 22:52:49 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../minishell.h"
+#include "../../../minishell.h"
 
-int	is_whitespace(char c)
+int	ft_trim_quotes(char **str)
 {
-	if (c == ' ')
-		return (1);
-	return (0);
-}
-
-int	skip_whitespace(char **str)
-{
-	size_t	c;
+	char	*strcpy;
 	char	*new;
+	size_t	len;
 
-	c = 0;
-	while ((*str)[c] && is_whitespace((*str)[c]))
-		c++;
-	new = ft_strdup((*str) + c);
-	free(*str);
-	*str = new;
-	if (!new)
+	strcpy = *str;
+	if (!*str || !str)
 		return (-1);
+	len = ft_strlen(strcpy);
+	if (len < 2)
+		return (0);
+	if (strcpy[0] == strcpy[len - 1])
+	{
+		if (strcpy[0] == '\'' || strcpy[0] == '\"')
+		{
+			strcpy[len - 1] = '\0';
+			new = ft_strdup(strcpy + 1);
+			if (!new)
+				return (-1);
+			free(*str);
+			*str = new;
+		}
+	}
 	return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:39:10 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/03 18:26:52 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/01/04 22:52:29 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,19 +32,21 @@ void	free_array(char **array)
 void	free_table(t_cmd_table *table)
 {
 	t_cmd_table		*tmp;
+	t_redir_data	*redir_tmp;
 
+	free_lst(table->tokens);
+	table->tokens = NULL;
 	while (table)
 	{
+		while (table->redir_data)
+		{
+			redir_tmp = table->redir_data;
+			table->redir_data = table->redir_data->next;
+			free(redir_tmp);
+			redir_tmp = NULL;
+		}
 		tmp = table->next;
-		free(table->input_redir);
-		free(table->output_redir);
-		free(table->append_redir);
-		free(table->heredoc_delim);
-		table->input_redir = NULL;
-		table->output_redir = NULL;
-		table->append_redir = NULL;
-		table->heredoc_delim = NULL;
-		free_array(table->args);
+		free(table->args);
 		table->args = NULL;
 		free(table);
 		table = NULL;
@@ -53,21 +55,6 @@ void	free_table(t_cmd_table *table)
 }
 
 void	free_lst(t_token *lst)
-{
-	t_token	*tmp;
-
-	if (!lst)
-		return ;
-	while (lst)
-	{
-		tmp = lst;
-		lst = lst->next;
-		free(tmp);
-		tmp = NULL;
-	}
-}
-
-void	fully_free(t_token *lst)
 {
 	t_token	*tmp;
 
@@ -102,20 +89,28 @@ static void	args_print(char **args)
 
 void	cmd_print(t_cmd_table *table)
 {
+	t_redir_data	*redirs;
+
 	while (table)
 	{
 		printf("---TABLE INDEX: %i!---\n", table->index);
 		printf("command |%s|\n", table->cmd);
-		if (table->input_redir)
-			printf("%s: input\n", table->input_redir);
-		if (table->output_redir)
-			printf("%s: output\n", table->output_redir);
-		if (table->append_redir)
-			printf("%s: append\n", table->append_redir);
-		if (table->heredoc_delim)
-			printf("%s: heredoc\n", table->heredoc_delim);
 		if (table->args)
 			args_print(table->args);
+		if (table->redir_data)
+		{
+			printf("HELLO WORLD\n");
+			redirs = table->redir_data;
+			while (redirs)
+			{
+				printf("append_file: %s, ", redirs->append);
+				printf("input_file: %s, ", redirs->input);
+				printf("output_file: %s, ", redirs->output);
+				printf("heredoc_delim: %s, ", redirs->heredoc_delimiter);
+				printf("\n");
+				redirs = redirs->next;
+			}
+		}
 		table = table->next;
 	}
 }
