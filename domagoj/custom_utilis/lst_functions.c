@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lst_functions.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: domagoj <domagoj@student.42.fr>            +#+  +:+       +#+        */
+/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 19:59:59 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/03 18:25:11 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/01/04 22:52:26 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ void	add_previous(t_token *lst)
 	tmp = NULL;
 	while (lst)
 	{
-		lst->previous = tmp;
+		lst->prev = tmp;
 		tmp = lst;
 		lst = lst->next;
 	}

@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/07 13:46:57 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/03 18:23:39 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/01/04 23:27:41 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,35 +30,37 @@ t_cmd_table	*parse(const char *input)
 {
 	t_token		*tokens;
 	t_cmd_table	*cmd_table;
-	char		*str;
 
-	str = ft_strdup(input);
-	if (!str)
+	cmd_table = NULL;
+	if (input_check(input) == 1)
 		return (NULL);
-	if (input_check(str) == 1)
-	{
-		free(str);
-		return (NULL);
-	}
-	tokens = tokenize(str);
-	free(str);
+	tokens = tokenize(ft_strdup(input));
 	if (!tokens)
 		return (NULL);
 	cmd_table = table_init(table_size(tokens));
 	if (!cmd_table)
 	{
-		fully_free(tokens);
+		free_lst(tokens);
+		return (NULL);
+	}
+	if (expander(tokens))
+	{
+		free_lst(tokens);
+		tokens = NULL;
+		free_table(cmd_table);
 		return (NULL);
 	}
 	if (arr_create(cmd_table, tokens) == 1)
 	{
-		fully_free(tokens);
+		free_lst(tokens);
+		tokens = NULL;
 		free_table(cmd_table);
 		return (NULL);
 	}
-	token_distribution(cmd_table, tokens);
-	if (expander(&cmd_table) == 1)
+	if (token_distribution(cmd_table, tokens))
 	{
+		free_lst(tokens);
+		tokens = NULL;
 		free_table(cmd_table);
 		return (NULL);
 	}

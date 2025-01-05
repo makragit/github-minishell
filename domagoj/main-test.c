@@ -1,20 +1,46 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main-test.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/01/02 13:50:08 by dbogovic          #+#    #+#             */
+/*   Updated: 2025/01/04 22:52:39 by dbogovic         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../minishell.h"
 
-
-int main_test(void)
+int	main_test(void)
 {
-
-	int		counter = 0;
-	const char *test_cases[] =
+	int			counter = 0;
+	const char	*current_test;
+	t_cmd_table	*table;
+	const char	*test_cases[] =
 	{
-		"ls > out.txt && cat $?out.txt",
-		"cat << EOF\nHello, EOF\nEOF",
-		"cat << END\nHello\nWorld\nEND",
+		"echo $$",
+		"echo $)",
+		"echo $HOME",
+		"echo $HOME$",
+		"echo $$HOME",
+		"echo $$$HOME",
+		"echo $$$l",
 		"cat << EOF | grep 'pattern'",
+		"< 'input.txy' echo 'hi' > 1.out > 2.out",
+		"touch file.txt && rm -i file.txt",
+		"ls &&",
+		"cat << EOF\nNested << redirection\nEOF",
+			"cat << EOF\nHello, EOF\n",
+		"echo$HOME$$",
+		"ls > out.txt && cat $?out.txt",
+		"echo hello$HOME$",
+		"echo hello$HOME duh",
+		"echo$HOME$",
+		"cat << END\nHello\nWorld\nEND",
 		"cat << EOF | wc -l$?",
 		"cat << EOF | grep pattern\npattern\nEOF",
 		"cat << EOF | grep 'data' | wc -l",
-		"cat << EOF\nNested << redirection\nEOF",
 		"echo 'new line' >> output1.txt >> output2.txt",
 		"ls -l > output.txt 2> error.txt",
 		"ls nonexistent > /dev/null 2>&1",
@@ -57,7 +83,7 @@ int main_test(void)
 		"env | grep HOME",
 		"echo $? > result.txt",
 		"ls -la | sort",
-		"ls non_existent_dir",//efe
+		"ls non_existent_dir",
 		"grep 'pattern' file.txt",
 		"touch file1 file2 file3",
 		"rm file1 file2 file3",
@@ -77,7 +103,7 @@ int main_test(void)
 		"echo \"nested $(echo subcommand)\"",
 		"cd .. && ls | sort | head -n 3",
 		"export TEST=\"multiline value\" && echo $TEST",
-		"unset TEST && echo $TEST",//60
+		"unset TEST && echo $TEST",
 		"grep -E 'line[0-9]+' file.txt",
 		"rm -f file.txt",
 		"touch file{1..10}",
@@ -125,7 +151,6 @@ int main_test(void)
 		"echo Multiline\\\ncommand",
 		"export VAR=test && echo $VAR && unset VAR",
 		"echo Nested dollar \\$",
-		"touch file.txt && rm -i file.txt",
 		"seq 1 100 | grep 50",
 		"echo Multiple $UNKNOWN_VAR and $HOME",
 		"cd /bin && ls | grep bash",
@@ -137,24 +162,32 @@ int main_test(void)
 		"export TEST=test && echo \"Mixed $TEST string\"",
 		"echo Empty $EMPTY",
 		"echo Done.",
-		"echo Hello world",
-		"echo 1 \"2 3$HOME	\" 4",
-		"echo 1 '2 3$HOME' 5",
+		"| echo",
+		"echo |",
+		"",
+		"|",
+		"test <<",
+		"test >>",
+		"test <",
+		"test >",
+		"test >< test",
+		"test <> test",
+		"echo\ntest",
+		"echo $(HOME)",
 		NULL
 	};
 
 	while (test_cases[counter])
 	{
-		const char *current_test = (test_cases[counter]);
+		current_test = (test_cases[counter]);
 		printf("\n\n");
 		printf("---Test n.%i---\n %s\n", counter, current_test);
-		t_cmd_table *table = parse(current_test);
-
+		printf("-----\n");
+		table = parse(current_test);
 		if (table)
 		{
 			cmd_print(table);
 			free_table(table);
-
 			table = NULL;
 		}
 		else if (!table)
