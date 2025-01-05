@@ -9,10 +9,10 @@ LIBFT = ./libft/libft.a
 
 # Directories
 UTILS_DIR = ./domagoj/custom_utilis
-INPUT_CHCK = ./domagoj/parser/0_input_validation
-TOKEN_DIR = ./domagoj/parser/1_tokenizer
-TABLE_DIR = ./domagoj/parser/2_cmd_table
-EXPANDER_DIR = ./domagoj/parser/3_expander
+INPUT_CHCK = ./domagoj/parser/validate_input
+TOKEN_DIR = ./domagoj/parser/tokenisation
+TABLE_DIR = ./domagoj/parser/table_fill
+EXPANDER_DIR = ./domagoj/parser/expansion
 
 
 SOURCE = minishell.c \
@@ -31,6 +31,7 @@ SOURCE = minishell.c \
           $(TABLE_DIR)/fill_table.c \
           $(TABLE_DIR)/table_init.c \
 		  $(TABLE_DIR)/create_arr.c \
+		  $(TABLE_DIR)/create_redir.c \
 		  $(EXPANDER_DIR)/expander.c \
 		  $(EXPANDER_DIR)/del_quotes.c \
 		  $(EXPANDER_DIR)/exit_status.c \
@@ -79,7 +80,7 @@ fclean: clean
 
 re: fclean all
 
-$(LIBFT): 
+$(LIBFT):
 	make -C ./libft/
 
 $(DEBUG):
@@ -92,5 +93,5 @@ run: $(NAME)
 exe: re
 	$(MAKE) clean
 
-.PHONY: all clean fclean run re exe 
+.PHONY: all clean fclean run re exe
 #.PHONY: all clean fclean
