@@ -24,9 +24,19 @@ t_data *init_data(char **envp)
 	data->original_envp = NULL;
 	data->mini_envp = NULL;
 
+	get_data(data); // put here so copy_array free_data() can work on malloc fail
+
+
 	data->mini_envp = copy_array(envp);
+	// TODO Malloc Check in func
+	if (data->mini_envp == NULL) 
+	{
+		free_data();
+		return (0);
+	}
 
 	data->env_paths = get_envp_path(envp);
+	// TODO Malloc Check in func
 	if (data->env_paths == NULL)
 	{
 		free_data();
@@ -35,6 +45,7 @@ t_data *init_data(char **envp)
 
 	// TODO can home_path be NULL? How to guard?
 	data->home_path = get_home_path(envp);
+	// TODO Malloc Check in func
 	if (data->home_path == NULL)
 	{
 		free_data();
@@ -51,21 +62,23 @@ void free_data()
 	t_data *data;
 
 	data = get_data(NULL);
+	if(!data)
+		return;
 	if(data->prompt_str)
 		free(data->prompt_str);
 	if(data->env_paths)
 		MAK_free_array(data->env_paths);
 	// if(data->home_path)
 	// 	free(data->home_path);
+	if(data->mini_envp)
+		MAK_free_array(data->mini_envp);
 	free(data);
 }
 
 int	MAK_free_array(char **arr)
 {
 	size_t	i;
-
-	if (!arr)
-		return (0);
+if (!arr) return (0);
 	i = 0;
 	while (arr[i])
 	{
@@ -129,6 +142,7 @@ char *prepare_prompt_string(char *user, char *path, char *hostname, int size)
 	// write str to data for easier freeing
 	// TODO prompt_str needs to be freed every time prompt is rewritten
 	free(get_data(NULL)->prompt_str);
+	get_data(NULL)->prompt_str = NULL; // TODO funcheck fix?
 	get_data(NULL)->prompt_str = str;
 
 	str[size] = '\0';
@@ -230,11 +244,14 @@ char *get_cwd_path()
 	return (ret);
 }
 
+// TODO if ! envp check
+// TODO exit_error on ft_split fail neede for funcheck?
 char **get_envp_path(char **envp)
 {
 	int     i;
 	char    **paths;
 	
+	//TODO if ! envp check
 	i = 0;
 	while (envp[i] && ft_strncmp(envp[i], "PATH=", 5) != 0)
 		i++;
@@ -242,7 +259,8 @@ char **get_envp_path(char **envp)
 		return (NULL);
 	paths = ft_split(envp[i] + 5, ':'); // Skip "PATH="
 	if (paths == NULL)
-		return (NULL);
+		exit_error("get_envp_path malloc kp"); // TODO test
+		/* return (NULL); // TODO handle malloc fail */
 	return (paths);
 }
 
@@ -425,6 +443,26 @@ char *return_executable_path(const char *str, char **paths)
 	return (NULL);
 }
 
+int builtin_check_table(t_cmd_table *table)
+{
+	DEBUG_printf("bultin_check_table");
+	if (!table)
+		return (DEBUG_0("builtin_check_table: !table\n"));
+
+	if (ft_strncmp(table->cmd, "cd", 2) == 0 && table->cmd[2] == '\0')
+		builtin_chdir(table->args);
+	else if (ft_strncmp(table->cmd, "echo", 4) == 0 && table->cmd[4] == '\0')
+		builtin_echo_table(table->args);
+		/* builtin_echo(table->args); */
+	else
+		return (0);
+
+	return (1);
+}
+
+
+
+
 int builtin_check(char *input)
 {
 	char **split;
@@ -449,10 +487,11 @@ int builtin_check(char *input)
 	else if (ft_strncmp(split[0], "env", 3) == 0 && split[0][3] == '\0')
 		builtin_env();
 	else if (ft_strncmp(split[0], "export", 6) == 0 && split[0][6] == '\0')
-		builtin_export("test");
+		builtin_export(split);
+	else if (ft_strncmp(split[0], "unset", 5) == 0 && split[0][5] == '\0')
+		builtin_unset(split);
 	/* else if (ft_strncmp(split[0], "exit", x) == 0) */
-	/* else if (ft_strncmp(split[0], "export", x) == 0) */
-	/* else if (ft_strncmp(split[0], "unset", x) == 0) */
+
 	else // TODO else statement needed?
 	{
 		MAK_free_array(split);
@@ -515,12 +554,47 @@ int builtin_pwd(char **split)
 void builtin_env()
 {
 	char **env;
-	env = get_data(NULL)->original_envp; // TODO change to mini_envp
+
+	DEBUG_printf("bultin: env");
+
+	env = get_data(NULL)->mini_envp;
 	while(*env != NULL)
 	{
 		printf("%s\n", *env);
 		env++;
 	}
+
+	return ;
+}
+
+int builtin_echo_table(char **args)
+{
+	int i;
+	int option_found = 0;
+
+	DEBUG_printf("bultin_echo_table");
+
+	// TODO better solution for space?
+	//check if single argument, echo without space
+	/* if (MAK_arr_size(args) == 2) // TODO needs to check for '-n' too */
+	/* { */
+	/* 	printf("%s", args[1]); */
+	/* 	return (1); */
+	/* } */
+
+	asdf
+
+	i = 1;
+	while(args[i])
+	{
+		printf("%s ", args[i]); // uses space
+		i++;
+	}
+
+	if (!option_found) // if -n found no newline
+		printf("\n");
+
+	return (1);
 }
 
 // TODO echo 1 "2 3" 4 -> 1 2 3 4
@@ -565,6 +639,7 @@ int builtin_echo(char *input)
 	return (0);
 }
 
+// TODO Not Needed anymore !!!
 // TODO !!! ECHO needs parser/lexer for '""' etc
 // Needs to split ' ' for whitespace and "2 3"  and '' correctly
 char *builtin_echo_parse_option(char *str)
@@ -589,62 +664,216 @@ char *builtin_echo_parse_option(char *str)
 	return (str);
 }
 
-// Does not free input arr !
-// TODO input entry should be malloced/freed or not?
 // TODO handle strdup fail
 // TODO use ft_calloc?
 // TODO what if *arr / arr[0] is NULL or size 0?
-char **add_to_array(char **arr, char *new_value)
+/* Takes malloced array, frees it and creates new array with added Value */
+int array_free_and_add(char ***arr, char *new_value)
 {
 	char **new_arr;
 	int size;
 	int i;
 
-	if (!arr)
-	{
-		DEBUG_printf("no arr");
-		return(NULL);
-	}
-	// if !new_value
+	if (!arr || !*arr)
+    return(DEBUG_0("array_free_and_add: arr or *arr is NULL"));
 	if (!new_value)
-	{
-		DEBUG_printf("no new_value");
-		return(arr);
-	}
+    return(DEBUG_0("array_free_and_add: new_value is NULL"));
 
-
-	size = MAK_arr_size(arr);
+	size = MAK_arr_size(*arr);
 	new_arr = malloc(sizeof(char *) * (size + 2));
 	if (!new_arr)
-		exit_error("copy_array malloc");
+		exit_error("array_free_and_add: malloc");
 
 	i = 0;
-	while(arr[i])
+	while((*arr)[i])
 	{
-		new_arr[i] = ft_strdup(arr[i]);
+		new_arr[i] = ft_strdup((*arr)[i]);
 		if (!new_arr[i])
 		{
-    	while (--i >= 0)
-    		free(new_arr[i]);
-    	free(new_arr);
-    	exit_error("add_to_array ft_strdup");
+			MAK_free_array(new_arr);
+    	exit_error("array_free_and_add: ft_strdup");
     }
 		i++;
 	}
 	new_arr[i] = ft_strdup(new_value); // TODO refactor "free_failed_malloc"
 	if (!new_arr[i])
 	{
-  	while (--i >= 0)
-  		free(new_arr[i]);
-  	free(new_arr);
-  	exit_error("add_to_array ft_strdup");
+		MAK_free_array(new_arr);
+  	exit_error("array_free_and_add: ft_strdup");
   }
 
 	new_arr[++i] = NULL;
+	MAK_free_array(*arr);
+	*arr = new_arr;
 
-	/* free(arr); */
-	return (new_arr);
+	return (1);
 }
+
+// TODO what if value found multiple times?
+// TODO array issue strncmp because last value unset?
+// removes value from array. Only works if value is unique in array (like in envp)
+int array_free_and_remove(char ***arr, char *remove_value)
+{
+	char **new_arr;
+	int size;
+	int i;
+
+	char **temp_arr;
+	temp_arr = (*arr);
+
+	if (!arr || !*arr)
+    return(DEBUG_0("array_free_remove: arr or *arr is NULL"));
+	if (!remove_value)
+    return(DEBUG_0("array_free_remove: new_value is NULL"));
+
+	// Search for remove_value and return if not found
+	if (!search_array((*arr), remove_value))
+		return(DEBUG_0("array_free_and_remove: remove_value not found"));
+
+	size = MAK_arr_size(*arr);
+	new_arr = malloc(sizeof(char *) * (size)); // excluding +1 because of removed value
+	if (!new_arr)
+		exit_error("array_free_remove: malloc");
+
+	i = 0;
+	while(*temp_arr)
+	{
+		/* if (ft_strncmp(temp_arr[i], remove_value, ft_strlen(remove_value)) != 0) */
+		if (ft_strncmp(*temp_arr, remove_value, ft_strlen(remove_value)) != 0)
+		{
+			/* new_arr[i] = ft_strdup(temp_arr[i]); */
+			new_arr[i] = ft_strdup(*temp_arr);
+			if (!new_arr[i++])
+			{
+				MAK_free_array(new_arr);
+    		exit_error("array_free_remove: ft_strdup");
+    	}
+		}
+
+		temp_arr++;
+	}
+
+	// TODO if i != arr_size -> multiple values found?
+
+	new_arr[i] = NULL;
+	MAK_free_array(*arr);
+	*arr = new_arr;
+
+	return(1);
+}
+
+// TODO handle strdup fail
+// TODO use ft_calloc?
+// TODO what if *arr / arr[0] is NULL or size 0?
+/* Takes malloced array, frees it and creates new array without remove_value */
+
+// int array_free_and_remove_2(char ***arr, char *remove_value)
+// {
+// 	char **new_arr;
+// 	int size;
+// 	int i;
+// 
+// 	if (!arr || !*arr)
+//     return(DEBUG_0("array_free_remove: arr or *arr is NULL"));
+// 	if (!remove_value)
+//     return(DEBUG_0("array_free_remove: new_value is NULL"));
+// 
+// 	size = MAK_arr_size(*arr);
+// 	new_arr = malloc(sizeof(char *) * (size + 2));
+// 	if (!new_arr)
+// 		exit_error("array_free_remove: malloc");
+// 
+// 	i = 0;
+// 	while((*arr)[i])
+// 	{
+// 		if (ft_strncmp((*arr)[i], remove_value, ft_strlen(remove_value)) == 0)
+// 		{
+// 			(*arr)++;
+// 			continue;
+// 		}
+// 		new_arr[i] = ft_strdup((*arr)[i]);
+// 		if (!new_arr[i])
+// 		{
+// 			MAK_free_array(new_arr);
+//     	exit_error("array_free_remove: ft_strdup");
+//     }
+// 		i++;
+// 	}
+// 
+// 	/* new_arr[i] = ft_strdup(new_value); */
+// 	/* if (!new_arr[i]) */
+// 	/* { */
+// 	/* 	MAK_free_array(new_arr); */
+//   	/* exit_error("add_to_array ft_strdup"); */
+//   /* } */
+// 
+// 	new_arr[i] = NULL;
+// 	MAK_free_array(*arr);
+// 	*arr = new_arr;
+// 
+// 	return (1);
+// }
+
+
+
+// TODO NOT NEEDED, use array_free_malloc_and_add instead
+// Does not free input arr !
+// TODO input entry should be malloced/freed or not?
+// TODO handle strdup fail
+// TODO use ft_calloc?
+// TODO what if *arr / arr[0] is NULL or size 0?
+/* char **add_to_array(char **arr, char *new_value) */
+/* { */
+/* 	char **new_arr; */
+/* 	int size; */
+/* 	int i; */
+
+/* 	if (!arr) { */
+/* 		DEBUG_printf("no arr"); */
+/* 		return(NULL); */
+/* 	} */
+/* 	if (!new_value) 	{ */
+/* 		DEBUG_printf("no new_value"); */
+/* 		return(arr); */
+/* 	} */
+
+/* 	size = MAK_arr_size(arr); */
+/* 	new_arr = malloc(sizeof(char *) * (size + 2)); */
+/* 	if (!new_arr) */
+/* 		exit_error("copy_array malloc"); */
+
+/* 	i = 0; */
+/* 	while(arr[i]) */
+/* 	{ */
+/* 		new_arr[i] = ft_strdup(arr[i]); */
+/* 		if (!new_arr[i]) */
+/* 		{ */
+/*     	while (--i >= 0) */
+/*     		free(new_arr[i]); */
+/*     	free(new_arr); */
+/*     	exit_error("add_to_array ft_strdup"); */
+/*     } */
+/* 		i++; */
+/* 	} */
+/* 	new_arr[i] = ft_strdup(new_value); // TODO refactor "free_failed_malloc" */
+/* 	if (!new_arr[i]) */
+/* 	{ */
+/*   	while (--i >= 0) */
+/*   		free(new_arr[i]); */
+/*   	free(new_arr); */
+/*   	exit_error("add_to_array ft_strdup"); */
+/*   } */
+
+/* 	new_arr[++i] = NULL; */
+
+/* 	/1* free(arr); *1/ */
+/* 	return (new_arr); */
+/* } */
+
+
+
+
+
 
 // TODO handle strdup fail
 // TODO use ft_calloc?
@@ -657,15 +886,16 @@ char **copy_array(char **arr)
 
 	if (!arr)
 	{
-		DEBUG_printf("no arr");
-		return(NULL);
+		DEBUG_printf("copy_array: no arr");
+		/* return(NULL); */
+		return(arr);
 	}
 
 	size = MAK_arr_size(arr);
 
 	new_arr = malloc(sizeof(char *) * (size + 1));
 	if (!new_arr)
-		exit_error("copy_array malloc");
+		exit_error("copy_array: malloc");
 
 	i = 0;
 	while(arr[i])
@@ -673,10 +903,8 @@ char **copy_array(char **arr)
 		new_arr[i] = ft_strdup(arr[i]);
 		if (!new_arr[i])
 		{
-    	while (--i >= 0)
-    		free(new_arr[i]);
-    	free(new_arr);
-    	exit_error("copy_array ft_strdup");
+			MAK_free_array(new_arr);
+    	exit_error("copy_array: ft_strdup");
     }
 		i++;
 	}
@@ -684,33 +912,86 @@ char **copy_array(char **arr)
 	return (new_arr);
 }
 
-/*
- *char **envp_copy = malloc((count + 1) * sizeof(char *));
-    if (!envp_copy) {
-        perror("malloc");
-        exit(EXIT_FAILURE);
-    }
-
-    // Copy each string
-    for (int i = 0; i < count; i++) {
-        envp_copy[i] = strdup(envp[i]);
-        if (!envp_copy[i]) {
-            perror("strdup");
-            exit(EXIT_FAILURE);
-        }
-    }
-    envp_copy[count] = NULL;  // Null-terminate the array
-
-    return envp_copy;
- *
- * */
-
-
-char *builtin_export(char *str)
+// returns how many times 'search' was found using in array
+// search is not exact, only checks for len of 'search'
+int search_array(char **arr, char *search)
 {
-	DEBUG_printf("bultin_echo");
-	(void)str;
-	return 0;
+	int i;
+	int found;
+
+	found = 0;
+	i = 0;
+	while(arr[i])
+	{
+		if (ft_strncmp(arr[i], search, ft_strlen(search)) == 0)
+				found++;
+		i++;
+	}
+
+	return (found);
+}
+
+
+
+// TODO how to handle array_free_and_add fail?
+// TODO export with no argument prints env? 
+// TODO export abc def -> must add a string abc='' and def='' to env, not just abc and def
+int builtin_export(char **split)
+{
+	int i;
+
+	DEBUG_printf("builtin_export");
+	/* DEBUG_print_strings(split); */
+
+	/* if (MAK_arr_size(split) != 2) */
+	/* 	return (DEBUG_0("builtin_export: split size != 2\n")); */
+
+
+	if (MAK_arr_size(split) == 1)
+	{
+		builtin_env();
+		return (DEBUG_0("split size == 1, ran builtin_env\n"));
+	}
+
+	i = 1;
+	while(split[i])
+	{
+		if (!array_free_and_add(&get_data(NULL)->mini_envp, split[i]))
+			return (DEBUG_0("builtin_export: array_free_and failed\n"));
+		i++;
+	}
+
+
+	return (1);
+}
+
+// TODO unset behaviour multiple arguments? Deletes all?
+// TODO unset behaviour value not found?
+// TODO unset behaviour multiple arguments, one value not found?
+int builtin_unset(char **split)
+{
+	int i;
+
+	DEBUG_printf("builtin_unset");
+
+	if (MAK_arr_size(split) == 1)
+	{
+		printf("unset: not enough arguments\n"); // TODO Error Handling
+		return (DEBUG_0("builtin_unset: split size == 1\n"));
+	}
+
+	// TODO while needed for unsetting multiple arguments?
+	i = 1;
+	while(split[i])
+	{
+		// TODO add search_array check
+		if (!array_free_and_remove(&get_data(NULL)->mini_envp, split[i]))
+			return (DEBUG_0("builtin_export: array_free_and_remove failed\n"));
+		//TODO return 2 if value not found?
+		i++;
+	}
+
+	return (1);
 }
 
 // path, arguments usage:
