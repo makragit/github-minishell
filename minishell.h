@@ -128,14 +128,26 @@ char *is_relative_path(const char *str); // TODO not needed
 int is_executable(const char *str, char **paths); // TODO not needed
 char *return_executable_path(const char *str, char **paths);
 
-int builtin_check(char *input);
+int builtin_check(char *input); // TODO switch to table variant
+int builtin_check_table(t_cmd_table *table);
 int builtin_chdir(char **split);
 int builtin_pwd(char **split);
 void builtin_env();
 int builtin_echo(char *input);
+int builtin_echo_table(char **args);
 char *builtin_echo_parse_option(char *str); // TODO use parser/lexer instead
-char *builtin_export(char *str); // TODO not finished
+											//
+/* char *builtin_export(char *str); */
+/* int builtin_export(char *str); */
+int builtin_export(char **split); // TODO not finished
 char **copy_array(char **arr);
+/* char **add_to_array(char **arr, char *new_value); // TODO not needed -> array_free_and_add */
+int search_array(char **arr, char *search);
+int array_free_and_add(char ***arr, char *new_value);
+int array_free_and_remove(char ***arr, char *remove_value);
+/* int array_free_and_remove_2(char ***arr, char *remove_value); */
+
+int builtin_unset(char **split);
 
 void test_execute(char* input, char **paths, char **envp);
 int test_fork(char* exec_path, char **input_split, char **envp);
