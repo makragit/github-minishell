@@ -26,32 +26,7 @@ t_data *init_data(char **envp)
 
 	get_data(data); // put here so copy_array free_data() can work on malloc fail
 
-
-	data->mini_envp = copy_array(envp);
-	// TODO Malloc Check in func
-	if (data->mini_envp == NULL) 
-	{
-		free_data();
-		return (0);
-	}
-
-	data->env_paths = get_envp_path(envp);
-	// TODO Malloc Check in func
-	if (data->env_paths == NULL)
-	{
-		free_data();
-		return (0);
-	}
-
-	// TODO can home_path be NULL? How to guard?
-	data->home_path = get_home_path(envp);
-	// TODO Malloc Check in func
-	if (data->home_path == NULL)
-	{
-		free_data();
-		return (0);
-	}
-
+	data->last_ex_code = 0;
 	data->original_envp = envp;
 
 	return (data);
@@ -125,7 +100,7 @@ char *display_prompt()
 	// No Color
 	/* prompt_len = ft_strlen(user) + ft_strlen(hostname) + ft_strlen(cwd) + 4; */
 
-	prompt_str = prepare_prompt_string(user, 
+	prompt_str = prepare_prompt_string(user,
 			cwd, hostname, prompt_len);
 
 	return (readline(prompt_str));
@@ -250,7 +225,7 @@ char **get_envp_path(char **envp)
 {
 	int     i;
 	char    **paths;
-	
+
 	//TODO if ! envp check
 	i = 0;
 	while (envp[i] && ft_strncmp(envp[i], "PATH=", 5) != 0)
@@ -268,7 +243,7 @@ char *get_home_path(char **envp)
 {
 	char 	*home_dir;
 	int		i;
-	
+
 	i = 0;
 	while (envp[i] && ft_strncmp(envp[i], "HOME=", 5) != 0)
 		i++;
@@ -335,7 +310,7 @@ int is_executable(const char *str, char **paths)
 	if (!str || !paths || !paths[0]) {
 		return (DEBUG_0("!str || !paths || !paths[0]"));
 	}
-	
+
 	// TODO root '/' should be executable?
 	if (str[0] == '/' && ft_strlen(str) == 1) {
 		return (DEBUG_0("is_executable: '/'"));
@@ -400,7 +375,7 @@ char *return_executable_path(const char *str, char **paths)
 	if (!str || !paths || !paths[0]) {
 		return (DEBUG_NULL("!str || !paths || !paths[0]"));
 	}
-	
+
 	// TODO root '/' should be executable?
 	if (str[0] == '/' && ft_strlen(str) == 1) {
 		return (DEBUG_NULL("is_executable: '/'"));
@@ -618,7 +593,7 @@ int builtin_echo(char *input)
 	if (option_found == NULL)
 		split = ft_split(input, ' '); // TODO parse/lexer
 		/* split = ft_split(input, '"'); // TODO parse/lexer */
-	else 
+	else
 		split = ft_split(option_found, ' '); // TODO parse/lexer
 		/* split = ft_split(option_found, '"'); // TODO parse/lexer */
 
@@ -657,7 +632,7 @@ char *builtin_echo_parse_option(char *str)
 
 	while(ft_isspace(*str))
 		str++;
-	
+
 	DEBUG_printf("-n found");
 	return (str);
 }
@@ -770,17 +745,17 @@ int array_free_and_remove(char ***arr, char *remove_value)
 // 	char **new_arr;
 // 	int size;
 // 	int i;
-// 
+//
 // 	if (!arr || !*arr)
 //     return(DEBUG_0("array_free_remove: arr or *arr is NULL"));
 // 	if (!remove_value)
 //     return(DEBUG_0("array_free_remove: new_value is NULL"));
-// 
+//
 // 	size = MAK_arr_size(*arr);
 // 	new_arr = malloc(sizeof(char *) * (size + 2));
 // 	if (!new_arr)
 // 		exit_error("array_free_remove: malloc");
-// 
+//
 // 	i = 0;
 // 	while((*arr)[i])
 // 	{
@@ -797,18 +772,18 @@ int array_free_and_remove(char ***arr, char *remove_value)
 //     }
 // 		i++;
 // 	}
-// 
+//
 // 	/* new_arr[i] = ft_strdup(new_value); */
 // 	/* if (!new_arr[i]) */
 // 	/* { */
 // 	/* 	MAK_free_array(new_arr); */
 //   	/* exit_error("add_to_array ft_strdup"); */
 //   /* } */
-// 
+//
 // 	new_arr[i] = NULL;
 // 	MAK_free_array(*arr);
 // 	*arr = new_arr;
-// 
+//
 // 	return (1);
 // }
 
@@ -932,7 +907,7 @@ int search_array(char **arr, char *search)
 
 
 // TODO how to handle array_free_and_add fail?
-// TODO export with no argument prints env? 
+// TODO export with no argument prints env?
 // TODO export abc def -> must add a string abc='' and def='' to env, not just abc and def
 int builtin_export(char **split)
 {
@@ -1003,13 +978,13 @@ void test_execute(char* input, char **env_paths, char **envp)
 
 	if (input == NULL || *input == '\0')
 		return(DEBUG_VOID("test_execute: NULL or 0"));
-		
+
 	input_split = ft_split(input, ' ');
 	if (input_split == NULL)
 		exit_error("test_execute input_split"); // TODO how to handle?
 	exec_path = return_executable_path(input_split[0], env_paths);
 	/* DEBUG_printf("ret: %s", test_ret); */
-	DEBUG_printf("INPUT: %s PATH: %s EXECUTABLE : %d\n", input, exec_path, 
+	DEBUG_printf("INPUT: %s PATH: %s EXECUTABLE : %d\n", input, exec_path,
 																is_executable(input_split[0], env_paths));
 
 	if (exec_path == NULL)
@@ -1046,7 +1021,7 @@ int test_fork(char* exec_path, char **input_split, char **envp)
 		perror("fork");
 		// TODO free
 		exit(1);
-	} 
+	}
 	else if (pid == 0)
 	{
 		// Child process: run the command
@@ -1058,8 +1033,8 @@ int test_fork(char* exec_path, char **input_split, char **envp)
 		perror("execve"); // If execve returns, it failed
 		/* exit(1); */
 		return (1);
-	} 
-	else 
+	}
+	else
 	{
 		// Parent process: wait for the child
 		int status;
@@ -1074,7 +1049,7 @@ int test_fork(char* exec_path, char **input_split, char **envp)
 
 void DEBUG_is_executable(char **paths)
 {
-	char *commands[] = {"/", "/usr/bin/cat", "cat", "/nix", "/usr/nix", 
+	char *commands[] = {"/", "/usr/bin/cat", "cat", "/nix", "/usr/nix",
 		"usr/bin/cat", "/usr/bin/cat/", "./minishell", "./test-script/val-test.sh",
 		"./notexisting", NULL};
 
@@ -1091,7 +1066,7 @@ void DEBUG_is_executable(char **paths)
 void DEBUG_print_strings(char **arr)
 {
 	if (arr == NULL) return;
-	
+
 	for (int i = 0; arr[i] != NULL; i++)
 		printf("_%s_\n", arr[i]);
 }
@@ -1118,7 +1093,7 @@ void DEBUG_print_strings(char **arr)
 /* 	if(S_ISDIR(Stat.st_mode) > 0 ){ */
 /* 		printf("is a directory \n"); */
 /* 	} */
-	
+
 /* 	//Test if its a regular file */
 /* 	// > 0 means it is a directory */
 /* 	if(S_ISREG(Stat.st_mode) > 0 ){ */
