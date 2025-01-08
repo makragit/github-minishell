@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 22:50:12 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/04 22:53:08 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/07 20:03:07 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,6 @@ static size_t	arr_size(t_token *token)
 	size_t	i;
 
 	i = 1;
-	if (!token)
-		return (0);
 	while (token)
 	{
 		if (token->type == CMD_t)
@@ -27,6 +25,8 @@ static size_t	arr_size(t_token *token)
 			break ;
 		}
 		token = token->next;
+		if (!token)
+			return (0);
 	}
 	while (token)
 	{
@@ -68,7 +68,10 @@ int	arr_create(t_cmd_table *table, t_token *token)
 	{
 		size = arr_size(token);
 		if (!size)
-			return (1);
+		{
+			table->args = NULL;
+			return (0);
+		}
 		table->args = malloc(sizeof(char *) * (size + 1));
 		if (!(table->args))
 			return (1);

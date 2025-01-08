@@ -6,17 +6,16 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/05 16:44:59 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/05 19:54:02 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/07 20:13:40 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include"../../../minishell.h"
 
-
-
-t_err cmp_line(const char *str1, const char *str2)
+t_err	cmp_line(const char *str1, const char *str2)
 {
-	int return_value;
+	int	return_value;
+
 	if (!str2 || !str1)
 		return (ERROR);
 	if (str2[0] == '\'' || str2[0] == '\"')
@@ -28,70 +27,62 @@ t_err cmp_line(const char *str1, const char *str2)
 	return (FAIL);
 }
 
-char *expand_line(char *line, char *delim)
+char	*expand_line(char *line, char *delim)
 {
 	if (!line || !delim)
 		return (NULL);
 	if (delim[0] == '\'' || delim[0] == '\"')
 		return (NULL);
-
-
 	expand_exit_status(&line);
 	expand_env(&line);
 	ft_trim_quotes(&line);
 	return (line);
 }
 
-int heredoc(t_cmd_table *table) {
-
-    while (table) {
-        t_redir_data *redir_current = table->redir_data; // Local pointer for traversal
-
-        while (redir_current) {
-            if (redir_current->heredoc_delimiter) {
-                if (table->heredoc_fd == -1) {
-                    table->heredoc_fd = ft_create_file();
-                }
-
-                char *heredoc_delimiter = redir_current->heredoc_delimiter;
-                printf("HEREDOC DELIM IS |%s|\n", heredoc_delimiter);
-
-                while (1) {
-                    char *line = readline("readline:");
-                    if (!line) { // Handle EOF (Ctrl+D)
-                        printf("Unexpected end of input\n");
-                        return (ERROR);
-                    }
-
-                    if (cmp_line(line, heredoc_delimiter) == EQUAL) {
-                        free(line); // Free the line before breaking
-                        break;
-                    }
-
-                    printf("the line |%s|\n", line);
-
-                    char *expanded_line = expand_line(line, heredoc_delimiter);
-                    free(line); // Free the original line after expanding
-
-                    if (!expanded_line) {
-                        return (ERROR);
-                    }
-
-                    ft_append(expanded_line, table->heredoc_fd);
-                    free(expanded_line); // Free expanded line after appending
-                }
-            }
-            redir_current = redir_current->next; // Move to the next redirection
-        }
-        table = table->next; // Move to the next command table node
-    }
-
-    return (0);
+int	heredoc(t_cmd_table *table)
+{
+	char			*heredoc_delimiter;
+	char			*line;
+	char			*expanded_line;
+	t_redir_data	*redir_current;
+	while (table)
+	{
+		redir_current = table->redir_data;
+		while (redir_current)
+		{
+			if (redir_current->heredoc_delimiter)
+			{
+				if (table->heredoc_fd == -1)
+					table->heredoc_fd = ft_create_file();
+				heredoc_delimiter = redir_current->heredoc_delimiter;
+				while (1)
+				{
+					line = readline("readline:");
+					if (!line)
+					{ // Handle EOF (Ctrl+D)
+						printf("Unexpected end of input\n");
+						return (ERROR);
+					}
+					if (cmp_line(line, heredoc_delimiter) == EQUAL)
+					{
+						free(line); // Free the line before breaking
+						break ;
+					}
+					expanded_line = expand_line(line, heredoc_delimiter);
+					free(line); // Free the original line after expanding
+					if (!expanded_line)
+						return (ERROR);
+					ft_append(expanded_line, table->heredoc_fd);
+					free(expanded_line); // Free expanded line after appending
+				}
+			}
+			redir_current = redir_current->next; // Move to the next redirection
+		}
+		table = table->next; // Move to the next command table node
+	}
+	return (0);
 }
 
-
-
-//*how to do heredoc
 /*
 	heredoc delimit = get heredoc str!
 
@@ -118,16 +109,6 @@ int heredoc(t_cmd_table *table) {
 	delete file
 	-Have impleented fds for such files
 
-
-
-
-
-
-
-
-
-*/
-/*
 heredoc expansion rules
 
 EOF

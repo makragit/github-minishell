@@ -1,40 +1,22 @@
-//fix
-/*
-replace my minishell.c with his
-return -Werror to makefile
-
-*/
-
-
-
-
-
-
-
-
-
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
-#include "./debug/debug.h" // TODO DEBUG
-#include "libft/libft.h"
-#include <stdlib.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <readline/readline.h>
-#include <readline/history.h>
-#include <linux/limits.h>
-
-#include <sys/stat.h>
-#include <sys/wait.h>
-
-#include <signal.h>
-
+# include "./debug/debug.h" // TODO DEBUG
+# include "libft/libft.h"
+# include <stdlib.h>
+# include <unistd.h>
+# include <stdio.h>
+# include <readline/readline.h>
+# include <readline/history.h>
+# include <linux/limits.h>
+# include <sys/stat.h>
+# include <sys/wait.h>
+# include <signal.h>
 # include <string.h>
 # include <ctype.h>
 # include <stdbool.h>
+# include <errno.h>
 
-extern int	last_executed_cmd;
 typedef enum t_err
 {
 	OK,
@@ -77,13 +59,13 @@ typedef struct t_redir_data
 	int						heredoc_fd;
 	struct t_redir_data		*next;
 	struct t_redir_data		*prev;
-	//int		stdin_backup;//to return to original input and output I think (after execuition or smth)
-	//int		stdout_backup;
 }	t_redir_data;
 
 typedef struct t_cmd_table
 {
 	int					index;
+	int					stdin_backup;
+	int					stdout_backup;
 	t_token				*tokens;
 	char				*cmd;
 	char				**args;
@@ -97,6 +79,7 @@ typedef struct t_cmd_table
 
 typedef struct s_data
 {
+	int		last_ex_code;
 	char	*prompt_str;
 	char	**env_paths;
 	char	*home_path;
@@ -107,35 +90,31 @@ typedef struct s_data
 
 // MAK
 // temp.c
-t_data *get_data(t_data *data);
-t_data *init_data(char **envp);
-void free_data();
-int	MAK_free_array(char **arr);
-
-void exit_error(char *s);
-char *display_prompt();
-char *prepare_prompt_string(char *user, char *path, char *hostname, int size);
-
-int is_root();
-int ft_isspace(char c);
-void signal_handler(int signum);
-int	MAK_arr_size(char **arr);
-
-char *get_cwd_path();
-char **get_envp_path(char **envp);
-char *get_home_path(char **envp);
-char *is_relative_path(const char *str); // TODO not needed
-int is_executable(const char *str, char **paths); // TODO not needed
-char *return_executable_path(const char *str, char **paths);
-
-int builtin_check(char *input); // TODO switch to table variant
-int builtin_check_table(t_cmd_table *table);
-int builtin_chdir(char **split);
-int builtin_pwd(char **split);
-void builtin_env();
-int builtin_echo(char *input);
-int builtin_echo_table(char **args);
-char *builtin_echo_parse_option(char *str); // TODO use parser/lexer instead
+t_data			*get_data(t_data *data);
+t_data			*init_data(char **envp);
+void			free_data();
+int				MAK_free_array(char **arr);
+void			exit_error(char *s);
+char			*display_prompt();
+char			*prepare_prompt_string(char *user, char *path, char *hostname, int size);
+int				is_root();
+int				ft_isspace(char c);
+void			signal_handler(int signum);
+int				MAK_arr_size(char **arr);
+char			*get_cwd_path();
+char			**get_envp_path(char **envp);
+char			*get_home_path(char **envp);
+char			*is_relative_path(const char *str); // TODO not needed
+int				is_executable(const char *str, char **paths); // TODO not needed
+char			*return_executable_path(const char *str, char **paths);
+int				builtin_check(char *input); // TODO switch to table variant
+int				builtin_check_table(t_cmd_table *table);
+int				builtin_chdir(char **split);
+int				builtin_pwd(char **split);
+void			builtin_env();
+int				builtin_echo(char *input);
+int				builtin_echo_table(char **args);
+char			*builtin_echo_parse_option(char *str); // TODO use parser/lexer instead
 											//
 /* char *builtin_export(char *str); */
 /* int builtin_export(char *str); */
@@ -167,7 +146,7 @@ int				make_token_entry(t_token **tokens, char *str_token);
 t_cmd_table		*table_init(size_t of_size);
 int				token_distribution(t_cmd_table *table, t_token *token);
 int				arr_create(t_cmd_table *table, t_token *token);
-int				expander(t_token *tokens);
+t_err			expander(t_token *tokens);
 int				expand_exit_status(char **str);
 int				expand_env(char **arg);
 int				is_whitespace(char c);
@@ -183,17 +162,21 @@ t_token			*reverse_lst(t_token *lst);
 void			free_lst(t_token *lst);
 void			add_previous(t_token *lst);
 int				input_check(const char *input);
+size_t	table_size(t_token *tokens);
 t_redir_data	*add_redir_entry(t_redir_data *data, t_token *token);
 char			*getenv_local(char *name);
 
 //exec starting - domi
-t_err execute(t_cmd_table *table);
-int	pipe_setup(t_cmd_table *table);
-int close_pipes(t_cmd_table *table);
-int heredoc(t_cmd_table *table);
-int ft_create_file(void);
-int ft_append(const char *str, int fd);
+t_err		execute(t_cmd_table *table);
+int			pipe_setup(t_cmd_table *table);
+int			close_pipes(t_cmd_table *table);
+int			heredoc(t_cmd_table *table);
+int			ft_create_file(void);
+int			ft_append(const char *str, int fd);
+char		**get_path(const char *cmd);
+void		ft_free_array(char **arr);
+int			connect_pipes(t_cmd_table *table);
+t_err			redir(t_cmd_table *table);
 // Main-test
-int main_test(void);
-
+char		*fetch_test(int counter);
 #endif

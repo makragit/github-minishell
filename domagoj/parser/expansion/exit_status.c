@@ -6,26 +6,36 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/15 18:31:12 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/04 22:52:59 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/07 20:08:54 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../../minishell.h"
 
+static char	*fetch_ex_cmd(void)
+{
+	int		ex_code;
+	char	*return_str;
+	t_data	*data;
+
+	data = get_data(NULL);
+	ex_code = data->last_ex_code;
+	return_str = ft_itoa(ex_code);
+	return (return_str);
+}
+
 int	expand_exit_status(char **str)
 {
 	int		*indexes;
 	int		i;
-	int		g_last_executed_cmd;
 	char	*status;
 	size_t	offset;
 
-	g_last_executed_cmd = 0;
 	i = 0;
 	offset = 0;
 	if (!*str || !str)
 		return (-1);
-	status = ft_itoa(g_last_executed_cmd);
+	status = fetch_ex_cmd();
 	if (!status)
 		return (-1);
 	indexes = find_indexes(*str, "$?");
