@@ -6,18 +6,20 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/15 21:11:31 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/05 00:14:44 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/07 20:08:26 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../../minishell.h"
 
-char *getenv_local(char *name)
+char	*getenv_local(char *name)
 {
-	char **env;
-	size_t line = 0;
+	char		**env;
+	size_t		line;
+	t_data		*shared_data;
 
-	t_data *shared_data = get_data(NULL);//possible make error return type
+	line = 0;
+	shared_data = get_data(NULL);
 	if (!shared_data)
 		return (NULL);
 	if (!shared_data->mini_envp)
@@ -30,9 +32,7 @@ char *getenv_local(char *name)
 		line++;
 	}
 	return (NULL);
-
 }
-
 
 static int	replace(char **arg, char *var_name, size_t start)
 {
@@ -43,7 +43,7 @@ static int	replace(char **arg, char *var_name, size_t start)
 		return (1);
 	env_var = getenv_local(var_name + 1);
 	if (!env_var)
-		env_var = "";//mayve need to do error reteurn
+		env_var = "";
 	new_value = ft_strdup(env_var);
 	free(var_name);
 	if (!new_value)

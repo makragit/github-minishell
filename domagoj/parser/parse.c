@@ -6,63 +6,79 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/07 13:46:57 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/04 23:27:41 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/07 20:24:19 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-static size_t	table_size(t_token *tokens)
+static void	add_tokens_to_table(t_cmd_table *table, t_token *lst)
 {
-	size_t	return_value;
-
-	return_value = 1;
-	while (tokens)
+	while (table)
 	{
-		if (tokens->type == PIPE_TOKEN)
-			return_value++;
-		tokens = tokens->next;
+		table->tokens = lst;
+		table = table->next;
 	}
-	return (return_value);
+}
+
+static t_token	*parse_tokens(char *input)
+{
+	t_token	*tokens;
+
+	tokens = tokenize(input);
+	if (!tokens)
+		return (NULL);
+	if (expander(tokens) == ERROR)
+	{
+		free_lst(tokens);
+		return (NULL);
+	}
+	return (tokens);
+}
+
+static t_cmd_table	*parse_table(t_token *tokens)
+{
+	t_cmd_table	*table;
+
+	table = table_init((table_size(tokens)));
+	if (!table)
+		return (NULL);
+	if (arr_create(table, tokens) == 1)
+	{
+		free_table(table);
+		return (NULL);
+	}
+	if (token_distribution(table, tokens))
+	{
+		free_table(table);
+		return (NULL);
+	}
+	return (table);
 }
 
 t_cmd_table	*parse(const char *input)
 {
-	t_token		*tokens;
-	t_cmd_table	*cmd_table;
+	char			*input_cpy;
+	t_token			*token_lst;
+	t_cmd_table		*table;
 
-	cmd_table = NULL;
-	if (input_check(input) == 1)
+	input_cpy = ft_strdup(input);
+	if (!input_cpy)
 		return (NULL);
-	tokens = tokenize(ft_strdup(input));
-	if (!tokens)
-		return (NULL);
-	cmd_table = table_init(table_size(tokens));
-	if (!cmd_table)
+	if (input_check(input_cpy) == 1)
 	{
-		free_lst(tokens);
+		free(input_cpy);
 		return (NULL);
 	}
-	if (expander(tokens))
+	token_lst = parse_tokens(input_cpy);
+	if (!token_lst)
+		return (NULL);
+	table = parse_table(token_lst);
+	if (!table)
 	{
-		free_lst(tokens);
-		tokens = NULL;
-		free_table(cmd_table);
+		free_lst(token_lst);
 		return (NULL);
 	}
-	if (arr_create(cmd_table, tokens) == 1)
-	{
-		free_lst(tokens);
-		tokens = NULL;
-		free_table(cmd_table);
-		return (NULL);
-	}
-	if (token_distribution(cmd_table, tokens))
-	{
-		free_lst(tokens);
-		tokens = NULL;
-		free_table(cmd_table);
-		return (NULL);
-	}
-	return (cmd_table);
+	add_tokens_to_table(table, token_lst);
+	return (table);
 }

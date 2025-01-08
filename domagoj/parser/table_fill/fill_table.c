@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 20:49:52 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/05 00:37:44 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/07 20:06:06 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,6 @@ int	token_distribution(t_cmd_table *table, t_token *tokens)
 			type = token->type;
 			if (type == PIPE_TOKEN)
 			{
-				printf("THERE IS A PIPE THERE!\n");
 				token = token->next;
 				break ;
 			}
@@ -95,7 +94,6 @@ int	token_distribution(t_cmd_table *table, t_token *tokens)
 			table->redir_data = reverse_data_lst(table->redir_data);
 			add_data_previous(table->redir_data);
 		}
-		table->tokens = tokens;
 		table = table->next;
 	}
 	return (0);

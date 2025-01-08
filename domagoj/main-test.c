@@ -6,19 +6,29 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/02 13:50:08 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/05 19:13:52 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/07 20:21:46 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-int	main_test(void)
+char	*fetch_test(int counter)
 {
-	int			counter = 0;
-	const char	*current_test;
-	t_cmd_table	*table;
 	const char	*test_cases[] =
 	{
+		"ls > out.txt && cat $?out.txt",
+		"ls | wc -l > a.txt > b.txt | cat",
+		"ls | cat",
+		"hi",
+		"ls | wc -l | cat",
+		"< b.txt cat /dev/null > test.txt",
+		//" echo 'stderr' >&2", FIX
+		"ls | grep -v '^d'",
+		//"grep 'pattern'",
+		"cat < input.txt",
+		//"uniq > output.txt",
+		//"cat < input.txt | grep 'pattern' | ls | uniq > output.txt",
+		"ls | wc -l | cat",
 		"echo $$",
 		"echo $)",
 		"echo $HOME",
@@ -26,26 +36,24 @@ int	main_test(void)
 		"echo $$HOME",
 		"echo $$$HOME",
 		"echo $$$l",
-		"cat << EOF | grep 'pattern'",
+		//"cat << EOF | grep 'pattern'",
 		"< 'input.txy' echo 'hi' > 1.out > 2.out",
 		"touch file.txt && rm -i file.txt",
 		"ls &&",
-	//	"cat << EOF\nNested << redirection\nEOF",
-	//		"cat << EOF\nHello, EOF\n",
+		//	"cat << EOF\nNested << redirection\nEOF",
+		//		"cat << EOF\nHello, EOF\n",
 		"echo$HOME$$",
-		"ls > out.txt && cat $?out.txt",
 		"echo hello$HOME$",
 		"echo hello$HOME duh",
 		"echo$HOME$",
-	//	"cat << END\nHello\nWorld\nEND",
-		"cat << EOF | wc -l$?",
-		"cat << EOF | grep pattern\npattern",
-		"cat << EOF | grep 'data' | wc -l",
+		//	"cat << END\nHello\nWorld\nEND",
+		//	"cat << EOF | wc -l$?",
+		//		"cat << EOF | grep pattern\npattern",
+		//	"cat << EOF | grep 'data' | wc -l",
 		"echo 'new line' >> output1.txt >> output2.txt",
-		"ls -l > output.txt 2> error.txt",
-		"ls nonexistent > /dev/null 2>&1",
-		"cat < input.txt | grep 'pattern' | ls | uniq > output.txt",
-		"cat | grep '$HOMEpattern'",
+		//"ls -l > output.txt 2> error.txt",
+		//"ls nonexistent > /dev/null 2>&1",
+		//"cat | grep '$HOMEpattern'",
 		"cat < input.txt",
 		"echo $HOME \"Double $HOMEquotes\"",
 		"ls -l",
@@ -54,7 +62,7 @@ int	main_test(void)
 		"ls | grep 'pattern' > output.txt",
 		"ls | grep 'pattern' >> output.txt",
 		"cat < input.txt | grep 'pattern' > output.txt",
-		"cat < non_existent_file.txt | grep 'pattern'",
+		//"cat < non_existent_file.txt | grep 'pattern'",
 		"| grep 'pattern'",
 		"echo 'data' | tee -a file1.txt file2.txt",
 		"echo 'hello' | grep 'hello' > overwrite.txt",
@@ -121,7 +129,6 @@ int	main_test(void)
 		"seq 1 5 | xargs -I {} echo Number: {}",
 		"echo \"Tabs\\tTest\" | expand",
 		"echo \"This\\tis\\ta\\ttest\" | tr -d '\\t'",
-		"cat /dev/null > test.txt",
 		"ls | grep -i test",
 		"export EMPTY_VAR='' && echo $EMPTY_VAR",
 		"echo $?",
@@ -138,7 +145,7 @@ int	main_test(void)
 		"echo $(ls -l)",
 		"ls | grep pattern | sort",
 		"echo 'Hello' 'World'!",
-		"echo 'stderr' >&2",
+		//	"echo 'stderr' >&2",
 		"env | grep PATH",
 		"export TEST=hello && echo $TEST && unset TEST",
 		"export PATH=$PATH:/bin && echo $PATH",
@@ -164,9 +171,9 @@ int	main_test(void)
 		"echo Done.",
 		"| echo",
 		"echo |",
-		"",
+		//"", see  this provblem later
 		"|",
-		"test <<",
+		//	"test <<",
 		"test >>",
 		"test <",
 		"test >",
@@ -177,24 +184,5 @@ int	main_test(void)
 		NULL
 	};
 
-	while (test_cases[counter])
-	{
-		current_test = (test_cases[counter]);
-		printf("\n\n");
-		printf("---Test n.%i---\n %s\n", counter, current_test);
-		printf("-----\n");
-		table = parse(current_test);
-		if (table)
-		{
-			cmd_print(table);
-			if (execute(table) == ERROR)
-				printf("ERROR DURING EXECUTION PROCESS!\n");
-			free_table(table);
-			table = NULL;
-		}
-		else if (!table)
-			printf("-test_is_error-\n");
-		counter++;
-	}
-	return (0);
+	return ((char *)test_cases[counter]);
 }

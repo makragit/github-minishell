@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/15 13:06:52 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/04 22:52:18 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/06 21:19:00 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@ static char	*cut_connect(char *str, size_t index, size_t cut_len)
 	char	*part2;
 	char	*return_str;
 
+	if (!str)
+		return (NULL);
 	part1 = ft_substr(str, 0, index);
 	if (!part1)
 	{

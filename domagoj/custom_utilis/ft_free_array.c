@@ -1,35 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_append.c                                        :+:      :+:    :+:   */
+/*   ft_free_array.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/05 18:10:57 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/07 19:44:19 by dbogovic         ###   ########.fr       */
+/*   Created: 2025/01/06 16:35:33 by dbogovic          #+#    #+#             */
+/*   Updated: 2025/01/07 19:45:04 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-int	ft_append(const char *str, int fd)
+void	ft_free_array(char **arr)
 {
-	ssize_t		written;
-	size_t		len;
-	size_t		total_written;
+	size_t	c;
 
-	total_written = 0;
-	if (!str || fd < 0)
-		return (-1);
-	len = 0;
-	while (str[len])
-		len++;
-	while (total_written < len)
+	c = 0;
+	if (!arr)
+		return ;
+	while (arr[c])
 	{
-		written = write(fd, str + total_written, len - total_written);
-		if (written == -1)
-			return (-1);
-		total_written += written;
+		free(arr[c]);
+		arr[c] = NULL;
+		c++;
 	}
-	return (0);
+	free(arr);
 }

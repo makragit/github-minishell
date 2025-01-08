@@ -6,11 +6,32 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/15 17:51:15 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/04 22:52:07 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/07 20:23:57 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
+
+static int	*create_int_arr(char *str, char *needle, size_t *c)
+{
+	int	*array;
+
+	while (str)
+	{
+		str = ft_strnstr(str, needle, ft_strlen(str));
+		if (!str)
+			break ;
+		(*c)++;
+		str += ft_strlen(needle);
+	}
+	if ((*c) == 0)
+		return (NULL);
+	array = malloc(sizeof(int) * ((*c) + 1));
+	if (!array)
+		return (NULL);
+	array[*c] = -1;
+	return (array);
+}
 
 int	*find_indexes(char *str, char *needle)
 {
@@ -25,20 +46,9 @@ int	*find_indexes(char *str, char *needle)
 	i = 0;
 	if (!str || !needle || ft_strlen(needle) == 0)
 		return (NULL);
-	while (str)
-	{
-		str = ft_strnstr(str, needle, ft_strlen(str));
-		if (!str)
-			break ;
-		c++;
-		str += ft_strlen(needle);
-	}
-	if (c == 0)
-		return (NULL);
-	array = malloc(sizeof(int) * (c + 1));
+	array = create_int_arr(str, needle, &c);
 	if (!array)
 		return (NULL);
-	array[c] = -1;
 	str = str_cpy;
 	while (i < c)
 	{

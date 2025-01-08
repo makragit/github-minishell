@@ -6,16 +6,18 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 22:46:16 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/04 23:29:06 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/07 20:22:18 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../../minishell.h"
 
-int	expander(t_token *tokens)
+t_err	expander(t_token *tokens)
 {
-	char	*current;
+	char		*current;
+	t_token		*head;
 
+	head = tokens;
 	while (tokens)
 	{
 		current = ft_strdup(tokens->value);
@@ -43,5 +45,6 @@ int	expander(t_token *tokens)
 		tokens->value = current;
 		tokens = tokens->next;
 	}
+	tokens = head;
 	return (OK);
 }
