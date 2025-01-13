@@ -6,11 +6,11 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/15 21:11:31 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/07 20:08:26 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/10 16:42:20 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../../minishell.h"
+#include "../../minishell.h"
 
 char	*getenv_local(char *name)
 {
@@ -39,6 +39,8 @@ static int	replace(char **arg, char *var_name, size_t start)
 	char	*env_var;
 	char	*new_value;
 
+	if (!var_name)
+		return (1);
 	if (!arg || !*arg)
 		return (1);
 	env_var = getenv_local(var_name + 1);
@@ -84,7 +86,7 @@ static int	start_len(size_t *start, size_t *len, char *str)
 	return (0);
 }
 
-static char	*extract(char **str, size_t start, size_t len)
+static char	*_var_name(char **str, size_t start, size_t len)
 {
 	char	*tmp;
 	char	*part;
@@ -92,7 +94,7 @@ static char	*extract(char **str, size_t start, size_t len)
 	part = ft_substr(*str, start, len);
 	if (!part)
 		return (NULL);
-	tmp = ft_strexpel(*str, part);
+	tmp = ft_strexpel(*str, part, ONE);
 	if (!tmp)
 	{
 		free(part);
@@ -115,7 +117,7 @@ int	expand_env(char **arg)
 		return (1);
 	while (start_len(&start, &len, str_cpy))
 	{
-		var_name = extract(&str_cpy, start, len);
+		var_name = _var_name(&str_cpy, start, len);
 		if (!var_name)
 		{
 			free(str_cpy);
@@ -127,9 +129,8 @@ int	expand_env(char **arg)
 			return (1);
 		}
 	}
-	if (!str_cpy)
-		return (1);
 	free(*arg);
 	*arg = str_cpy;
 	return (0);
 }
+//*find indexew

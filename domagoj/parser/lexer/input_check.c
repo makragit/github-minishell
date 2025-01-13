@@ -6,11 +6,11 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 13:27:10 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/07 20:21:18 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/10 16:42:33 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../../minishell.h"
+#include "../../minishell.h"
 
 static int	check_quotes(const char *input)
 {
@@ -33,72 +33,11 @@ static int	check_quotes(const char *input)
 	return (open_quote != '\0');
 }
 
-static int	check_redirs(const char *input)
-{
-	size_t	i;
-
-	i = 0;
-	while (input[i])
-	{
-		if (i == 0)
-		{
-			if (input[i] == '>' || input[i] == '#')
-			{
-				printf("Minishell: syntax error near unexpected token `>'\n");
-				return (1);
-			}
-		}
-		if (!input[i + 1])
-		{
-			if (input[i] == '<' || input[i] == '>')
-			{
-				printf("Minishell: syntax error near unexpected token `>'\n");
-				return (1);
-			}
-		}
-		i++;
-	}
-	return (0);
-}
-
-static int	pipe_check(const char *input)
-{
-	size_t	i;
-
-	i = 0;
-	while (input[i])
-	{
-		if (input[i] == '|')
-		{
-			if (!i || !input[i + 1])
-			{
-				return (1);
-			}
-			else if (i)
-			{
-				if (input[i - 1] == '|')
-				{
-					return (1);
-				}
-			}
-		}
-		i++;
-	}
-	return (0);
-}
-
 int	input_check(const char *input)
 {
-	if (check_redirs(input) == 1)
-		return (1);
 	if (check_quotes(input) == 1)
 	{
-		printf("Minishell: syntax error!\n");
-		return (1);
-	}
-	if (pipe_check(input) == 1)
-	{
-		printf("Minishell: syntax error near unexpected token\n");
+		syntax_error_print("quote");
 		return (1);
 	}
 	return (0);

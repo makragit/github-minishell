@@ -6,11 +6,11 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 13:23:28 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/07 18:03:41 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/10 16:43:15 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../../minishell.h"
+#include "../../minishell.h"
 
 static int	break_up_str(char **token_part, char **remainder_part)
 {
@@ -38,6 +38,33 @@ static int	break_up_str(char **token_part, char **remainder_part)
 	return (0);
 }
 
+int	check_token_validity(t_token *token)
+{
+	while (token)
+	{
+		if (!token->prev && token->type == PIPE)
+		{
+			syntax_error_print(token->value);
+			return (1);
+		}
+		if (token->prev)
+		{
+			if (token->type == token->prev->type && token->type != WORD)
+			{
+				syntax_error_print(token->value);
+				return (1);
+			}
+		}
+		if (!token->next && (token->type == PIPE || token->type == REDIRECTION))
+		{
+			syntax_error_print("newline");
+			return (1);
+		}
+		token = token->next;
+	}
+	return (0);
+}
+
 t_token	*finish_process(t_token *tokens, char *str)
 {
 	if (!str)
@@ -48,6 +75,11 @@ t_token	*finish_process(t_token *tokens, char *str)
 	tokens = reverse_lst(tokens);
 	add_previous(tokens);
 	free(str);
+	if (check_token_validity(tokens))
+	{
+		free_lst(tokens);
+		return (NULL);
+	}
 	token_categorisation(&tokens);
 	return (tokens);
 }

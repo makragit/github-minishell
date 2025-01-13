@@ -6,11 +6,11 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/15 18:31:12 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/07 20:08:54 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/10 16:42:24 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../../minishell.h"
+#include "../../minishell.h"
 
 static char	*fetch_ex_cmd(void)
 {
@@ -24,42 +24,53 @@ static char	*fetch_ex_cmd(void)
 	return (return_str);
 }
 
-int	expand_exit_status(char **str)
+char	*process_expanding(char *str, int *indexes, char *status)
 {
-	int		*indexes;
-	int		i;
-	char	*status;
-	size_t	offset;
+	int			i;
+	size_t		offset;
+	char		*s_cpy;
+	char		*cpy;
 
 	i = 0;
 	offset = 0;
-	if (!*str || !str)
-		return (-1);
-	status = fetch_ex_cmd();
-	if (!status)
+	s_cpy = ft_strdup(str);
+	if (!s_cpy)
+		return (NULL);
+	while (indexes[i] != -1)
+	{
+		if (ft_str_insert(&s_cpy, status, indexes[i++] + offset) == -1)
+		{
+			free(s_cpy);
+			return (NULL);
+		}
+		offset += ft_strlen(status);
+	}
+	cpy = ft_strexpel(s_cpy, "$?", ALL);
+	free(s_cpy);
+	return (cpy);
+}
+
+int	exit_status(char **str)
+{
+	int		*indexes;
+	char	*insert;
+	char	*expanded_str;
+
+	insert = fetch_ex_cmd();
+	if (!insert)
 		return (-1);
 	indexes = find_indexes(*str, "$?");
 	if (!indexes)
 	{
-		free(status);
+		free(insert);
 		return (0);
 	}
-	while (indexes[i] != -1)
-	{
-		if (ft_str_insert(str, status, indexes[i++] + offset) == -1)
-		{
-			free(status);
-			free(indexes);
-			return (-1);
-		}
-		offset += ft_strlen(status);
-	}
-	free(status);
+	expanded_str = process_expanding(*str, indexes, insert);
 	free(indexes);
-	status = ft_strexpel(*str, "$?");
-	if (!status)
+	free(insert);
+	if (!expanded_str)
 		return (-1);
 	free(*str);
-	*str = status;
+	*str = expanded_str;
 	return (0);
 }

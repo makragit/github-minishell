@@ -1,40 +1,27 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   del_quotes.c                                       :+:      :+:    :+:   */
+/*   print_error.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/12 20:32:28 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/10 16:42:16 by dbogovic         ###   ########.fr       */
+/*   Created: 2025/01/10 15:58:01 by dbogovic          #+#    #+#             */
+/*   Updated: 2025/01/10 16:42:37 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-int	ft_trim_quotes(char **str)
+void	syntax_error_print(char *reason)
 {
-	char	*strcpy;
-	char	*new;
-	size_t	len;
+	const char	*prefix = "Minishell: syntax error near unexpected token `";
+	const char	*suffix = "'\n";
+	t_data		*data;
 
-	strcpy = *str;
-	if (!*str || !str)
-		return (-1);
-	len = ft_strlen(strcpy);
-	if (len < 2)
-		return (0);
-	if (strcpy[0] == strcpy[len - 1])
-	{
-		if (strcpy[0] == '\'' || strcpy[0] == '\"')
-		{
-			strcpy[len - 1] = '\0';
-			new = ft_strdup(strcpy + 1);
-			if (!new)
-				return (-1);
-			free(*str);
-			*str = new;
-		}
-	}
-	return (0);
+	data = get_data(NULL);
+	write(STDERR_FILENO, prefix, strlen(prefix));
+	if (reason)
+		write(STDERR_FILENO, reason, strlen(reason));
+	write(STDERR_FILENO, suffix, strlen(suffix));
+	data->last_ex_code = 2;
 }

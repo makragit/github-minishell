@@ -6,11 +6,11 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/03 18:31:16 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/06 16:18:01 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/10 16:42:45 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../../minishell.h"
+#include "../../minishell.h"
 
 t_redir_data	*add_redir_entry(t_redir_data *data, t_token *token)
 {
@@ -24,8 +24,6 @@ t_redir_data	*add_redir_entry(t_redir_data *data, t_token *token)
 	if (!new)
 		return (NULL);
 	ft_memset(new, 0, sizeof(t_redir_data));
-	if (!new)
-		return (NULL);
 	if (type == APPEND)
 		new->append = token->value;
 	else if (type == INPUT)
@@ -33,7 +31,11 @@ t_redir_data	*add_redir_entry(t_redir_data *data, t_token *token)
 	else if (type == OUTPUT)
 		new->output = token->value;
 	else if (type == HEREDOC)
+	{
 		new->heredoc_delimiter = token->value;
+		if ((token->value)[0] == '\'' || (token->value)[0] == '\"')
+			new->is_quoted = 1;
+	}
 	new->next = data;
 	data = new;
 	return (data);
