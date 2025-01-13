@@ -10,6 +10,17 @@ t_data *get_data(t_data *data)
 	return (resource);
 }
 
+t_cmd_table *get_table_reset(t_cmd_table *table, int reset)
+{
+	static t_cmd_table *resource = NULL;
+	
+	if (reset)
+		resource = NULL;
+	else if (table != NULL)
+		resource = table;
+	return (resource);
+}
+
 // TODO Error message? use exit_error?
 t_data *init_data(char **envp)
 {
@@ -17,7 +28,8 @@ t_data *init_data(char **envp)
 
 	data = (t_data *)malloc(sizeof(t_data) * 1);
 	if (!data)
-		exit(EXIT_FAILURE);
+		malloc_error("ERROR: malloc failed in init_data");
+		
 	data->prompt_str = NULL;
 	data->env_paths = NULL;
 	data->home_path = NULL;
@@ -26,8 +38,12 @@ t_data *init_data(char **envp)
 
 	get_data(data); // put here so copy_array free_data() can work on malloc fail
 
-	data->last_ex_code = 0;
 	data->original_envp = envp;
+	data->mini_envp = copy_array(envp);
+	if (data->mini_envp == NULL) 
+    exit_error("ERROR: empty envp"); // TODO needed? envp is check in main
+	data->env_paths = get_envp_path(data->mini_envp); // NULL if PATH= not in env variables
+	data->home_path = get_home_path(data->mini_envp); // "(null)" if no HOME= env variable
 
 	return (data);
 }
@@ -50,6 +66,19 @@ void free_data()
 	free(data);
 }
 
+void free_all()
+{
+	t_cmd_table *table;
+
+	free_data();
+
+	table = get_table_reset(NULL, 0);
+	if (!table)
+		return;
+	else
+		free_table(table);
+}
+
 int	MAK_free_array(char **arr)
 {
 	size_t	i;
@@ -64,14 +93,28 @@ if (!arr) return (0);
 	return (0);
 }
 
-// TODO use EXIT_FAILURE and perror instead
+// same as malloc_error for now
 void exit_error(char *s)
 {
-	/* perror(s); */
-	printf("%s\n", s);
-	free_data();
-	/* exit(EXIT_FAILURE); */
-	exit(0);
+	perror(s);
+	free_all();
+
+	if (errno == 0)
+		errno = 1;
+
+	exit(errno);
+}
+
+// TODO perror or stderror?
+void malloc_error(char *s)
+{
+	perror(s);
+	free_all();
+
+	if (errno == 0)
+		errno = 1;
+
+	exit(errno);
 }
 
 // TODO guard bigger than PATH_MAX?
@@ -97,10 +140,7 @@ char *display_prompt()
 	prompt_len = ft_strlen("\033[1;36m") + ft_strlen(user)
 		+ ft_strlen(hostname) + ft_strlen(cwd) + ft_strlen("\033[0m") + 4;
 
-	// No Color
-	/* prompt_len = ft_strlen(user) + ft_strlen(hostname) + ft_strlen(cwd) + 4; */
-
-	prompt_str = prepare_prompt_string(user,
+	prompt_str = prepare_prompt_string(user, 
 			cwd, hostname, prompt_len);
 
 	return (readline(prompt_str));
@@ -112,12 +152,9 @@ char *prepare_prompt_string(char *user, char *path, char *hostname, int size)
 
 	str = (char *)ft_calloc(sizeof(char), size + 1);
 	if (!str)
-		exit_error("prepare: str malloc failed");
+		malloc_error("ERROR: malloc failed in prepare_prompt_string");
 
-	// write str to data for easier freeing
-	// TODO prompt_str needs to be freed every time prompt is rewritten
 	free(get_data(NULL)->prompt_str);
-	get_data(NULL)->prompt_str = NULL; // TODO funcheck fix?
 	get_data(NULL)->prompt_str = str;
 
 	str[size] = '\0';
@@ -138,7 +175,6 @@ char *prepare_prompt_string(char *user, char *path, char *hostname, int size)
 }
 
 // TODO getenv for root okay? getuid() not allowed
-// TODO getenv NULL -> exit or use (null)?
 int is_root()
 {
 	char *user;
@@ -170,8 +206,6 @@ int ft_isspace(char c)
 	return (0);
 }
 
-
-
 void signal_handler(int signum)
 {
 	if (signum == SIGINT)
@@ -200,7 +234,7 @@ int	MAK_arr_size(char **arr)
 	return (i);
 }
 
-// TODO exit on getcwd Error?
+// returns malloced 'current working directory', exits program on getcwd() failure
 char *get_cwd_path()
 {
 	char cwd[PATH_MAX];
@@ -209,6 +243,9 @@ char *get_cwd_path()
 	if (getcwd(cwd, sizeof(cwd)) == NULL)
 		exit_error("ERROR: getcwd failed\n");
 	ret = (char *)malloc(sizeof(char) * (ft_strlen(cwd) + 1));
+	if (ret == NULL)
+		malloc_error("ERROR: malloc failed in get_cwd_path");
+
 	i = 0;
 	while(cwd[i])
 	{
@@ -219,14 +256,17 @@ char *get_cwd_path()
 	return (ret);
 }
 
-// TODO if ! envp check
-// TODO exit_error on ft_split fail neede for funcheck?
+// returns array of split PATH= values, returns NULL if !envp or no PATH= found
 char **get_envp_path(char **envp)
 {
 	int     i;
 	char    **paths;
 
-	//TODO if ! envp check
+	if (!envp) {
+		DEBUG_NULL("get_envp: no envp");
+		return(NULL);
+	}
+
 	i = 0;
 	while (envp[i] && ft_strncmp(envp[i], "PATH=", 5) != 0)
 		i++;
@@ -234,16 +274,16 @@ char **get_envp_path(char **envp)
 		return (NULL);
 	paths = ft_split(envp[i] + 5, ':'); // Skip "PATH="
 	if (paths == NULL)
-		exit_error("get_envp_path malloc kp"); // TODO test
-		/* return (NULL); // TODO handle malloc fail */
+		malloc_error("ERROR: malloc failed in getenvp_path: ft_split");
 	return (paths);
 }
 
+// Does not need to be freed
 char *get_home_path(char **envp)
 {
 	char 	*home_dir;
 	int		i;
-
+	
 	i = 0;
 	while (envp[i] && ft_strncmp(envp[i], "HOME=", 5) != 0)
 		i++;
@@ -283,8 +323,7 @@ char *is_relative_path(const char *str)
 
 	full_path = ft_strjoin(cwd, str);
 	if (!full_path)
-		exit_error("is_relative_path ft_strjoin failed");
-		/* return (NULL); */
+		malloc_error("ERROR: malloc failed in is_relative_path: ft_strjoin");
 
 	if (stat(str, &Stat) == 0)
 		if (S_ISREG(Stat.st_mode) && (Stat.st_mode & S_IXUSR))
@@ -310,7 +349,7 @@ int is_executable(const char *str, char **paths)
 	if (!str || !paths || !paths[0]) {
 		return (DEBUG_0("!str || !paths || !paths[0]"));
 	}
-
+	
 	// TODO root '/' should be executable?
 	if (str[0] == '/' && ft_strlen(str) == 1) {
 		return (DEBUG_0("is_executable: '/'"));
@@ -337,14 +376,12 @@ int is_executable(const char *str, char **paths)
 	{
 		slash_path = ft_strjoin(paths[i++], "/");
 		if (!slash_path) {
-			// TODO how to free?
-			exit_error("!slash_path");
+			malloc_error("ERROR: malloc failed in is_executable: ft_strjoin");
 		}
 		full_path = ft_strjoin(slash_path, str);
 		if (!full_path) {
-			// TODO how to free?
 			free(slash_path);
-			exit_error("!full_path");
+			malloc_error("ERROR: malloc failed in is_executable: ft_strjoin");
 		}
 		free(slash_path);
 
@@ -375,16 +412,23 @@ char *return_executable_path(const char *str, char **paths)
 	if (!str || !paths || !paths[0]) {
 		return (DEBUG_NULL("!str || !paths || !paths[0]"));
 	}
-
+	
 	// TODO root '/' should be executable?
 	if (str[0] == '/' && ft_strlen(str) == 1) {
 		return (DEBUG_NULL("is_executable: '/'"));
 	}
 
-	// check absolute str '/usr/bin/cat'
+	// check absolute str '/usr/bin/cat' and return copy
 	if (stat(str, &Stat) == 0)
+	{
 		if (S_ISREG(Stat.st_mode) && (Stat.st_mode & S_IXUSR))
-			return (ft_strdup(str));
+		{
+			full_path = ft_strdup(str);
+			if (!full_path)
+				malloc_error("ERROR: malloc failed in return_executable_path: ft_strdup");
+			return (full_path);
+		}
+	}
 
 	// check relative str './minishell' TODO not needed?
 		/* full_path = is_relative_path(str); */
@@ -399,14 +443,12 @@ char *return_executable_path(const char *str, char **paths)
 	{
 		slash_path = ft_strjoin(paths[i++], "/");
 		if (!slash_path) {
-			// TODO how to free?
-			exit_error("!slash_path");
+			malloc_error("ERROR: malloc failed in return_executable_path: ft_strjoin");
 		}
 		full_path = ft_strjoin(slash_path, str);
 		if (!full_path) {
-			// TODO how to free?
 			free(slash_path);
-			exit_error("!full_path");
+			malloc_error("ERROR: malloc failed in return_executable_path: ft_strjoin");
 		}
 		free(slash_path);
 
@@ -418,102 +460,82 @@ char *return_executable_path(const char *str, char **paths)
 	return (NULL);
 }
 
-int builtin_check_table(t_cmd_table *table)
+
+int try_builtin(t_cmd_table *table)
 {
 	DEBUG_printf("bultin_check_table");
 	if (!table)
-		return (DEBUG_0("builtin_check_table: !table\n"));
-
-	if (ft_strncmp(table->cmd, "cd", 2) == 0 && table->cmd[2] == '\0')
-		builtin_chdir(table->args);
-	else if (ft_strncmp(table->cmd, "echo", 4) == 0 && table->cmd[4] == '\0')
-		builtin_echo_table(table->args);
-		/* builtin_echo(table->args); */
-	else
-		return (0);
-
-	return (1);
-}
-
-
-
-
-int builtin_check(char *input)
-{
-	char **split;
-
-	if (*input == '\0' || input == NULL)
-		return (DEBUG_0("builtin_check: 0 or NULL"));
-
-	split = ft_split(input, ' ');
-	if (split == NULL)
-		exit_error("test_execute split"); // TODO how to handle?
-
-	/* DEBUG_print_strings(split); */
-	/* printf("\n"); */
-
-	// TODO Refactor!
-	if (ft_strncmp(split[0], "cd", 2) == 0 && split[0][2] == '\0')
-		builtin_chdir(split);
-	else if (ft_strncmp(split[0], "echo", 4) == 0 && split[0][4] == '\0')
-		builtin_echo(input + 4);
-	else if (ft_strncmp(split[0], "pwd", 3) == 0 && split[0][3] == '\0')
-		builtin_pwd(split);
-	else if (ft_strncmp(split[0], "env", 3) == 0 && split[0][3] == '\0')
-		builtin_env();
-	else if (ft_strncmp(split[0], "export", 6) == 0 && split[0][6] == '\0')
-		builtin_export(split);
-	else if (ft_strncmp(split[0], "unset", 5) == 0 && split[0][5] == '\0')
-		builtin_unset(split);
-	/* else if (ft_strncmp(split[0], "exit", x) == 0) */
-
-	else // TODO else statement needed?
 	{
-		MAK_free_array(split);
-		return (0);
+		DEBUG_printf("builtin_check_table: !table\n");
+		return (-1); // TODO -1 okay here? 1 only if execution fails
 	}
 
-	MAK_free_array(split);
-	return (1);
+	if (ft_strncmp(table->cmd, "cd", 2) == 0 && table->cmd[2] == '\0')
+		return (builtin_chdir(table->args));
+	else if (ft_strncmp(table->cmd, "echo", 4) == 0 && table->cmd[4] == '\0')
+		return (builtin_echo(table->args));
+	else if (ft_strncmp(table->cmd, "pwd", 3) == 0 && table->cmd[3] == '\0')
+		return (builtin_pwd(table->args));
+	else if (ft_strncmp(table->cmd, "env", 3) == 0 && table->cmd[3] == '\0')
+		return (builtin_env(table->args));
+	else if (ft_strncmp(table->cmd, "export", 6) == 0 && table->cmd[6] == '\0')
+		return (builtin_export(table->args));
+	else if (ft_strncmp(table->cmd, "unset", 5) == 0 && table->cmd[5] == '\0')
+		return (builtin_unset(table->args));
+	else if (ft_strncmp(table->cmd, "exit", 4) == 0 && table->cmd[4] == '\0')
+		return (builtin_exit(table->args));
+
+	return (-1);
 }
 
 
 // TODO save new dir in data
-int builtin_chdir(char **split)
+// returns 0 for success, errno or 1 on failure
+int builtin_chdir(char **args)
 {
 	char *path;
 
 	DEBUG_printf("bultin: cd");
-	if (split == NULL)
-		return(DEBUG_0("builtin_chdir split == NULL"));
 
-	if (MAK_arr_size(split) > 2)
+	if (args == NULL)
 	{
-		printf("minishell: cd: too many arguments\n");
-		return (0);
+		DEBUG_0("builtin_chdir args == NULL");
+		return(1);
 	}
 
-	if (MAK_arr_size(split) == 1)
+	if (MAK_arr_size(args) > 2)
+	{
+		printf("minishell: cd: too many arguments\n"); // TODO perror? error_func
+		return (1);
+	}
+
+	if (MAK_arr_size(args) == 1)
 		path = get_data(NULL)->home_path;
-	else if (ft_strlen(split[1]) == 1 && split[1][0] == '~')
+	else if (ft_strlen(args[1]) == 1 && args[1][0] == '~')
 		path = get_data(NULL)->home_path;
 	else
-		path = split[1];
+		path = args[1];
 
 	if (chdir(path) != 0)
+	{
 		perror("minishell: cd"); // 'minishell: cd: No such file or directory
-	else // DEBUG
-		DEBUG_printf("Directory changed to: %s\n", path);
+		return(1); // TODO INFO set to (1) instead of errno,
+							 // because errno returns 2 on 'not found' and 20 on 'not a dir'
+							 // while bash exit code ist just 1
+		/* return(errno); */
+	}
+
+	DEBUG_printf("Directory changed to: %s\n", path);
 
 	return (0);
 }
 
-int builtin_pwd(char **split)
+int builtin_pwd(char **args)
 {
 	char *cwd_path;
 
 	DEBUG_printf("bultin_pwd");
-	if (MAK_arr_size(split) > 1)
+	if (MAK_arr_size(args) > 1)
 	{
 		printf("pwd: too many arguments\n");
 		return (1);
@@ -526,11 +548,17 @@ int builtin_pwd(char **split)
 	return (0);
 }
 
-void builtin_env()
+// returns 0 on SUCCESS, errno or 1 on Failure
+int builtin_env(char **args)
 {
 	char **env;
 
 	DEBUG_printf("bultin: env");
+	if (MAK_arr_size(args) > 1)
+	{
+		printf("env: ‘%s‘: No such file or directory\n", args[1]);
+		return (0); // TODO 0 correct? 
+	}
 
 	env = get_data(NULL)->mini_envp;
 	while(*env != NULL)
@@ -539,108 +567,75 @@ void builtin_env()
 		env++;
 	}
 
-	return ;
+	return (0);
 }
 
-int builtin_echo_table(char **args)
+
+// returns 1 for -n -nnnn.., 0 for -nnnnx etc
+int bultin_echo_option(char *str)
+{
+	int i;
+
+	if (!str)
+		return (0);
+	if (ft_strlen(str) < 2)
+		return (0);
+	if (ft_strncmp(str, "-n", 2) != 0)
+		return (0);
+	i = 1;
+	while(str[i])
+	{
+		if (str[i] != 'n')
+			return (0);
+		i++;
+	}
+	return(1);
+}
+
+// TODO multiple printfs okay for output?
+// return 0 on Success, errno or 1 on Failure
+int builtin_echo(char **args)
 {
 	int i;
 	int option_found = 0;
 
 	DEBUG_printf("bultin_echo_table");
 
-	// TODO better solution for space?
-	//check if single argument, echo without space
-	/* if (MAK_arr_size(args) == 2) // TODO needs to check for '-n' too */
-	/* { */
-	/* 	printf("%s", args[1]); */
-	/* 	return (1); */
-	/* } */
+	if (!args || !*args)
+	{
+		DEBUG_printf("builtin_echo_table: !args !*args");
+		return (1);
+	}
+	if (MAK_arr_size(args) == 1)
+	{
+		printf("\n");
+		return (0);
+	}
 
-	i = 1;
+	DEBUG_printf("echo_parse_option: %d\n", bultin_echo_option(args[1]));
+	if (bultin_echo_option(args[1]))
+		option_found = 1;
+
+	i = 1 + option_found; // if -n found: skip the string
+
+	if (args[i]) // first value without space
+		printf("%s", args[i++]);
 	while(args[i])
 	{
-		printf("%s ", args[i]); // uses space
+		printf(" %s", args[i]); // uses space
 		i++;
 	}
 
 	if (!option_found) // if -n found no newline
 		printf("\n");
 
-	return (1);
-}
-
-// TODO echo 1 "2 3" 4 -> 1 2 3 4
-// 					minishell 1"23"4
-// TODO echo NO ARGUMENTS -> " " empty line
-// TODO return/print output as whole string?
-int builtin_echo(char *input)
-{
-	int i;
-	char **split;
-	/* int option_found; */
-	char* option_found;
-
-	option_found = NULL;
-	(void)option_found;
-
-	DEBUG_printf("bultin_echo");
-	DEBUG_printf("NEEDS PARSE/LEXER");
-	DEBUG_printf("input: _%s_", input);
-
-	// char *builtin_echo_parse_option(char *str)
-	option_found = builtin_echo_parse_option(input);
-	if (option_found == NULL)
-		split = ft_split(input, ' '); // TODO parse/lexer
-		/* split = ft_split(input, '"'); // TODO parse/lexer */
-	else
-		split = ft_split(option_found, ' '); // TODO parse/lexer
-		/* split = ft_split(option_found, '"'); // TODO parse/lexer */
-
-	i = 0;
-	while(split[i])
-	{
-		printf("%s", split[i]);
-		i++;
-	}
-
-	if (!option_found) // if -n found no newline
-		printf("\n");
-
-	/* (void)split; */
-	MAK_free_array(split);
 	return (0);
 }
 
-// TODO Not Needed anymore !!!
-// TODO !!! ECHO needs parser/lexer for '""' etc
-// Needs to split ' ' for whitespace and "2 3"  and '' correctly
-char *builtin_echo_parse_option(char *str)
-{
-	while(ft_isspace(*str))
-		str++;
-
-	if (ft_strncmp(str, "-n", 2) != 0)
-		return (DEBUG_NULL("NULL: no -n \n"));
-
-	str += 2;
-	while (*str == 'n')
-		str++;
-
-	if (!ft_isspace(*str) && *str != '\0')
-		return (DEBUG_NULL("!isspace != 0 \n"));
-
-	while(ft_isspace(*str))
-		str++;
-
-	DEBUG_printf("-n found");
-	return (str);
-}
-
-// TODO handle strdup fail
 // TODO use ft_calloc?
 // TODO what if *arr / arr[0] is NULL or size 0?
-/* Takes malloced array, frees it and creates new array with added Value */
+/* Takes malloced array, frees it and creates new array with added Value using the same ptr*/
+/* 0 on fail 1 success */
 int array_free_and_add(char ***arr, char *new_value)
 {
 	char **new_arr;
@@ -655,7 +650,7 @@ int array_free_and_add(char ***arr, char *new_value)
 	size = MAK_arr_size(*arr);
 	new_arr = malloc(sizeof(char *) * (size + 2));
 	if (!new_arr)
-		exit_error("array_free_and_add: malloc");
+		malloc_error("ERROR: malloc failed in array_free_and_add");
 
 	i = 0;
 	while((*arr)[i])
@@ -664,15 +659,15 @@ int array_free_and_add(char ***arr, char *new_value)
 		if (!new_arr[i])
 		{
 			MAK_free_array(new_arr);
-    	exit_error("array_free_and_add: ft_strdup");
+			malloc_error("ERROR: malloc failed in array_free_and_add: ft_strdup");
     }
 		i++;
 	}
-	new_arr[i] = ft_strdup(new_value); // TODO refactor "free_failed_malloc"
+	new_arr[i] = ft_strdup(new_value);
 	if (!new_arr[i])
 	{
 		MAK_free_array(new_arr);
-  	exit_error("array_free_and_add: ft_strdup");
+		malloc_error("ERROR: malloc failed in array_free_and_add: ft_strdup");
   }
 
 	new_arr[++i] = NULL;
@@ -682,8 +677,7 @@ int array_free_and_add(char ***arr, char *new_value)
 	return (1);
 }
 
-// TODO what if value found multiple times?
-// TODO array issue strncmp because last value unset?
+// TODO use ft_calloc?
 // removes value from array. Only works if value is unique in array (like in envp)
 int array_free_and_remove(char ***arr, char *remove_value)
 {
@@ -702,31 +696,29 @@ int array_free_and_remove(char ***arr, char *remove_value)
 	// Search for remove_value and return if not found
 	if (!search_array((*arr), remove_value))
 		return(DEBUG_0("array_free_and_remove: remove_value not found"));
+	if (search_array((*arr), remove_value) > 1) // TODO can be deleted or integrated into if above
+		return(DEBUG_0("array_free_and_remove: remove_value found multiple times"));
 
 	size = MAK_arr_size(*arr);
 	new_arr = malloc(sizeof(char *) * (size)); // excluding +1 because of removed value
 	if (!new_arr)
-		exit_error("array_free_remove: malloc");
+		malloc_error("ERROR: malloc failed in array_free_and_remove");
 
 	i = 0;
 	while(*temp_arr)
 	{
-		/* if (ft_strncmp(temp_arr[i], remove_value, ft_strlen(remove_value)) != 0) */
 		if (ft_strncmp(*temp_arr, remove_value, ft_strlen(remove_value)) != 0)
 		{
-			/* new_arr[i] = ft_strdup(temp_arr[i]); */
 			new_arr[i] = ft_strdup(*temp_arr);
 			if (!new_arr[i++])
 			{
 				MAK_free_array(new_arr);
-    		exit_error("array_free_remove: ft_strdup");
+				malloc_error("ERROR: malloc failed in array_free_and_remove: ft_strdup");
     	}
 		}
 
 		temp_arr++;
 	}
-
-	// TODO if i != arr_size -> multiple values found?
 
 	new_arr[i] = NULL;
 	MAK_free_array(*arr);
@@ -735,120 +727,8 @@ int array_free_and_remove(char ***arr, char *remove_value)
 	return(1);
 }
 
-// TODO handle strdup fail
-// TODO use ft_calloc?
-// TODO what if *arr / arr[0] is NULL or size 0?
-/* Takes malloced array, frees it and creates new array without remove_value */
-
-// int array_free_and_remove_2(char ***arr, char *remove_value)
-// {
-// 	char **new_arr;
-// 	int size;
-// 	int i;
-//
-// 	if (!arr || !*arr)
-//     return(DEBUG_0("array_free_remove: arr or *arr is NULL"));
-// 	if (!remove_value)
-//     return(DEBUG_0("array_free_remove: new_value is NULL"));
-//
-// 	size = MAK_arr_size(*arr);
-// 	new_arr = malloc(sizeof(char *) * (size + 2));
-// 	if (!new_arr)
-// 		exit_error("array_free_remove: malloc");
-//
-// 	i = 0;
-// 	while((*arr)[i])
-// 	{
-// 		if (ft_strncmp((*arr)[i], remove_value, ft_strlen(remove_value)) == 0)
-// 		{
-// 			(*arr)++;
-// 			continue;
-// 		}
-// 		new_arr[i] = ft_strdup((*arr)[i]);
-// 		if (!new_arr[i])
-// 		{
-// 			MAK_free_array(new_arr);
-//     	exit_error("array_free_remove: ft_strdup");
-//     }
-// 		i++;
-// 	}
-//
-// 	/* new_arr[i] = ft_strdup(new_value); */
-// 	/* if (!new_arr[i]) */
-// 	/* { */
-// 	/* 	MAK_free_array(new_arr); */
-//   	/* exit_error("add_to_array ft_strdup"); */
-//   /* } */
-//
-// 	new_arr[i] = NULL;
-// 	MAK_free_array(*arr);
-// 	*arr = new_arr;
-//
-// 	return (1);
-// }
 
 
-
-// TODO NOT NEEDED, use array_free_malloc_and_add instead
-// Does not free input arr !
-// TODO input entry should be malloced/freed or not?
-// TODO handle strdup fail
-// TODO use ft_calloc?
-// TODO what if *arr / arr[0] is NULL or size 0?
-/* char **add_to_array(char **arr, char *new_value) */
-/* { */
-/* 	char **new_arr; */
-/* 	int size; */
-/* 	int i; */
-
-/* 	if (!arr) { */
-/* 		DEBUG_printf("no arr"); */
-/* 		return(NULL); */
-/* 	} */
-/* 	if (!new_value) 	{ */
-/* 		DEBUG_printf("no new_value"); */
-/* 		return(arr); */
-/* 	} */
-
-/* 	size = MAK_arr_size(arr); */
-/* 	new_arr = malloc(sizeof(char *) * (size + 2)); */
-/* 	if (!new_arr) */
-/* 		exit_error("copy_array malloc"); */
-
-/* 	i = 0; */
-/* 	while(arr[i]) */
-/* 	{ */
-/* 		new_arr[i] = ft_strdup(arr[i]); */
-/* 		if (!new_arr[i]) */
-/* 		{ */
-/*     	while (--i >= 0) */
-/*     		free(new_arr[i]); */
-/*     	free(new_arr); */
-/*     	exit_error("add_to_array ft_strdup"); */
-/*     } */
-/* 		i++; */
-/* 	} */
-/* 	new_arr[i] = ft_strdup(new_value); // TODO refactor "free_failed_malloc" */
-/* 	if (!new_arr[i]) */
-/* 	{ */
-/*   	while (--i >= 0) */
-/*   		free(new_arr[i]); */
-/*   	free(new_arr); */
-/*   	exit_error("add_to_array ft_strdup"); */
-/*   } */
-
-/* 	new_arr[++i] = NULL; */
-
-/* 	/1* free(arr); *1/ */
-/* 	return (new_arr); */
-/* } */
-
-
-
-
-
-
-// TODO handle strdup fail
 // TODO use ft_calloc?
 // TODO what if *arr / arr[0] is NULL or size 0?
 char **copy_array(char **arr)
@@ -857,18 +737,16 @@ char **copy_array(char **arr)
 	int size;
 	int i;
 
-	if (!arr)
-	{
-		DEBUG_printf("copy_array: no arr");
-		/* return(NULL); */
-		return(arr);
+	if (!arr || !*arr) {
+		DEBUG_printf("copy_array: !arr !*arr");
+		return(NULL);
 	}
 
 	size = MAK_arr_size(arr);
 
 	new_arr = malloc(sizeof(char *) * (size + 1));
 	if (!new_arr)
-		exit_error("copy_array: malloc");
+		malloc_error("ERROR: malloc failed in copy_array");
 
 	i = 0;
 	while(arr[i])
@@ -877,7 +755,7 @@ char **copy_array(char **arr)
 		if (!new_arr[i])
 		{
 			MAK_free_array(new_arr);
-    	exit_error("copy_array: ft_strdup");
+			malloc_error("ERROR malloc failed in copy_array: ft_strdup");
     }
 		i++;
 	}
@@ -885,6 +763,7 @@ char **copy_array(char **arr)
 	return (new_arr);
 }
 
+// TODO check ft_strlen of arr[i] instead for exact match?
 // returns how many times 'search' was found using in array
 // search is not exact, only checks for len of 'search'
 int search_array(char **arr, char *search)
@@ -904,67 +783,92 @@ int search_array(char **arr, char *search)
 	return (found);
 }
 
-
-
 // TODO how to handle array_free_and_add fail?
-// TODO export with no argument prints env?
+// TODO export with no argument prints env? 
 // TODO export abc def -> must add a string abc='' and def='' to env, not just abc and def
-int builtin_export(char **split)
+// returns 0 on SUCCESS, errno or 1 on Failure
+int builtin_export_old(char **args)
 {
 	int i;
 
 	DEBUG_printf("builtin_export");
 	/* DEBUG_print_strings(split); */
 
-	/* if (MAK_arr_size(split) != 2) */
-	/* 	return (DEBUG_0("builtin_export: split size != 2\n")); */
-
-
-	if (MAK_arr_size(split) == 1)
+	if (MAK_arr_size(args) == 1)
 	{
-		builtin_env();
-		return (DEBUG_0("split size == 1, ran builtin_env\n"));
+		builtin_env(args);
+		/* return (DEBUG_0("split size == 1, ran builtin_env\n")); */
+		DEBUG_printf("split size == 1, ran builtin_env\n");
+		return (0);
 	}
 
 	i = 1;
-	while(split[i])
+	while(args[i])
 	{
-		if (!array_free_and_add(&get_data(NULL)->mini_envp, split[i]))
-			return (DEBUG_0("builtin_export: array_free_and failed\n"));
+		if (!array_free_and_add(&get_data(NULL)->mini_envp, args[i]))
+		{
+			DEBUG_printf("builtin_export: array_free_and failed\n");
+			return (1); // TODO 1 okay? only fails on !arr !*arr !new_value
+		}
 		i++;
 	}
 
-
-	return (1);
+	return (0);
 }
 
 // TODO unset behaviour multiple arguments? Deletes all?
 // TODO unset behaviour value not found?
 // TODO unset behaviour multiple arguments, one value not found?
-int builtin_unset(char **split)
+// TODO Refactor if-else
+// returns 0 on SUCCESS, errno or 1 on Failure
+int builtin_unset(char **args)
 {
 	int i;
+	int search;
 
 	DEBUG_printf("builtin_unset");
 
-	if (MAK_arr_size(split) == 1)
-	{
-		printf("unset: not enough arguments\n"); // TODO Error Handling
-		return (DEBUG_0("builtin_unset: split size == 1\n"));
-	}
+	if (MAK_arr_size(args) == 1)
+		return (0);
+		/* printf("unset: not enough arguments\n"); // no Error message in bash */
 
-	// TODO while needed for unsetting multiple arguments?
+
 	i = 1;
-	while(split[i])
+	while(args[i])
 	{
-		// TODO add search_array check
-		if (!array_free_and_remove(&get_data(NULL)->mini_envp, split[i]))
-			return (DEBUG_0("builtin_export: array_free_and_remove failed\n"));
-		//TODO return 2 if value not found?
+
+		if (key_valid(args[i]) == 3) // 3 does not end with =
+		{
+			/* printf("minishell: unset: invalid parameter name"); // TODO perror? error_func */
+			/* 																										// No Error message in bash! */
+			i++;
+			continue;
+		}
+
+
+		// TODO search_array for value to be removed
+		search = search_array(get_data(NULL)->mini_envp, args[i]);
+		if (search < 1) {
+			DEBUG_printf("bultin_unset: search not found");
+			i++;
+			continue;
+		}
+		// TODO DEBUG check > 1
+		if (search > 1) {
+			DEBUG_printf("bultin_unset: SEARCH found > 1 ??");
+			i++;
+			continue;
+		}
+
+		if (!array_free_and_remove(&get_data(NULL)->mini_envp, args[i]))
+		{
+			DEBUG_printf("builtin_export: array_free_and_remove failed\n");
+			return (1); // TODO 1 okay? only returns on !arr !*arr !remove_value, not found, mult. found
+		}
 		i++;
 	}
 
-	return (1);
+	return (0);
 }
 
 // path, arguments usage:
@@ -978,13 +882,13 @@ void test_execute(char* input, char **env_paths, char **envp)
 
 	if (input == NULL || *input == '\0')
 		return(DEBUG_VOID("test_execute: NULL or 0"));
-
+		
 	input_split = ft_split(input, ' ');
 	if (input_split == NULL)
-		exit_error("test_execute input_split"); // TODO how to handle?
+		malloc_error("ERROR: malloc failed in test_execute");
 	exec_path = return_executable_path(input_split[0], env_paths);
 	/* DEBUG_printf("ret: %s", test_ret); */
-	DEBUG_printf("INPUT: %s PATH: %s EXECUTABLE : %d\n", input, exec_path,
+	DEBUG_printf("INPUT: %s PATH: %s EXECUTABLE : %d\n", input, exec_path, 
 																is_executable(input_split[0], env_paths));
 
 	if (exec_path == NULL)
@@ -1000,7 +904,7 @@ void test_execute(char* input, char **env_paths, char **envp)
 	/* input_split[0] = exec_path; */
 
 	// TODO test_fork test
-	test_fork(exec_path, input_split, envp); // TODO change to mini_envp
+	test_fork(exec_path, input_split, envp);
 
 	free(exec_path);
 	MAK_free_array(input_split);
@@ -1021,7 +925,7 @@ int test_fork(char* exec_path, char **input_split, char **envp)
 		perror("fork");
 		// TODO free
 		exit(1);
-	}
+	} 
 	else if (pid == 0)
 	{
 		// Child process: run the command
@@ -1033,8 +937,8 @@ int test_fork(char* exec_path, char **input_split, char **envp)
 		perror("execve"); // If execve returns, it failed
 		/* exit(1); */
 		return (1);
-	}
-	else
+	} 
+	else 
 	{
 		// Parent process: wait for the child
 		int status;
@@ -1043,13 +947,252 @@ int test_fork(char* exec_path, char **input_split, char **envp)
 	return (0);
 }
 
+// TODO CRAP, already in unset, still needed?
+int key_search_remove(char *str)
+{
+	int search;
+
+	search = search_array(get_data(NULL)->mini_envp, str);
+	if (search > 0)
+	{
+		if (!array_free_and_remove(&get_data(NULL)->mini_envp, str))
+		{
+			DEBUG_printf("key_search_remove: array_free_and_remove failed\n");
+			return (1); // TODO 1 okay? only returns on !arr !*arr !remove_value, not found, mult. found
+		}
+	}
+
+	return (0);
+}
+
+// returns 0 if invalid
+// returns 1 if valid and without '=' at the end
+// returns 2 if valid and WITH '=' at the end
+// returns 3 not ending with '=' (abc=test)
+int	key_valid(char *str)
+{
+	int	i;
+
+	// check first letter (cant be digit, etc)
+	if (!str)
+		return (0);
+	if (str[0] == '=')
+		return (0);
+
+	/* if ((str[0] <= 'A' || str[0] >= 'Z') */
+	/* 	&& (str[0] <= 'a' || str[0] >= 'z') */
+	/* 	&& (str[0] != '_')) */
+	/* 	return (0); */
+
+
+	if (!((str[0] >= 'A' && str[0] <= 'Z')
+		||(str[0] >= 'a' && str[0] <= 'z')
+		||(str[0] == '_')))
+		return (0);
+
+
+
+	i = 1;
+	while (str[i] != '\0' && str[i] != '=')
+	{
+		if ((str[i] >= 'A' && str[i] <= 'Z')
+			|| (str[i] >= 'a' && str[i] <= 'z')
+			|| (str[i] >= '0' && str[i] <= '9')
+			|| (str[i] == '_'))
+			i++;
+		else
+			return (0);
+	}
+
+	// TODO might have to change this for export ZZZ==test,
+			// 	output must be ZZZ='=test' and table returns 'ZZZ==test'
+
+	// check for potential case where '=' is not in the end
+	if (str[i] == '=')
+	{
+			if (str[i + 1] != '\0')
+				return (3);
+			else
+				return (2); // if key ends with '=' return 2
+	}
+	return (1);
+}
+
+// TODO needs to return correct error code back
+// 0 invalid
+// 1 ends without =
+// 2 ends with =
+// 3 not ending with = (abc=test)
+int key_value_handling(char **args)
+{
+	int i;
+	int ret;
+	char *key_value;
+
+	/* key_value = NULL; */
+
+	i = 1; // start with 'export'
+
+	DEBUG_printf("key_handling_args:");
+	/* DEBUG_print_strings(args); */
+	DEBUG_printf("\n");
+
+	while(args[i])
+	{
+		ret = key_valid(args[i]);
+		DEBUG_printf("key_value_handling arg: %s", args[i]);
+		DEBUG_printf("key_value_handling key_valid ret: %d", ret);
+
+		/* if (ret == 1) // ends without = */
+		if (ret == 1 || (ret == 2 && args[i+1] == NULL) ) // ends without =, or no possible value
+		{
+			key_search_remove(args[i]); // TODO Unique check CRAP make better
+
+			key_value = ft_strjoin(args[i], "=\'\'"); // VAL=""
+			if (!array_free_and_add(&get_data(NULL)->mini_envp, key_value)) {
+				DEBUG_printf("key_value_handling: array_free_and_add failed\n");
+				return (1); // TODO 1 okay? only fails on !arr !*arr !new_value
+			}
+			free(key_value);
+			/* key_value = NULL; */
+		}
+
+		if (ret == 2) // ends with =
+		{
+
+//			size = 0;
+//			size = ft_strlen(args[i]); // TODO try size in one line
+//			size += ft_strlen(value);
+//			/* size += 2; // " and " */
+//
+//			key_value = malloc(sizeof(char *) * (size + 1));
+//			if (!key_value)
+//				malloc_error("ERROR: malloc failed in array_free_and_add");
+//
+//			key_value[size] = '\0';
+//			ft_strlcat(key_value, args[i], size + 1);
+//			/* ft_strlcat(key_value, "\"", size + 1); */
+//			ft_strlcat(key_value, args[i+1], size + 1);
+//			/* ft_strlcat(key_value, "\"", size + 1); */
+
+
+			key_search_remove(args[i]); // TODO Unique check CRAP make better
+
+			key_value = ft_strjoin(args[i], args[i+1]);
+
+			if (!array_free_and_add(&get_data(NULL)->mini_envp, key_value)) {
+				DEBUG_printf("key_value_handling: array_free_and_add failed\n");
+				return (1); // TODO 1 okay? only fails on !arr !*arr !new_value
+			}
+
+			free(key_value);
+			/* key_value = NULL; */
+			i++; // skip next arg thats already used as value
+		}
+
+		if (ret == 3) // not ending with '=' (test=abc)
+		{	
+			key_search_remove(args[i]); // TODO Unique check CRAP make better
+
+			if (!array_free_and_add(&get_data(NULL)->mini_envp, args[i])) {
+				DEBUG_printf("key_value_handling: array_free_and_add failed\n");
+				return (1); // TODO 1 okay? only fails on !arr !*arr !new_value
+			}
+		}
+
+		if (ret == 0)
+			printf("minishell: export: `(var)': not a valid identifier\n"); // TODO perror? error_func
+
+
+		i++;
+	}
+
+	return (0);
+}
+
+// NEW NEW NEW
+// NEW NEW NEW
+// NEW NEW NEW
+// TODO how to handle array_free_and_add fail?
+// TODO export with no argument prints env? 
+// TODO export abc def -> must add a string abc='' and def='' to env, not just abc and def
+// returns 0 on SUCCESS, errno or 1 on Failure
+int builtin_export(char **args)
+{
+	/* int i; */
+
+	DEBUG_printf("builtin_export");
+	/* DEBUG_print_strings(split); */
+
+	if (MAK_arr_size(args) == 1)
+	{
+		builtin_env(args);
+		/* return (DEBUG_0("split size == 1, ran builtin_env\n")); */
+		DEBUG_printf("split size == 1, ran builtin_env\n");
+		return (0);
+	}
+
+
+	int ret;
+	ret = 0;
+	ret = key_value_handling(args);
+
+	return (ret);
+}
+
+int builtin_exit(char **args)
+{
+	int ret;
+
+	if (MAK_arr_size(args) == 1)
+		return (0); // TODO return 0 if exit without number argument?
+
+	if (MAK_arr_size(args) > 2)
+	{
+		printf("minishell: exit: too many arguments\n"); // TODO perror? error_func
+		return (1);
+	}
+
+	if (!is_numeric(args[1]))
+	{
+		printf("minishell: exit: numeric argument required\n"); // TODO perror? error_func
+		return (2);
+	}
+
+	ret = ft_atoi(args[1]);
+
+	return (ret);
+}
+
+
+
+int is_numeric(const char *str)
+{
+	if (!str || *str == '\0') // Null or empty string check
+		return (0);
+	
+	if (*str == '-' || *str == '+')
+		str++;
+	
+	while (*str)
+	{
+		/* if (!isdigit((unsigned char)*str)) // Check if the character is not a digit */
+		if (!ft_isdigit(*str))
+			return (0);
+	str++;
+	}
+	return (1); // All characters are digits
+}
+
+
+
 //////////////////// DEBUG ////////////////////
 //////////////////// DEBUG ////////////////////
 //////////////////// DEBUG ////////////////////
 
 void DEBUG_is_executable(char **paths)
 {
-	char *commands[] = {"/", "/usr/bin/cat", "cat", "/nix", "/usr/nix",
+	char *commands[] = {"/", "/usr/bin/cat", "cat", "/nix", "/usr/nix", 
 		"usr/bin/cat", "/usr/bin/cat/", "./minishell", "./test-script/val-test.sh",
 		"./notexisting", NULL};
 
@@ -1066,45 +1209,12 @@ void DEBUG_is_executable(char **paths)
 void DEBUG_print_strings(char **arr)
 {
 	if (arr == NULL) return;
-
+	
 	for (int i = 0; arr[i] != NULL; i++)
 		printf("_%s_\n", arr[i]);
 }
 
-//////////////////// TEMP ////////////////////
-//////////////////// TEMP ////////////////////
-//////////////////// TEMP ////////////////////
 
-
-/* void stat_test(char *path) */
-/* { */
-/* 	struct stat Stat; */
-/* 	int result; */
-
-/* 	// 0 on success and -1 on failure */
-/* 	result = stat(path, &Stat); */
-/* 	if (result == -1) { */
-/* 		perror("Error:"); */
-/* 		exit(2); */
-/* 	} */
-
-/* 	//Test if Directory or not */
-/* 	// > 0 means it is a directory */
-/* 	if(S_ISDIR(Stat.st_mode) > 0 ){ */
-/* 		printf("is a directory \n"); */
-/* 	} */
-
-/* 	//Test if its a regular file */
-/* 	// > 0 means it is a directory */
-/* 	if(S_ISREG(Stat.st_mode) > 0 ){ */
-/* 		printf("is a regular file \n"); */
-/* 	} */
-
-/* 	if (result == 0) */
-/* 		printf("path exists with result %d\n", result); */
-/* 	else */
-/* 		printf("path DOESNT exist with result %d\n", result); */
-/* } */
 
 
 

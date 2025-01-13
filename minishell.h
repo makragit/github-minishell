@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   minishell.h                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/10 14:18:07 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/10 16:02:06 by dbogovic         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
@@ -102,46 +90,68 @@ typedef struct s_data
 
 }	t_data;
 
-t_data			*get_data(t_data *data);
-t_data			*init_data(char **envp);
-void			free_data(void);
-int				MAK_free_array(char **arr);
-void			exit_error(char *s);
-char			*display_prompt(void);
-char			*prepare_prompt_string(char *user, char *path, char *hostname, int size);
-int				is_root(void);
-int				ft_isspace(char c);
-void			signal_handler(int signum);
-int				MAK_arr_size(char **arr);
-char			*get_cwd_path(void);
-char			**get_envp_path(char **envp);
-char			*get_home_path(char **envp);
-char			*is_relative_path(const char *str); // TODO not needed
-int				is_executable(const char *str, char **paths); // TODO not needed
-char			*return_executable_path(const char *str, char **paths);
-int				builtin_check(char *input); // TODO switch to table variant
-int				builtin_check_table(t_cmd_table *table);
-int				builtin_chdir(char **split);
-int				builtin_pwd(char **split);
-void			builtin_env(void);
-int				builtin_echo(char *input);
-int				builtin_echo_table(char **args);
-char			*builtin_echo_parse_option(char *str); // TODO use parser/lexer instead
-/* char *builtin_export(char *str); */
-/* int builtin_export(char *str); */
-int				builtin_export(char **split); // TODO not finished
-char			**copy_array(char **arr);
-/* char **add_to_array(char **arr, char *new_value); // TODO not needed -> array_free_and_add */
-int				search_array(char **arr, char *search);
-int				array_free_and_add(char ***arr, char *new_value);
-int				array_free_and_remove(char ***arr, char *remove_value);
+// MAK
+// temp.c
+t_data *get_data(t_data *data);
+t_cmd_table *get_table_reset(t_cmd_table *table, int reset);
+t_data *init_data(char **envp);
+
+void free_data(); // frees only data
+void free_all(); // frees data and table
+int	MAK_free_array(char **arr);
+
+void exit_error(char *s); // TODO switch to malloc_error
+void malloc_error(char *s);
+
+char *display_prompt();
+char *prepare_prompt_string(char *user, char *path, char *hostname, int size);
+
+int is_root();
+int ft_isspace(char c);
+void signal_handler(int signum);
+int	MAK_arr_size(char **arr);
+
+char *get_cwd_path();
+char **get_envp_path(char **envp);
+char *get_home_path(char **envp);
+char *is_relative_path(const char *str); // TODO not needed
+int is_executable(const char *str, char **paths); // TODO not needed
+char *return_executable_path(const char *str, char **paths);
+
+int try_builtin(t_cmd_table *table);
+
+int builtin_chdir(char **args);
+int builtin_pwd(char **args);
+int builtin_env(char **args);
+int builtin_echo(char **args);
+int builtin_echo_option(char *str);
+
+int builtin_export(char **args); // TODO not finished
+int builtin_export_old(char **args); // TODO not finished
+char **copy_array(char **arr);
+int search_array(char **arr, char *search);
+int array_free_and_add(char ***arr, char *new_value);
+int array_free_and_remove(char ***arr, char *remove_value);
 /* int array_free_and_remove_2(char ***arr, char *remove_value); */
-int				builtin_unset(char **split);
-void			test_execute(char *input, char **paths, char **envp);
-int				test_fork(char *exec_path, char **input_split, char **envp);
+
+int builtin_unset(char **args);
+int builtin_exit(char **args);
+int is_numeric(const char *str);
+
+void test_execute(char* input, char **paths, char **envp);
+int test_fork(char* exec_path, char **input_split, char **envp);
+
+int key_valid(char *str); // TODO Rename // TODO Rename
+int key_search_remove(char *str); // TODO CRAP
+
 // temp.c DEBUG
-void			DEBUG_print_strings(char **arr);
-void			DEBUG_is_executable(char **paths);
+void DEBUG_print_strings(char **arr);
+void DEBUG_is_executable(char **paths);
+
+
+
+
+
 // DOMAGOJ
 t_token			*cut_token(t_token *token);
 t_cmd_table		*parse(const char *input);

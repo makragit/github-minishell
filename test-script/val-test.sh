@@ -29,6 +29,8 @@ VALGRINDFDFLAGS="--track-fds=all"
 IGNORED_PATHS="/bin/* /usr/bin/* /usr/sbin/* $(which -a norminette)"
 VALGRINDFLAGS+=" --trace-children-skip=$(echo $IGNORED_PATHS | sed 's/ /,/g')"
 
+# TODO echo 1 "2 3" 4
+# TODO echo $HOME
 test_cases=(
     "exit"
     "asdf\nexit\n"
@@ -59,6 +61,16 @@ test_cases=(
     "NULL\nexit\n"
     "env\nexit\n"
     "env\nenv\nexit\n"
+
+    "export\nexit"
+    "unset\nexit"
+    "export test\nexit"
+    "export test\nunset test\nexit"
+
+    "echo\nexit"
+    "echo \nexit"
+    "echo hello world\nexit"
+    "echo 1 2 3 4\nexit"
 )
 
 # Flag handling

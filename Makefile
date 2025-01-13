@@ -17,7 +17,7 @@ LIBFT = ./libft/libft.a
 # PIPE_DIR = ./execution/pipe_redir
 
 UTILS_DIR = ./domagoj/custom_utilis
-INPUT_CHCK = ./domagoj/parser/lexer
+INPUT_CHCK = ./domagoj/parser/validate_input
 TOKEN_DIR = ./domagoj/parser/tokenisation
 TABLE_DIR = ./domagoj/parser/table_fill
 EXPANDER_DIR = ./domagoj/parser/expansion
@@ -42,7 +42,6 @@ SOURCE = minishell.c \
           $(UTILS_DIR)/ft_insert_str.c \
           $(UTILS_DIR)/ft_find_indexes.c \
 		  $(UTILS_DIR)/ft_append.c \
-		  $(UTILS_DIR)/ft_free_array.c \
 		  $(UTILS_DIR)/ft_create_file.c \
 		  $(UTILS_DIR)/print_or_free.c \
           $(UTILS_DIR)/ft_iswhitespace.c \
@@ -59,12 +58,8 @@ SOURCE = minishell.c \
 		  $(PIPE_DIR)/pipe_redir.c \
 		  ./domagoj/main-test.c \
 		  ./domagoj/execution/execute.c \
-		  ./domagoj/execution/cmd_path.c \
-		  ./domagoj/execution/redirect.c \
 
-
-CFLAGS = -Wall -Wextra -g # TODO -g
-
+CFLAGS = -Wall -Wextra -Werror -g # TODO -g
 
 #FSAN = -fsanitize=address,undefined -fsanitize-memory-track-origins
 FSAN = -O1 -fsanitize=address,undefined -fsanitize-memory-track-origins -fno-omit-frame-pointer
