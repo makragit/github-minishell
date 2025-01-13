@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 
 char	*fetch_test(int counter)
@@ -314,6 +314,10 @@ char	*fetch_test(int counter)
 		"echo $(HOME)",
 		NULL
 	};
+
+    // MAK merge add 130125
+    (void)test_cases_org;
+    (void)error_test_cases;
 
 	return ((char *)test_cases[counter]);
 }

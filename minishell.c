@@ -6,7 +6,8 @@ int	main(int argc, char **argv, char **envp)
 	t_data *data;
 	t_cmd_table *table;
 
-	main_test(); // TEST DOMAGOJ
+	/* main_test(); // TEST DOMAGOJ */
+	// now fetch_test?
 
   signal(SIGINT, signal_handler);
   signal(SIGQUIT, signal_handler);

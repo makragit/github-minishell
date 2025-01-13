@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../minishell.h"
+#include "../../../minishell.h"
 
 t_redir_data	*add_redir_entry(t_redir_data *data, t_token *token)
 {
