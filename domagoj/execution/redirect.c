@@ -6,11 +6,11 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/06 16:25:39 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/07 21:08:19 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/10 16:42:01 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../minishell.h"
+#include "../minishell.h"
 
 int	connect_pipes(t_cmd_table *table)
 {
@@ -34,6 +34,17 @@ static t_err	open_fd(char *filename, t_token_type mode)
 	int	fd;
 
 	fd = -1;
+	if (mode == HEREDOC)
+	{
+		fd = open (filename, O_RDONLY);
+		if (unlink(filename) == -1)
+		{
+			perror("unlink");
+			free(filename);
+			close(fd);
+			return (FAIL);
+		}
+	}
 	if (mode == APPEND)
 		fd = open(filename, O_WRONLY | O_CREAT | O_APPEND, 0644);
 	else if (mode == INPUT)
@@ -41,13 +52,10 @@ static t_err	open_fd(char *filename, t_token_type mode)
 	else if (mode == OUTPUT)
 		fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd == -1)
-	{
-		printf("%s: %s\n", filename, strerror(errno));
 		return (FAIL);
-	}
 	if (mode == APPEND || mode == OUTPUT)
 		dup2(fd, STDOUT_FILENO);
-	else if (mode == INPUT)
+	else if (mode == INPUT || mode == HEREDOC)
 		dup2(fd, STDIN_FILENO);
 	close(fd);
 	return (OK);
@@ -58,11 +66,16 @@ t_err	redir(t_cmd_table *table)
 	t_redir_data	*head;
 	t_err			result;
 
+	result = OK;
 	if (!table->redir_data)
 		return (OK);
 	head = table->redir_data;
 	while (table->redir_data)
 	{
+		if (table->redir_data->heredoc_file_name)
+			result = open_fd(table->redir_data->heredoc_file_name, HEREDOC);
+		if (result == FAIL)
+			break ;
 		if (table->redir_data->input)
 			result = open_fd(table->redir_data->input, INPUT);
 		if (result == FAIL)

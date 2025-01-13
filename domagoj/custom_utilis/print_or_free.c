@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../minishell.h"
+#include "../minishell.h"
 
 void	free_array(char **array)
 {
@@ -39,10 +39,10 @@ void	free_table(t_cmd_table *table)
 	while (table)
 	{
 		close_pipes(table);
-		if (table->heredoc_fd != -1)
-			close(table->heredoc_fd);
 		while (table->redir_data)
 		{
+			if (table->redir_data->heredoc_file_name)
+				free(table->redir_data->heredoc_file_name);
 			redir_tmp = table->redir_data;
 			table->redir_data = table->redir_data->next;
 			free(redir_tmp);

@@ -6,11 +6,11 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/05 16:44:59 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/07 20:13:40 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/10 16:41:44 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include"../../../minishell.h"
+#include "../../minishell.h"
 
 t_err	cmp_line(const char *str1, const char *str2)
 {
@@ -27,104 +27,79 @@ t_err	cmp_line(const char *str1, const char *str2)
 	return (FAIL);
 }
 
-char	*expand_line(char *line, char *delim)
+char	*expand_line(char *line, char *delim, int is_quoted)
 {
 	if (!line || !delim)
 		return (NULL);
-	if (delim[0] == '\'' || delim[0] == '\"')
+	if (is_quoted == 1)
+		return (line);
+	if (exit_status(&line) || expand_env(&line))
 		return (NULL);
-	expand_exit_status(&line);
-	expand_env(&line);
-	ft_trim_quotes(&line);
 	return (line);
+}
+
+int	fetch_herdoc(char *heredoc_delim, int file_descriptor, int is_quoted)
+{
+	char	*line;
+	char	*processed_line;
+
+	while (1)
+	{
+		line = readline("heredoc:");
+		if (!line)
+		{
+			printf("Unexpected end of input\n");
+			return (1);
+		}
+		if (cmp_line(line, heredoc_delim) == EQUAL)
+			break ;
+		processed_line = expand_line(line, heredoc_delim, is_quoted);
+		if (!processed_line)
+			return (ERROR);
+		ft_append(processed_line, file_descriptor);
+		free(processed_line);
+	}
+	return (0);
 }
 
 int	heredoc(t_cmd_table *table)
 {
-	char			*heredoc_delimiter;
-	char			*line;
-	char			*expanded_line;
-	t_redir_data	*redir_current;
+	t_redir_data	*current;
+	char			*filename;
+	int				fd;
+
+	fd = -1;
+	filename = NULL;
 	while (table)
 	{
-		redir_current = table->redir_data;
-		while (redir_current)
+		current = table->redir_data;
+		while (current)
 		{
-			if (redir_current->heredoc_delimiter)
+			if (current->heredoc_delimiter)
 			{
-				if (table->heredoc_fd == -1)
-					table->heredoc_fd = ft_create_file();
-				heredoc_delimiter = redir_current->heredoc_delimiter;
-				while (1)
-				{
-					line = readline("readline:");
-					if (!line)
-					{ // Handle EOF (Ctrl+D)
-						printf("Unexpected end of input\n");
-						return (ERROR);
-					}
-					if (cmp_line(line, heredoc_delimiter) == EQUAL)
-					{
-						free(line); // Free the line before breaking
-						break ;
-					}
-					expanded_line = expand_line(line, heredoc_delimiter);
-					free(line); // Free the original line after expanding
-					if (!expanded_line)
-						return (ERROR);
-					ft_append(expanded_line, table->heredoc_fd);
-					free(expanded_line); // Free expanded line after appending
-				}
+				if (fd == -1)
+					fd = ft_create_file(&filename);
+				if (fetch_herdoc(current->heredoc_delimiter, fd, current->is_quoted))
+					return (1);
+				table->redir_data->heredoc_file_name = filename;
+				printf("filename %s\n", filename);
 			}
-			redir_current = redir_current->next; // Move to the next redirection
+			if (fd != -1)
+				close(fd);
+			fd = -1;
+			current = current->next;
 		}
-		table = table->next; // Move to the next command table node
+		table = table->next;
 	}
 	return (0);
 }
 
 /*
-	heredoc delimit = get heredoc str!
+	if (!line) after readline() means user activated Ctrl + D
 
-	if (!heredocs)
-		return;
-	if (heredocs)
-		//CREATE A FILE TO WRITE IN
-
-	while (heredoc_delimiters!)
-	{
-		//GET A LINE FROM READLINE
-
-		//IF LINE == EOF
-				>- move to the next delimiter!
-				>- create fd for that file and delete the file
-				>- free stuff if remains to be freed
-				>- store fd as in cmd_table.redirs.heredocs
-		//TOKENIZE THE LINE - and expand
-		//SAVE THE LINE TO A FILE- while at it, create append
-
-
-	}
-	create fd for that file
-	delete file
-	-Have impleented fds for such files
-
-heredoc expansion rules
-
-EOF
-->var expansion
-'EOF'
-->nothing
-"EOF"
-->same as EOF
-EOF - always with no quotes
-
-quotes rules:
-
-'EOF'
-- everyhing inside input is kept as it is!!!!! EVERYTHING
-
-"EOF" and EOF
-- quotes are removes from lines! - normal token rules regardig expansion of quotes inside quotes
+	How heredoc works
+	--> sees about what heredoc is 
+	->catches lines until him
+	->
 
 */

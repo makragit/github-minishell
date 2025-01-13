@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 21:24:26 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/01/07 17:28:20 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/10 14:20:44 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ char	*ft_strdup(const char *s)
 {
 	int		i;
 	char	*new;
+
 	if (!s)
 		return (0);
 	new = (char *)malloc((sizeof(char) * ft_strlen(s)) + 1);

@@ -6,11 +6,11 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 22:50:12 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/07 20:03:07 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/10 16:42:41 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../../minishell.h"
+#include "../../minishell.h"
 
 static size_t	arr_size(t_token *token)
 {
@@ -30,7 +30,7 @@ static size_t	arr_size(t_token *token)
 	}
 	while (token)
 	{
-		if (token->type == PIPE_TOKEN)
+		if (token->type == PIPE)
 			break ;
 		if (token->type == ARG_TOKEN)
 			i++;

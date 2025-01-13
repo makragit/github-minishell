@@ -1,26 +1,44 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   lst_functions.c                                    :+:      :+:    :+:   */
+/*   cmd_table_funcs.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/02 19:59:59 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/04 22:52:26 by dbogovic         ###   ########.fr       */
+/*   Created: 2025/01/10 14:13:30 by dbogovic          #+#    #+#             */
+/*   Updated: 2025/01/10 14:15:37 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-t_token	*reverse_lst(t_token *lst)
+t_token	*cut_token(t_token *token)
 {
-	t_token	*prev;
-	t_token	*current;
+	t_token	*previous;
 	t_token	*next;
+
+	if (token == NULL)
+		return (NULL);
+	previous = token->prev;
+	next = token->next;
+	if (previous)
+		previous->next = next;
+	if (next)
+		next->prev = previous;
+	free(token);
+	token = NULL;
+	return (next);
+}
+
+t_redir_data	*reverse_data_lst(t_redir_data *data)
+{
+	t_redir_data	*prev;
+	t_redir_data	*current;
+	t_redir_data	*next;
 
 	prev = NULL;
 	next = NULL;
-	current = lst;
+	current = data;
 	while (current != NULL)
 	{
 		next = current->next;
@@ -28,13 +46,13 @@ t_token	*reverse_lst(t_token *lst)
 		prev = current;
 		current = next;
 	}
-	lst = prev;
-	return (lst);
+	data = prev;
+	return (data);
 }
 
-void	add_previous(t_token *lst)
+void	add_data_previous(t_redir_data *lst)
 {
-	t_token	*tmp;
+	t_redir_data	*tmp;
 
 	tmp = NULL;
 	while (lst)

@@ -6,49 +6,37 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/05 18:09:54 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/07 20:19:06 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/08 19:00:32 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../minishell.h"
+#include "../minishell.h"
 
-int	ft_create_file(void)
+char	*generate_filename(void)
 {
-	char		*filename;
-	int			fd;
-	char		*tmp;
-	char		*counter_str;
+	char		*str_pid;
 	static int	counter = 0;
 
-	tmp = ft_itoa(getpid());
-	if (!tmp)
-		return (-1);
+	str_pid = ft_itoa((int)getppid() + counter);
+	printf("PROCESS ID: %d\n", getppid());
+	if (!str_pid)
+		return (NULL);
 	counter++;
-	counter_str = ft_itoa(counter);
-	if (!counter_str)
-	{
-		free(tmp);
+	return (str_pid);
+}
+
+int	ft_create_file(char **filename)
+{
+	int			fd;
+
+	*filename = generate_filename();
+	if (!*filename)
 		return (-1);
-	}
-	filename = ft_strjoin(tmp, counter_str);
-	free(tmp);
-	free(counter_str);
-	if (!filename)
-		return (-1);
-	fd = open(filename, O_CREAT | O_EXCL | O_RDWR | O_APPEND, 0600);
+	fd = open((*filename), O_CREAT | O_EXCL | O_RDWR | O_APPEND, 0600);
 	if (fd == -1)
 	{
-		perror("open");
-		free(filename);
+		free(*filename);
 		return (-1);
 	}
-	if (unlink(filename) == -1) //it will del file if when fd is closed
-	{
-		perror("unlink");
-		free(filename);
-		close(fd);
-		return (-1);
-	}
-	free(filename);
 	return (fd);
 }

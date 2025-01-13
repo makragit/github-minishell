@@ -6,66 +6,37 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 20:49:52 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/07 20:06:06 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/10 16:42:50 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../../minishell.h"
+#include "../../minishell.h"
 
-t_token	*cut_token(t_token *token)
+int	fill_table(t_token *token, t_cmd_table *table)
 {
-	t_token	*previous;
-	t_token	*next;
+	t_token_type	type;
 
-	if (token == NULL)
-		return (NULL);
-	previous = token->prev;
-	next = token->next;
-	if (previous)
-		previous->next = next;
-	if (next)
-		next->prev = previous;
-	free(token);
-	token = NULL;
-	return (next);
-}
-
-t_redir_data	*reverse_data_lst(t_redir_data *data)
-{
-	t_redir_data	*prev;
-	t_redir_data	*current;
-	t_redir_data	*next;
-
-	prev = NULL;
-	next = NULL;
-	current = data;
-	while (current != NULL)
+	type = token->type;
+	if (type == PIPE)
+		return (2);
+	else if (type == CMD_t)
 	{
-		next = current->next;
-		current->next = prev;
-		prev = current;
-		current = next;
+		table->cmd = token->value;
+		return (0);
 	}
-	data = prev;
-	return (data);
-}
-
-void	add_data_previous(t_redir_data *lst)
-{
-	t_redir_data	*tmp;
-
-	tmp = NULL;
-	while (lst)
+	else if (type == HEREDOC || type == APPEND
+		|| type == INPUT || type == OUTPUT)
 	{
-		lst->prev = tmp;
-		tmp = lst;
-		lst = lst->next;
+		table->redir_data = add_redir_entry(table->redir_data, token);
+		if (!table->redir_data)
+			return (1);
 	}
+	return (0);
 }
 
 int	token_distribution(t_cmd_table *table, t_token *tokens)
 {
-	t_token_type	type;
+	int				result;
 	t_token			*token;
 
 	token = tokens;
@@ -73,21 +44,12 @@ int	token_distribution(t_cmd_table *table, t_token *tokens)
 	{
 		while (token)
 		{
-			type = token->type;
-			if (type == PIPE_TOKEN)
-			{
-				token = token->next;
-				break ;
-			}
-			else if (type == CMD_t)
-				table->cmd = token->value;
-			else if (type == HEREDOC || type == APPEND || type == INPUT || type == OUTPUT)
-			{
-				table->redir_data = add_redir_entry(table->redir_data, token);
-				if (!table->redir_data)
-					return (1);
-			}
+			result = fill_table(token, table);
+			if (result == 1)
+				return (1);
 			token = token->next;
+			if (result == 2)
+				break ;
 		}
 		if (table->redir_data)
 		{

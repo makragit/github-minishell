@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   minishell.h                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/01/10 14:18:07 by dbogovic          #+#    #+#             */
+/*   Updated: 2025/01/10 16:02:06 by dbogovic         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
@@ -25,7 +37,11 @@ typedef enum t_err
 	SINGLE_CMD,
 	NO,
 	EQUAL,
+	ALL,
+	ONE,
 	S_QUOTE,
+	CAPTURE,
+	RESTORE,
 }	t_err;
 
 typedef enum t_token_type
@@ -38,13 +54,13 @@ typedef enum t_token_type
 	REDIRECTION,
 	OUTPUT,
 	WORD,
-	PIPE_TOKEN,
+	PIPE,
 }	t_token_type;
 
 typedef struct t_token
 {
 	char			*value;
-	t_token_type		type;
+	t_token_type	type;
 	struct t_token	*next;
 	struct t_token	*prev;
 }	t_token;
@@ -55,8 +71,8 @@ typedef struct t_redir_data
 	char					*output;
 	char					*append;
 	char					*heredoc_delimiter;
-	bool					heredoc_quotes;
-	int						heredoc_fd;
+	char                    *heredoc_file_name;
+	int                      is_quoted;
 	struct t_redir_data		*next;
 	struct t_redir_data		*prev;
 }	t_redir_data;
@@ -70,10 +86,8 @@ typedef struct t_cmd_table
 	char				*cmd;
 	char				**args;
 	t_redir_data		*redir_data;
-//	bool				pipe_output;
 	int					p_input_fd;
 	int					p_output_fd;
-	int					heredoc_fd;
 	struct t_cmd_table	*next;
 }	t_cmd_table;
 
@@ -88,20 +102,18 @@ typedef struct s_data
 
 }	t_data;
 
-// MAK
-// temp.c
 t_data			*get_data(t_data *data);
 t_data			*init_data(char **envp);
-void			free_data();
+void			free_data(void);
 int				MAK_free_array(char **arr);
 void			exit_error(char *s);
-char			*display_prompt();
+char			*display_prompt(void);
 char			*prepare_prompt_string(char *user, char *path, char *hostname, int size);
-int				is_root();
+int				is_root(void);
 int				ft_isspace(char c);
 void			signal_handler(int signum);
 int				MAK_arr_size(char **arr);
-char			*get_cwd_path();
+char			*get_cwd_path(void);
 char			**get_envp_path(char **envp);
 char			*get_home_path(char **envp);
 char			*is_relative_path(const char *str); // TODO not needed
@@ -111,31 +123,25 @@ int				builtin_check(char *input); // TODO switch to table variant
 int				builtin_check_table(t_cmd_table *table);
 int				builtin_chdir(char **split);
 int				builtin_pwd(char **split);
-void			builtin_env();
+void			builtin_env(void);
 int				builtin_echo(char *input);
 int				builtin_echo_table(char **args);
 char			*builtin_echo_parse_option(char *str); // TODO use parser/lexer instead
-											//
 /* char *builtin_export(char *str); */
 /* int builtin_export(char *str); */
-int builtin_export(char **split); // TODO not finished
-char **copy_array(char **arr);
+int				builtin_export(char **split); // TODO not finished
+char			**copy_array(char **arr);
 /* char **add_to_array(char **arr, char *new_value); // TODO not needed -> array_free_and_add */
-int search_array(char **arr, char *search);
-int array_free_and_add(char ***arr, char *new_value);
-int array_free_and_remove(char ***arr, char *remove_value);
+int				search_array(char **arr, char *search);
+int				array_free_and_add(char ***arr, char *new_value);
+int				array_free_and_remove(char ***arr, char *remove_value);
 /* int array_free_and_remove_2(char ***arr, char *remove_value); */
-
-int builtin_unset(char **split);
-
-void test_execute(char* input, char **paths, char **envp);
-int test_fork(char* exec_path, char **input_split, char **envp);
-
+int				builtin_unset(char **split);
+void			test_execute(char *input, char **paths, char **envp);
+int				test_fork(char *exec_path, char **input_split, char **envp);
 // temp.c DEBUG
-void DEBUG_print_strings(char **arr);
-void DEBUG_is_executable(char **paths);
-
-
+void			DEBUG_print_strings(char **arr);
+void			DEBUG_is_executable(char **paths);
 // DOMAGOJ
 t_token			*cut_token(t_token *token);
 t_cmd_table		*parse(const char *input);
@@ -147,36 +153,37 @@ t_cmd_table		*table_init(size_t of_size);
 int				token_distribution(t_cmd_table *table, t_token *token);
 int				arr_create(t_cmd_table *table, t_token *token);
 t_err			expander(t_token *tokens);
-int				expand_exit_status(char **str);
+int				exit_status(char **str);
 int				expand_env(char **arg);
 int				is_whitespace(char c);
 int				skip_whitespace(char **str);
 void			free_table(t_cmd_table *table);
 void			cmd_print(t_cmd_table *table);
-char			*ft_strexpel(char *haystack, const char *needle);
+void			add_data_previous(t_redir_data *lst);
+char			*ft_strexpel(char *str, const char *expel, t_err mode);
 int				*find_indexes(char *haystack, char *needle);
 int				ft_str_insert(char **src, char *insert, size_t place);
 int				ft_trim_quotes(char **str);
 void			cmd_print(t_cmd_table *table);
+t_redir_data	*reverse_data_lst(t_redir_data *data);
 t_token			*reverse_lst(t_token *lst);
 void			free_lst(t_token *lst);
 void			add_previous(t_token *lst);
 int				input_check(const char *input);
-size_t	table_size(t_token *tokens);
+size_t			table_size(t_token *tokens);
 t_redir_data	*add_redir_entry(t_redir_data *data, t_token *token);
 char			*getenv_local(char *name);
-
-//exec starting - domi
-t_err		execute(t_cmd_table *table);
-int			pipe_setup(t_cmd_table *table);
-int			close_pipes(t_cmd_table *table);
-int			heredoc(t_cmd_table *table);
-int			ft_create_file(void);
-int			ft_append(const char *str, int fd);
-char		**get_path(const char *cmd);
-void		ft_free_array(char **arr);
-int			connect_pipes(t_cmd_table *table);
+t_err			execute(t_cmd_table *table);
+int				pipe_setup(t_cmd_table *table);
+int				close_pipes(t_cmd_table *table);
+int				heredoc(t_cmd_table *table);
+int				ft_create_file(char **filename);
+int				ft_append(const char *str, int fd);
+char			**get_path(const char *cmd);
+void			ft_free_array(char **arr);
+void			syntax_error_print(char *reason);
+int				connect_pipes(t_cmd_table *table);
 t_err			redir(t_cmd_table *table);
-// Main-test
-char		*fetch_test(int counter);
+void			finish_redir_data_lst(t_cmd_table *table);
+char			*fetch_test(int counter);
 #endif

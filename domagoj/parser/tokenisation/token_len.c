@@ -6,11 +6,11 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/08 12:18:02 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/02 17:21:27 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/10 16:43:01 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../../minishell.h"
+#include "../../minishell.h"
 
 static size_t	redir_len(char *str)
 {

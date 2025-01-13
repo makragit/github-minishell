@@ -6,11 +6,11 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/06 16:22:58 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/07 20:48:53 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/10 16:41:54 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../minishell.h"
+#include "../minishell.h"
 
 static int	is_cmd_path(const char *cmd)
 {

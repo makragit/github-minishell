@@ -6,11 +6,11 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/05 17:10:35 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/07 20:12:21 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/10 16:41:50 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../../minishell.h"
+#include "../../minishell.h"
 
 int	pipe_setup(t_cmd_table *table)
 {

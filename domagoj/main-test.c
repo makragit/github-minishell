@@ -6,16 +6,148 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/02 13:50:08 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/07 20:21:46 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/10 16:24:41 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../minishell.h"
+#include "minishell.h"
+
 
 char	*fetch_test(int counter)
 {
-	const char	*test_cases[] =
+	const char *test_cases[] = {
+    // Successful commands
+    "ls | grep 'test'",  // Lists files and filters those containing "test".
+    "echo $HOME | wc -c",  // Prints the home directory and counts characters.
+    "ls > out.txt && echo Output written",  // Redirects `ls` output to a file, prints a message.
+    "echo Hello > file.txt",  // Writes "Hello" to file.txt.
+    "cat file.txt | wc -w",  // Counts words in file.txt.
+    "ls | cat > result.txt",  // Redirects `ls` output to result.txt using `cat`.
+    "echo $USER | cat >> user.txt",  // Appends the username to user.txt.
+    "ls | wc -l > count.txt",  // Counts lines in `ls` output and writes to count.txt.
+    "echo $? > exit_status.txt",  // Writes the exit status of the previous command to a file.
+    "echo This is a test | wc -c",  // Counts characters in the string.
+
+    // Commands with errors or specific behaviors
+    "ls -l | ls -l-a",  // Executes `ls -l` successfully; error on `ls -l-a` due to invalid option.
+    "nonexistent_command | cat",  // `nonexistent_command` fails; `cat` runs but has no input.
+    "ls | nonexistent_command",  // `ls` runs; `nonexistent_command` fails.
+    "echo 'test' > /root/test.txt",  // Fails due to permission error writing to /root.
+    "echo $? | wc -l | nonexistent_command",  // `echo $?` and `wc -l` run; `nonexistent_command` fails.
+    "< nonexistent_file cat",  // Fails because nonexistent_file does not exist.
+    "ls | cat | nonexistent_command > output.txt",  // Runs `ls` and `cat`; `nonexistent_command` fails.
+    "cat | wc -l",  // Waits for input; does nothing without additional input.
+    "ls >>",  // Syntax error due to incomplete redirection.
+    "ls < nonexistent_file | wc -l",  // Fails due to nonexistent_file.
+
+    // Using environment variables
+    "echo $PATH | wc -l",  // Counts lines in the PATH environment variable.
+    "echo $HOME | grep '/'",  // Prints the home directory and checks for slashes.
+    "ls $PWD",  // Lists files in the current working directory.
+    "echo $SHELL | wc -c",  // Counts characters in the shell's path.
+    "cat < $HOME/.bashrc | wc -l",  // Counts lines in .bashrc if it exists.
+
+    // Using exit status substitution
+    "true | echo $?",  // `true` exits with 0; `echo $?` prints 0.
+    "false | echo $?",  // `false` exits with 1; `echo $?` prints 1.
+    "ls > out.txt && echo $?",  // Writes `ls` output to a file and prints 0.
+    "ls nonexistent_file && echo $?",  // Prints nothing; $? is not 0.
+    "echo $? > status.txt",  // Writes the exit status of the last command to a file.
+
+    // Pipes and redirections
+    "ls | grep 'a' > result.txt",  // Filters `ls` output and writes matches to result.txt.
+    "echo 'line1\nline2' | wc -l",  // Counts the number of lines in the string.
+    "ls > out.txt | cat out.txt",  // Redirects `ls` output to a file, then prints it with `cat`.
+    "cat < input.txt | wc -c",  // Counts characters in input.txt.
+    "ls | wc -l | cat >> count.txt",  // Appends line count from `ls` output to count.txt.
+
+    // Invalid combinations or syntax
+    "echo 'test > test.txt",  // Syntax error: missing closing quote.
+    "ls | cat > > file.txt",  // Syntax error: invalid redirection.
+    "ls | | cat",  // Syntax error: double pipe is not allowed.
+    "echo $?",  // Prints the exit status of the last command.
+    "ls > | wc -l",  // Syntax error: incomplete redirection.
+
+    // Various combinations of allowed features
+    "ls -la | wc -l",  // Lists files in long format and counts lines.
+    "echo 'Test' | grep 'T' > out.txt",  // Filters `echo` output for 'T' and writes to out.txt.
+    "cat < /etc/passwd | grep 'root'",  // Filters lines containing 'root' in /etc/passwd.
+    "echo $? | wc -c >> status.txt",  // Appends the length of the exit status to status.txt.
+    "ls >> appended.txt | wc -c",  // Appends `ls` output to appended.txt; counts characters.
+
+    // Edge cases
+    "echo $NONEXISTENT_VAR",  // Prints an empty line because the variable is unset.
+    "echo $? > file.txt | ls nonexistent",  // $? is written to file.txt; `ls nonexistent` fails.
+    "ls | echo $PWD",  // Prints the current working directory; ignores `ls` output.
+    "echo $HOME | wc -l | nonexistent_command",  // Runs `echo $HOME` and `wc -l`; fails on `nonexistent_command`.
+
+    // Add more combinations as needed...
+    NULL
+};
+
+	const char *error_test_cases[] = {
+    // Redirection errors
+	"echo | > out.txt",  // Syntax error: invalid token sequence.
+	    "ls | | grep 'a'",  // Syntax error: consecutive `|`.
+    ">",  // Syntax error: missing file after `>`.
+    ">>",  // Syntax error: missing file after `>>`.
+    "<",  // Syntax error: missing file after `<`.
+    "echo > > file.txt",  // Syntax error: duplicate `>` token.
+    "ls > out.txt >",  // Syntax error: missing file after `>`.
+
+    // Pipe-related errors
+    "| ls",  // Syntax error: `|` at the beginning of the command.
+    "ls |",  // Syntax error: `|` at the end of the command.
+
+    // Quotes and escape sequence errors
+    "echo 'Hello",  // Syntax error: missing closing single quote.
+    "echo \"Hello",  // Syntax error: missing closing double quote.
+    "echo \\\"",  // Syntax error: invalid escape sequence.
+
+    // Environment variable and substitution errors
+    "echo $",  // Syntax error: incomplete variable substitution.
+    "echo $? $? >",  // Syntax error: missing file after `>`.
+
+    // Combination errors
+    "ls > out.txt | >",  // Syntax error: missing command/file after `>`.
+
+    // Invalid command structure
+    "&& echo 'Test'",  // Syntax error: `&&` without preceding command.
+    "echo 'Test' &&",  // Syntax error: `&&` without following command.
+    "|",  // Syntax error: lone `|` token.
+    ">",  // Syntax error: lone `>` token.
+    ">>",  // Syntax error: lone `>>` token.
+
+    // Misuse of redirections
+    "ls < > out.txt",  // Syntax error: `<` followed by `>` without file.
+    "ls < < input.txt",  // Syntax error: duplicate `<`.
+
+    // Invalid syntax with pipes and redirections
+    "cat < input.txt | >",  // Syntax error: missing command/file after `>`.
+    "| cat",  // Syntax error: pipe at the beginning.
+    "echo |",  // Syntax error: pipe at the end.
+
+    // Edge cases with invalid redirections
+    "echo hi < > >",  // Syntax error: consecutive invalid redirections.
+    "ls | >",  // Syntax error: pipe followed by invalid redirection.
+
+    // Redirection without commands
+    "< file.txt",  // Syntax error: `<` without a command.
+    "> file.txt",  // Syntax error: `>` without a command.
+    ">> file.txt",  // Syntax error: `>>` without a command.
+
+    // Other invalid command structures
+    "echo hi | && ls",  // Syntax error: `&&` cannot follow `|`.
+    "echo 'hi | grep 'h'",  // Syntax error: missing closing quote.
+
+    NULL
+};
+
+
+	const char	*test_cases_org[] =
 	{
+		"ls | grep -v '^d'",
+		//"echo $HOME | cat \"hi\"",
 		"ls > out.txt && cat $?out.txt",
 		"ls | wc -l > a.txt > b.txt | cat",
 		"ls | cat",
@@ -23,7 +155,6 @@ char	*fetch_test(int counter)
 		"ls | wc -l | cat",
 		"< b.txt cat /dev/null > test.txt",
 		//" echo 'stderr' >&2", FIX
-		"ls | grep -v '^d'",
 		//"grep 'pattern'",
 		"cat < input.txt",
 		//"uniq > output.txt",

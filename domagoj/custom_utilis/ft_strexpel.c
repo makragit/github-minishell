@@ -6,11 +6,11 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/15 13:06:52 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/06 21:19:00 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/08 20:33:25 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../minishell.h"
+#include "../minishell.h"
 
 static char	*cut_connect(char *str, size_t index, size_t cut_len)
 {
@@ -40,7 +40,7 @@ static char	*cut_connect(char *str, size_t index, size_t cut_len)
 	return (return_str);
 }
 
-char	*ft_strexpel(char *str, const char *expel)
+static char	*expel_single(char *str, const char *expel)
 {
 	size_t	len1;
 	size_t	len2;
@@ -64,4 +64,31 @@ char	*ft_strexpel(char *str, const char *expel)
 		return (NULL);
 	len1 = ft_strlen(str_cpy);
 	return (str_cpy);
+}
+
+char	*ft_strexpel(char *str, const char *expel, t_err mode)
+{
+	char	*str_cpy;
+	char	*cpy;
+	int		check;
+
+	str_cpy = ft_strdup(str);
+	if (!str_cpy)
+		return (NULL);
+	cpy = NULL;
+	check = 0;
+	while (ft_strnstr(str_cpy, expel, ft_strlen(str_cpy)))
+	{
+		check = 1;
+		cpy = expel_single(str_cpy, expel);
+		free(str_cpy);
+		if (!cpy)
+			return (NULL);
+		str_cpy = cpy;
+		if (mode == ONE)
+			break ;
+	}
+	if (check == 0)
+		free(str_cpy);
+	return (cpy);
 }

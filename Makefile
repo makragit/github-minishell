@@ -8,13 +8,13 @@ LIBFT = ./libft/libft.a
 
 
 # Directories
-UTILS_DIR = ./domagoj/custom_utilis
-INPUT_CHCK = ./domagoj/parser/lexer
-TOKEN_DIR = ./domagoj/parser/tokenisation
-TABLE_DIR = ./domagoj/parser/table_fill
-EXPANDER_DIR = ./domagoj/parser/expansion
-HEREDOC_DIR = ./domagoj/execution/heredoc_program
-PIPE_DIR = ./domagoj/execution/pipe_redir
+UTILS_DIR = ./custom_utilis
+INPUT_CHCK = ./parser/lexer
+TOKEN_DIR = ./parser/tokenisation
+TABLE_DIR = ./parser/table_fill
+EXPANDER_DIR = ./parser/expansion
+HEREDOC_DIR = ./execution/heredoc_program
+PIPE_DIR = ./execution/pipe_redir
 
 
 
@@ -24,9 +24,11 @@ SOURCE = minishell.c \
           $(TOKEN_DIR)/token_make_entry.c \
           $(TOKEN_DIR)/token_len.c \
           $(TOKEN_DIR)/token_type.c \
-          ./domagoj/parser/parse.c \
+          ./parser/parse.c \
           $(UTILS_DIR)/lst_functions.c \
+		  $(UTILS_DIR)/cmd_table_funcs.c \
           $(UTILS_DIR)/ft_strexpel.c \
+		  $(INPUT_CHCK)/print_error.c \
           $(UTILS_DIR)/ft_insert_str.c \
           $(UTILS_DIR)/ft_find_indexes.c \
 		  $(UTILS_DIR)/ft_append.c \
@@ -45,10 +47,10 @@ SOURCE = minishell.c \
 		  $(INPUT_CHCK)/input_check.c \
 		  $(HEREDOC_DIR)/heredoc_program.c \
 		  $(PIPE_DIR)/pipe_redir.c \
-		  ./domagoj/main-test.c \
-		  ./domagoj/execution/execute.c \
-		  ./domagoj/execution/cmd_path.c \
-		  ./domagoj/execution/redirect.c \
+		  ./main-test.c \
+		  ./execution/execute.c \
+		  ./execution/cmd_path.c \
+		  ./execution/redirect.c \
 
 CFLAGS = -Wall -Wextra -g # TODO -g
 
