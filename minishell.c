@@ -79,7 +79,7 @@ int	main(int argc, char **argv, char **envp)
 		if(ret == -1)
 			test_execute(input, data->env_paths, data->mini_envp);
 		else
-			data->last_exit_status = ret; // TODO how to handle last_exit_status from execve?
+			data->last_ex_code = ret; // TODO how to handle last_exit_status from execve?
 
 
 		free_table(get_table_reset(NULL, 0));
@@ -91,7 +91,7 @@ int	main(int argc, char **argv, char **envp)
 
 	(void)argv; // TODO get rid of argv in main()?
 
-	ret = data->last_exit_status;
+	ret = data->last_ex_code;
 	DEBUG_printf("\n\tEXIT_STATUS: %d\n", ret);
 	free_all();
 	return (ret);

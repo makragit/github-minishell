@@ -17,16 +17,12 @@ LIBFT = ./libft/libft.a
 # PIPE_DIR = ./execution/pipe_redir
 
 UTILS_DIR = ./domagoj/custom_utilis
-INPUT_CHCK = ./domagoj/parser/validate_input
+INPUT_CHCK = ./domagoj/parser/lexer
 TOKEN_DIR = ./domagoj/parser/tokenisation
 TABLE_DIR = ./domagoj/parser/table_fill
 EXPANDER_DIR = ./domagoj/parser/expansion
 HEREDOC_DIR = ./domagoj/execution/heredoc_program
 PIPE_DIR = ./domagoj/execution/pipe_redir
-
-
-					# ./domagoj/parser/lexer/print_error.c \
-					# ./domagoj/parser/lexer/input_check.c \
 
 SOURCE = minishell.c \
 		 ./mak/temp.c \
@@ -58,6 +54,9 @@ SOURCE = minishell.c \
 		  $(PIPE_DIR)/pipe_redir.c \
 		  ./domagoj/main-test.c \
 		  ./domagoj/execution/execute.c \
+		  ./domagoj/execution/cmd_path.c \
+		  ./domagoj/execution/redirect.c \
+			$(UTILS_DIR)/ft_free_array.c \
 
 CFLAGS = -Wall -Wextra -Werror -g # TODO -g
 
