@@ -162,7 +162,7 @@ t_cmd_table		*table_init(size_t of_size);
 int				token_distribution(t_cmd_table *table, t_token *token);
 int				arr_create(t_cmd_table *table, t_token *token);
 t_err			expander(t_token *tokens);
-int				exit_status(char **str);
+/* int				exit_status(char **str); */
 int				expand_env(char **arg);
 int				is_whitespace(char c);
 int				skip_whitespace(char **str);
@@ -193,6 +193,6 @@ void			ft_free_array(char **arr);
 void			syntax_error_print(char *reason);
 int				connect_pipes(t_cmd_table *table);
 t_err			redir(t_cmd_table *table);
-void			finish_redir_data_lst(t_cmd_table *table);
+/* void			finish_redir_data_lst(t_cmd_table *table); */
 char			*fetch_test(int counter);
 #endif
