@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/12 20:32:28 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/10 16:42:16 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:04:45 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,27 +14,31 @@
 
 int	ft_trim_quotes(char **str)
 {
-	char	*strcpy;
 	char	*new;
-	size_t	len;
+	char	*strr;
+	size_t	c;
 
-	strcpy = *str;
+	strr = *str;
 	if (!*str || !str)
 		return (-1);
-	len = ft_strlen(strcpy);
-	if (len < 2)
+	if (ft_strlen(*str) < 2)
 		return (0);
-	if (strcpy[0] == strcpy[len - 1])
+	c = 0;
+	while (strr[c])
 	{
-		if (strcpy[0] == '\'' || strcpy[0] == '\"')
+		if (strr[c] == '\'' || strr[c] == '\"')
 		{
-			strcpy[len - 1] = '\0';
-			new = ft_strdup(strcpy + 1);
+			if (strr[c] == '\"')
+				new = ft_strexpel(*str, "\"", ALL);
+			else if (strr[c] == '\'')
+				new = ft_strexpel(*str, "\'", ALL);
 			if (!new)
 				return (-1);
 			free(*str);
 			*str = new;
+			return (0);
 		}
+		c++;
 	}
 	return (0);
 }

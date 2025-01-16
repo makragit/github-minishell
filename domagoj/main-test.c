@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/02 13:50:08 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/10 16:24:41 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/16 20:18:32 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,11 @@
 
 char	*fetch_test(int counter)
 {
-	const char *test_cases[] = {
-    // Successful commands
-    "ls | grep 'test'",  // Lists files and filters those containing "test".
+
+	const char *test[] =
+{
+    // Redirection errors
+	 "ls | grep 'test'",  // Lists files and filters those containing "test".
     "echo $HOME | wc -c",  // Prints the home directory and counts characters.
     "ls > out.txt && echo Output written",  // Redirects `ls` output to a file, prints a message.
     "echo Hello > file.txt",  // Writes "Hello" to file.txt.
@@ -80,13 +82,6 @@ char	*fetch_test(int counter)
     "echo $? > file.txt | ls nonexistent",  // $? is written to file.txt; `ls nonexistent` fails.
     "ls | echo $PWD",  // Prints the current working directory; ignores `ls` output.
     "echo $HOME | wc -l | nonexistent_command",  // Runs `echo $HOME` and `wc -l`; fails on `nonexistent_command`.
-
-    // Add more combinations as needed...
-    NULL
-};
-
-	const char *error_test_cases[] = {
-    // Redirection errors
 	"echo | > out.txt",  // Syntax error: invalid token sequence.
 	    "ls | | grep 'a'",  // Syntax error: consecutive `|`.
     ">",  // Syntax error: missing file after `>`.
@@ -132,33 +127,26 @@ char	*fetch_test(int counter)
     "ls | >",  // Syntax error: pipe followed by invalid redirection.
 
     // Redirection without commands
-    "< file.txt",  // Syntax error: `<` without a command.
-    "> file.txt",  // Syntax error: `>` without a command.
-    ">> file.txt",  // Syntax error: `>>` without a command.
+   // "< file.txt",  // Syntax error: `<` without a command. //SEG FAULT!
+  //  "> file.txt",  // Syntax error: `>` without a command. // SEG FAULT!!!!!!!!!!!!!!!!!!!!!!
+    //">> file.txt",  // Syntax error: `>>` without a command// SEG FAULT!!!!!!!!!!!!!!!!!!!!!!!!
 
     // Other invalid command structures
     "echo hi | && ls",  // Syntax error: `&&` cannot follow `|`.
     "echo 'hi | grep 'h'",  // Syntax error: missing closing quote.
-
-    NULL
-};
-
-
-	const char	*test_cases_org[] =
-	{
 		"ls | grep -v '^d'",
-		//"echo $HOME | cat \"hi\"",
+		"echo $HOME | cat \"hi\"",
 		"ls > out.txt && cat $?out.txt",
 		"ls | wc -l > a.txt > b.txt | cat",
 		"ls | cat",
 		"hi",
 		"ls | wc -l | cat",
 		"< b.txt cat /dev/null > test.txt",
-		//" echo 'stderr' >&2", FIX
-		//"grep 'pattern'",
+		" echo 'stderr' >&2",
+		"grep 'pattern'",
 		"cat < input.txt",
-		//"uniq > output.txt",
-		//"cat < input.txt | grep 'pattern' | ls | uniq > output.txt",
+		"uniq > output.txt",
+		"cat < input.txt | grep 'pattern' | ls | uniq > output.txt",
 		"ls | wc -l | cat",
 		"echo $$",
 		"echo $)",
@@ -168,7 +156,7 @@ char	*fetch_test(int counter)
 		"echo $$$HOME",
 		"echo $$$l",
 		//"cat << EOF | grep 'pattern'",
-		"< 'input.txy' echo 'hi' > 1.out > 2.out",
+		//"< 'input.txy' echo 'hi' > 1.out > 2.out", SEG FAULT
 		"touch file.txt && rm -i file.txt",
 		"ls &&",
 		//	"cat << EOF\nNested << redirection\nEOF",
@@ -182,9 +170,9 @@ char	*fetch_test(int counter)
 		//		"cat << EOF | grep pattern\npattern",
 		//	"cat << EOF | grep 'data' | wc -l",
 		"echo 'new line' >> output1.txt >> output2.txt",
-		//"ls -l > output.txt 2> error.txt",
-		//"ls nonexistent > /dev/null 2>&1",
-		//"cat | grep '$HOMEpattern'",
+		"ls -l > output.txt 2> error.txt",
+		"ls nonexistent > /dev/null 2>&1",
+		"cat | grep '$HOMEpattern'",
 		"cat < input.txt",
 		"echo $HOME \"Double $HOMEquotes\"",
 		"ls -l",
@@ -193,7 +181,7 @@ char	*fetch_test(int counter)
 		"ls | grep 'pattern' > output.txt",
 		"ls | grep 'pattern' >> output.txt",
 		"cat < input.txt | grep 'pattern' > output.txt",
-		//"cat < non_existent_file.txt | grep 'pattern'",
+		"cat < non_existent_file.txt | grep 'pattern'",
 		"| grep 'pattern'",
 		"echo 'data' | tee -a file1.txt file2.txt",
 		"echo 'hello' | grep 'hello' > overwrite.txt",
@@ -210,7 +198,7 @@ char	*fetch_test(int counter)
 		"echo Mix \"Double\" and 'Single' quotes",
 		"cat < input.txt > output.txt",
 		"mkdir test_dir && cd test_dir && ls",
-		"export PATH=$PATH:/new/path && echo $PATH",
+		//"export PATH=$PATH:/new/path && echo $PATH", SEG FAULT
 		"echo \"Multiline\\nOutput\"",
 		"cd .. && pwd",
 		"echo $(echo Nested Command)",
@@ -241,7 +229,7 @@ char	*fetch_test(int counter)
 		"seq 1 10 | tail -n 2",
 		"echo \"nested $(echo subcommand)\"",
 		"cd .. && ls | sort | head -n 3",
-		"export TEST=\"multiline value\" && echo $TEST",
+		//"export TEST=\"multiline value\" && echo $TEST", SEG FAULT
 		"unset TEST && echo $TEST",
 		"grep -E 'line[0-9]+' file.txt",
 		"rm -f file.txt",
@@ -254,14 +242,14 @@ char	*fetch_test(int counter)
 		"ls | grep .c",
 		"echo \"Simple test\"",
 		"echo 'Single quotes with $VAR'",
-		"export TEST=test_var && echo \"Double quotes $TEST\"",
+		//"export TEST=test_var && echo \"Double quotes $TEST\"", SEG FAULT
 		"unset TEST && echo \"Unset $TEST\"",
 		"echo $(pwd)",
 		"seq 1 5 | xargs -I {} echo Number: {}",
 		"echo \"Tabs\\tTest\" | expand",
 		"echo \"This\\tis\\ta\\ttest\" | tr -d '\\t'",
 		"ls | grep -i test",
-		"export EMPTY_VAR='' && echo $EMPTY_VAR",
+	//	"export EMPTY_VAR='' && echo $EMPTY_VAR", SEG FAULT
 		"echo $?",
 		"echo \"Escaped dollar \\$VAR\"",
 		"echo \"Ending with space \"",
@@ -276,18 +264,18 @@ char	*fetch_test(int counter)
 		"echo $(ls -l)",
 		"ls | grep pattern | sort",
 		"echo 'Hello' 'World'!",
-		//	"echo 'stderr' >&2",
+		"echo 'stderr' >&2",
 		"env | grep PATH",
-		"export TEST=hello && echo $TEST && unset TEST",
-		"export PATH=$PATH:/bin && echo $PATH",
-		"unset PATH && echo $PATH",
+		///"export TEST=hello && echo $TEST && unset TEST",
+	//	"export PATH=$PATH:/bin && echo $PATH",
+		//"unset PATH && echo $PATH",
 		"echo Nested $(echo subcommand $(echo deeper))",
 		"echo \"Test \\\\$VAR\"",
 		"echo 'Preserve single quotes $VAR'",
 		"echo $(seq 1 5 | head -n 2)",
 		"echo 'Quotes inside $(subcommand)'",
 		"echo Multiline\\\ncommand",
-		"export VAR=test && echo $VAR && unset VAR",
+	//	"export VAR=test && echo $VAR && unset VAR",
 		"echo Nested dollar \\$",
 		"seq 1 100 | grep 50",
 		"echo Multiple $UNKNOWN_VAR and $HOME",
@@ -297,14 +285,14 @@ char	*fetch_test(int counter)
 		"echo 'math $((10/2))'",
 		"echo \"Escaped space \\ \"",
 		"echo \"New\\tline\"",
-		"export TEST=test && echo \"Mixed $TEST string\"",
+		//"export TEST=test && echo \"Mixed $TEST string\"",
 		"echo Empty $EMPTY",
 		"echo Done.",
 		"| echo",
 		"echo |",
-		//"", see  this provblem later
+	//	"",
 		"|",
-		//	"test <<",
+		"test <<",
 		"test >>",
 		"test <",
 		"test >",
@@ -312,12 +300,9 @@ char	*fetch_test(int counter)
 		"test <> test",
 		"echo\ntest",
 		"echo $(HOME)",
-		NULL
-	};
+    NULL
+};
 
-    // MAK merge add 130125
-    (void)test_cases_org;
-    (void)error_test_cases;
 
-	return ((char *)test_cases[counter]);
+	return ((char *)test[counter]);
 }

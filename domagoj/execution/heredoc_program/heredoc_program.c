@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/05 16:44:59 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/10 16:41:44 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/16 18:39:41 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ char	*expand_line(char *line, char *delim, int is_quoted)
 		return (NULL);
 	if (is_quoted == 1)
 		return (line);
-	if (exit_status(&line) || expand_env(&line))
+	if (expand_env(&line))
 		return (NULL);
 	return (line);
 }
@@ -98,7 +98,7 @@ int	heredoc(t_cmd_table *table)
 	if (!line) after readline() means user activated Ctrl + D
 
 	How heredoc works
-	--> sees about what heredoc is 
+	--> sees about what heredoc is
 	->catches lines until him
 	->
 

@@ -6,84 +6,55 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/15 21:11:31 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/10 16:42:20 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/16 19:27:46 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../../minishell.h"
 
-char	*getenv_local(char *name)
+static char	*fetch_ex_cde(void)
 {
-	char		**env;
-	size_t		line;
-	t_data		*shared_data;
+	int		ex_code;
+	char	*return_str;
+	t_data	*data;
 
-	line = 0;
-	shared_data = get_data(NULL);
-	if (!shared_data)
-		return (NULL);
-	if (!shared_data->mini_envp)
-		return (NULL);
-	env = shared_data->mini_envp;
-	while (env[line])
-	{
-		if (ft_strncmp(name, env[line], ft_strlen(name)) == OK)
-			return (env[line] + (ft_strlen(name) + 1));
-		line++;
-	}
-	return (NULL);
+	data = get_data(NULL);
+	ex_code = data->last_ex_code;
+	return_str = ft_itoa(ex_code);
+	return (return_str);
 }
 
 static int	replace(char **arg, char *var_name, size_t start)
 {
 	char	*env_var;
 	char	*new_value;
+	int		len;
 
-	if (!var_name)
-		return (1);
-	if (!arg || !*arg)
-		return (1);
-	env_var = getenv_local(var_name + 1);
-	if (!env_var)
-		env_var = "";
-	new_value = ft_strdup(env_var);
+	if (!var_name || !*arg || !arg)
+		return (-1);
+	if (var_name[1] == '?')
+	{
+		env_var = fetch_ex_cde();
+		new_value = env_var;
+	}
+	else
+	{
+		env_var = getenv_local(var_name + 1);
+		if (!env_var)
+			env_var = "";
+		new_value = ft_strdup(env_var);
+	}
+	len = ft_strlen(new_value);
 	free(var_name);
 	if (!new_value)
-		return (1);
+		return (-1);
 	if (ft_str_insert(arg, new_value, start) == -1)
 	{
 		free(new_value);
-		return (1);
+		return (-1);
 	}
 	free(new_value);
-	if (!arg)
-		return (1);
-	return (0);
-}
-
-static int	start_len(size_t *start, size_t *len, char *str)
-{
-	int		c;
-
-	c = 0;
-	if (!str)
-		return (0);
-	*len = 1;
-	while (str[c])
-	{
-		if (str[c] == '$' && ft_isalnum(str[c + 1]))
-		{
-			*start = c++;
-			while (str[c] && (ft_isalnum(str[c]) || str[c] == '_'))
-			{
-				(*len)++;
-				c++;
-			}
-			return (1);
-		}
-		c++;
-	}
-	return (0);
+	return (len);
 }
 
 static char	*_var_name(char **str, size_t start, size_t len)
@@ -105,32 +76,59 @@ static char	*_var_name(char **str, size_t start, size_t len)
 	return (part);
 }
 
+static size_t	get_len(char *str)
+{
+	size_t	i;
+
+	i = 1;
+	while (str[i] && ft_isalnum(str[i]))
+		i++;
+	if (i == 1 && str[i] == '?')
+		i = 2;
+	return (i);
+}
+
 int	expand_env(char **arg)
 {
 	char		*str_cpy;
 	char		*var_name;
-	size_t		start;
-	size_t		len;
+	size_t		c;
+	int			len;
 
 	str_cpy = ft_strdup(*arg);
 	if (!str_cpy)
 		return (1);
-	while (start_len(&start, &len, str_cpy))
+	c = 0;
+	while (str_cpy[c])
 	{
-		var_name = _var_name(&str_cpy, start, len);
-		if (!var_name)
+		if (str_cpy[c] == '\'')
 		{
-			free(str_cpy);
-			return (1);
+			c = ft_strchr(str_cpy + c + 1, '\'') - str_cpy + 1;
+			if ((int)c > ft_strlen(str_cpy))
+				break ;
+			continue ;
 		}
-		if (replace(&str_cpy, var_name, start))
+		if (str_cpy[c] == '$')
 		{
-			free(str_cpy);
-			return (1);
+			len = get_len(str_cpy + c);
+			var_name = _var_name(&str_cpy, c, len);
+			if (!var_name)
+			{
+				free(str_cpy);
+				return (-1);
+			}
+			len = replace(&str_cpy, var_name, c);
+			if (len == -1)
+			{
+				free(str_cpy);
+				return (-1);
+			}
+			c += len;
 		}
+		else
+			c++;
 	}
 	free(*arg);
 	*arg = str_cpy;
 	return (0);
 }
-//*find indexew

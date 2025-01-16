@@ -42,18 +42,42 @@ static size_t	word_len(char *str)
 static size_t	quote_len(char *str)
 {
 	size_t		c;
+	int			quote_type;
 
-	c = 1;
-	while (str[c] && str[c] != str[0])
+	c = 0;
+	while (str[c])
+	{
+		if (str[c] == '\'' || str[c] == '\"')
+		{
+			quote_type = str[c];
+			return ((ft_strrchr(str, quote_type) - str) + 1);
+		}
 		c++;
+	}
 	return (c + 1);
+}
+
+static size_t	is_quoted(char *str)
+{
+	size_t	c;
+
+	c = 0;
+	while (str[c])
+	{
+		if (str[c] == ' ')
+			return (0);
+		if (str[c] == '\'' || str[c] == '\"')
+			return (1);
+		c++;
+	}
+	return (0);
 }
 
 size_t	token_len(char *str)
 {
 	if (str[0] == '|')
 		return (1);
-	if (str[0] == '\'' || str[0] == '\"')
+	if (is_quoted(str))
 		return (quote_len(str));
 	if (str[0] == '<' || str[0] == '>')
 		return (redir_len(str));

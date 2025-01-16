@@ -40,6 +40,7 @@ SOURCE = minishell.c \
 		  $(UTILS_DIR)/ft_append.c \
 		  $(UTILS_DIR)/ft_create_file.c \
 		  $(UTILS_DIR)/print_or_free.c \
+		  $(UTILS_DIR)/getenv_local.c \
           $(UTILS_DIR)/ft_iswhitespace.c \
           $(TABLE_DIR)/fill_table.c \
           $(TABLE_DIR)/table_init.c \
@@ -47,7 +48,6 @@ SOURCE = minishell.c \
 		  $(TABLE_DIR)/create_redir.c \
 		  $(EXPANDER_DIR)/expander.c \
 		  $(EXPANDER_DIR)/del_quotes.c \
-		  $(EXPANDER_DIR)/exit_status.c \
 		  $(EXPANDER_DIR)/env_var.c \
 		  $(INPUT_CHCK)/input_check.c \
 		  $(HEREDOC_DIR)/heredoc_program.c \

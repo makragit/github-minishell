@@ -16,24 +16,20 @@ static size_t	arr_size(t_token *token)
 {
 	size_t	i;
 
-	i = 1;
-	while (token)
-	{
-		if (token->type == CMD_t)
-		{
-			token = token->next;
-			break ;
-		}
-		token = token->next;
-		if (!token)
-			return (0);
-	}
-	while (token)
+	i = 0;
+	while (token && token->type != CMD_t)
 	{
 		if (token->type == PIPE)
+			return (0);
+		token = token->next;
+	}
+	if (!token)
+		return (0);
+	while (token)
+	{
+		if (token->type != CMD_t && token->type != ARG_TOKEN)
 			break ;
-		if (token->type == ARG_TOKEN)
-			i++;
+		i++;
 		token = token->next;
 	}
 	return (i);
@@ -44,7 +40,7 @@ static t_token	*fill_array(char **arr, t_token *token, size_t size)
 	size_t	i;
 
 	i = 0;
-	while (token->type != CMD_t)
+	while (token && token->type != CMD_t)
 		token = token->next;
 	arr[i] = token->value;
 	i++;
@@ -66,11 +62,16 @@ int	arr_create(t_cmd_table *table, t_token *token)
 
 	while (table)
 	{
+		if (token->type == PIPE)
+			token = token->next;
 		size = arr_size(token);
 		if (!size)
 		{
+			while (token && token->type != CMD_t)
+				token = token->next;
 			table->args = NULL;
-			return (0);
+			table = table->next;
+			continue ;
 		}
 		table->args = malloc(sizeof(char *) * (size + 1));
 		if (!(table->args))
