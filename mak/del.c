@@ -4,6 +4,12 @@ int builtin_check(char *input); // TODO switch to try_builtin
 char *builtin_echo_parse_option(char *str); // TODO OLD not needed
 int builtin_echo(char *input); // non-table version
 
+int builtin_export_old(char **args); // TODO not finished
+void test_execute(char* input, char **paths, char **envp); // TODO switch to execute()*/ 
+int test_fork(char* exec_path, char **input_split, char **envp);
+
+int key_search_remove(char *str);
+
 
 // TODO Switch to try_builtin
 int builtin_check_table(t_cmd_table *table)
@@ -249,3 +255,132 @@ char *builtin_echo_parse_option(char *str)
 /* 	/1* free(arr); *1/ */
 /* 	return (new_arr); */
 /* } */
+
+// TODO how to handle array_free_and_add fail?
+// TODO export with no argument prints env? 
+// TODO export abc def -> must add a string abc='' and def='' to env, not just abc and def
+// returns 0 on SUCCESS, errno or 1 on Failure
+int builtin_export_old(char **args)
+{
+	int i;
+
+	DEBUG_printf("builtin_export");
+	/* DEBUG_print_strings(split); */
+
+	if (MAK_arr_size(args) == 1)
+	{
+		builtin_env(args);
+		/* return (DEBUG_0("split size == 1, ran builtin_env\n")); */
+		DEBUG_printf("split size == 1, ran builtin_env\n");
+		return (0);
+	}
+
+	i = 1;
+	while(args[i])
+	{
+		if (!array_free_and_add(&get_data(NULL)->mini_envp, args[i]))
+		{
+			DEBUG_printf("builtin_export: array_free_and failed\n");
+			return (1); // TODO 1 okay? only fails on !arr !*arr !new_value
+		}
+		i++;
+	}
+
+	return (0);
+}
+
+// TODO move to DEL.c and switch to doma execute()
+// path, arguments usage:
+  /* char *const path = "/usr/bin/cat"; */
+  /* char *const argv[] = {"/usr/bin/cat", "file.md", NULL}; */
+// TODO get_env_paths in function instead of argument?
+/* void test_execute(char* input, char **env_paths, char **envp) */
+/* { */
+/* 	char **input_split; */
+/* 	char *exec_path; */
+
+/* 	if (input == NULL || *input == '\0') */
+/* 		return(DEBUG_VOID("test_execute: NULL or 0")); */
+		
+/* 	input_split = ft_split(input, ' '); */
+/* 	if (input_split == NULL) */
+/* 		malloc_error("ERROR: malloc failed in test_execute"); */
+/* 	exec_path = return_executable_path(input_split[0], env_paths); */
+/* 	/1* DEBUG_printf("ret: %s", test_ret); *1/ */
+/* 	DEBUG_printf("INPUT: %s PATH: %s EXECUTABLE : %d\n", input, exec_path, */ 
+/* 																is_executable(input_split[0], env_paths)); */
+
+/* 	if (exec_path == NULL) */
+/* 	{ */
+/* 		free(exec_path); */
+/* 		MAK_free_array(input_split); */
+/* 		/1* DEBUG_printf("command not found"); *1/ */
+/* 		perror("minishell: command not found"); */
+/* 		return ; */
+/* 	} */
+/* 	free(input_split[0]); */
+/* 	input_split[0] = ft_strdup(exec_path); */
+/* 	/1* input_split[0] = exec_path; *1/ */
+
+/* 	// TODO test_fork test */
+/* 	test_fork(exec_path, input_split, envp); */
+
+/* 	free(exec_path); */
+/* 	MAK_free_array(input_split); */
+
+/*   /1* if (execve(exec_path, input_split, envp) == -1) { *1/ */
+/*   /1*     perror("execve failed"); *1/ */
+/*   /1*     return ; *1/ */
+/*   /1* } *1/ */
+/* 	return; */
+/* } */
+
+int test_fork(char* exec_path, char **input_split, char **envp)
+{
+	pid_t pid = fork();
+
+	if (pid < 0)
+	{
+		perror("fork");
+		// TODO free
+		exit(1);
+	} 
+	else if (pid == 0)
+	{
+		// Child process: run the command
+  	if (execve(exec_path, input_split, envp) == -1) {
+  	    perror("execve failed");
+  	    return (1);
+  	}
+		// ???
+		perror("execve"); // If execve returns, it failed
+		/* exit(1); */
+		return (1);
+	} 
+	else 
+	{
+		// Parent process: wait for the child
+		int status;
+		waitpid(pid, &status, 0);
+	}
+	return (0);
+}
+
+// TODO CRAP, already in unset, still needed?
+int key_search_remove(char *str)
+{
+	int search;
+
+	DEBUG_printf("key_search_remove str: %s", str);
+	search = search_array(get_data(NULL)->mini_envp, str);
+	if (search > 0)
+	{
+		if (!array_free_and_remove(&get_data(NULL)->mini_envp, str))
+		{
+			DEBUG_printf("key_search_remove: array_free_and_remove failed\n");
+			return (1); // TODO 1 okay? only returns on !arr !*arr !remove_value, not found, mult. found
+		}
+	}
+
+	return (0);
+}
