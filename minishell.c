@@ -4,24 +4,41 @@ void key_value_tests()
 {
 	printf("\n");
 	printf("KEY VALUE TESTS\n");
-	printf("key_valid %s : %d\n", "KEY", key_valid("KEY"));
-	printf("key_valid %s : %d\n", "KEY=", key_valid("KEY="));
-	printf("key_valid %s : %d\n", "1KEY=", key_valid("1KEY="));
-	printf("key_valid %s : %d\n", "_KEY=", key_valid("_KEY="));
-	printf("key_valid %s : %d\n", "_1KEY=", key_valid("_1KEY="));
-	printf("key_valid %s : %d\n", "=", key_valid("="));
+	printf("env_key_valid %s : %d\n", "KEY", env_key_valid("KEY"));
+	printf("env_key_valid %s : %d\n", "KEY=", env_key_valid("KEY="));
+	printf("env_key_valid %s : %d\n", "1KEY=", env_key_valid("1KEY="));
+	printf("env_key_valid %s : %d\n", "_KEY=", env_key_valid("_KEY="));
+	printf("env_key_valid %s : %d\n", "_1KEY=", env_key_valid("_1KEY="));
+	printf("env_key_valid %s : %d\n", "=", env_key_valid("="));
 
-	printf("key_valid %s : %d\n", "MY_VAR", key_valid("MY_VAR"));
-	printf("key_valid %s : %d\n", "123VAR", key_valid("123VAR"));
-	printf("key_valid %s : %d\n", "_MYVAR", key_valid("_MYVAR"));
-	printf("key_valid %s : %d\n", "MY_VAR_123", key_valid("MY_VAR_123"));
-	printf("key_valid %s : %d\n", "MY-VAR", key_valid("MY-VAR"));
-	printf("key_valid %s : %d\n", "MY VAR", key_valid("MY VAR"));
-	printf("key_valid %s : %d\n", "MY=VAR", key_valid("MY=VAR"));
+	printf("env_key_valid %s : %d\n", "MY_VAR", env_key_valid("MY_VAR"));
+	printf("env_key_valid %s : %d\n", "123VAR", env_key_valid("123VAR"));
+	printf("env_key_valid %s : %d\n", "_MYVAR", env_key_valid("_MYVAR"));
+	printf("env_key_valid %s : %d\n", "MY_VAR_123", env_key_valid("MY_VAR_123"));
+	printf("env_key_valid %s : %d\n", "MY-VAR", env_key_valid("MY-VAR"));
+	printf("env_key_valid %s : %d\n", "MY VAR", env_key_valid("MY VAR"));
+	printf("env_key_valid %s : %d\n", "MY=VAR", env_key_valid("MY=VAR"));
 
-	printf("key_valid %s : %d\n", "abc", key_valid("abc"));
-	printf("key_valid %s : %d\n", "ABC", key_valid("ABC"));
+	printf("env_key_valid %s : %d\n", "abc", env_key_valid("abc"));
+	printf("env_key_valid %s : %d\n", "ABC", env_key_valid("ABC"));
 	printf("\n");
+}
+
+void bash_error_tests()
+{
+	int ret;
+
+	printf("\n");
+	ret = bash_error_msg("command", "arg", "message", 1);
+	ret = bash_error_msg("command", NULL, "message", 1);
+	ret = bash_error_msg("export", NULL, "message", 1);
+	ret = bash_error_msg("unset", NULL, "message", 1);
+	ret = bash_error_msg("export", "1KEY", "message", 1);
+	ret = bash_error_msg("unset", "1KEY", "message", 1);
+	printf("ret: %d\n", ret);
+
+	printf("\n");
+
 }
 
 int	main(int argc, char **argv, char **envp)
@@ -32,8 +49,10 @@ int	main(int argc, char **argv, char **envp)
 	t_cmd_table *table;
 
 	/* main_test(); // TEST DOMAGOJ */
-	// now fetch_test?
+	// ???? now fetch_test?
+
 	/* key_value_tests(); */
+	/* bash_error_tests(); */
 	/* exit(0); */
 
   signal(SIGINT, signal_handler);
@@ -58,7 +77,9 @@ int	main(int argc, char **argv, char **envp)
 	/* 	exit_error("main: ft_strdup malloc fail"); // TODO DEBUG funcheck */
 
 	/* while(!input || ft_strncmp(input, "exit", 5) != 0) // TODO check for "     exit" */
-	while(!input || ft_strncmp(input, "exit", 4) != 0) // TODO check for "     exit"
+	/* while(!input || ft_strncmp(input, "exit", 4) != 0) // TODO check for "     exit" */
+																										 //
+	while(!input || data->exit_called == 0) // TODO check for "     exit"
 	{
 		free(input); // TODO readline return must be freed?
 		input = display_prompt();
@@ -70,14 +91,16 @@ int	main(int argc, char **argv, char **envp)
 			malloc_error("ERROR: get_table");
 		get_table_reset(table, 0);
 
-		/* DEBUG_print_strings(table->args); */
+		/* DEBUG_print_strings(table->args); // TODO DEBUG */
+
 		DEBUG_printf("table->cmd: %s\n", table->cmd);
 
 		ret = try_builtin(table);
 		DEBUG_printf("try_builtin return: %d", ret);
 		add_history(input);
 		if(ret == -1)
-			test_execute(input, data->env_paths, data->mini_envp);
+			/* test_execute(input, data->env_paths, data->mini_envp); */
+			execute(table); // doma execute
 		else
 			data->last_ex_code = ret; // TODO how to handle last_exit_status from execve?
 
@@ -87,7 +110,6 @@ int	main(int argc, char **argv, char **envp)
 	}
 	free(input); // TODO readline return must be freed?
 
-	printf("exit\n");
 
 	(void)argv; // TODO get rid of argv in main()?
 

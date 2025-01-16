@@ -87,6 +87,7 @@ typedef struct s_data
 	char	*home_path;
 	char	**original_envp;
 	char	**mini_envp;
+	int		exit_called;
 
 }	t_data;
 
@@ -104,7 +105,8 @@ void exit_error(char *s); // TODO switch to malloc_error
 void malloc_error(char *s);
 
 char *display_prompt();
-char *prepare_prompt_string(char *user, char *path, char *hostname, int size);
+char *prepare_prompt_string(char *user, char *prompt_path, int size);
+
 
 int is_root();
 int ft_isspace(char c);
@@ -125,24 +127,21 @@ int builtin_pwd(char **args);
 int builtin_env(char **args);
 int builtin_echo(char **args);
 int builtin_echo_option(char *str);
-
-int builtin_export(char **args); // TODO not finished
-int builtin_export_old(char **args); // TODO not finished
-char **copy_array(char **arr);
-int search_array(char **arr, char *search);
-int array_free_and_add(char ***arr, char *new_value);
-int array_free_and_remove(char ***arr, char *remove_value);
-/* int array_free_and_remove_2(char ***arr, char *remove_value); */
-
+int builtin_export(char **args);
 int builtin_unset(char **args);
 int builtin_exit(char **args);
+
+char **copy_array(char **arr);
+int search_key_in_array(char **arr, char *search);
+int array_free_and_add(char ***arr, char *new_value);
+int array_free_and_remove(char ***arr, char *remove_value);
+
 int is_numeric(const char *str);
+int env_key_valid(char *str);
+int bash_error_msg(char *cmd, char *arg, char *err_msg, int error_code);
 
-void test_execute(char* input, char **paths, char **envp);
-int test_fork(char* exec_path, char **input_split, char **envp);
-
-int key_valid(char *str); // TODO Rename // TODO Rename
-int key_search_remove(char *str); // TODO CRAP
+int export_handle_key_value(char **args, int *i);
+int len_to_equal_sign(char *str);
 
 // temp.c DEBUG
 void DEBUG_print_strings(char **arr);
