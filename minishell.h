@@ -152,6 +152,7 @@ void DEBUG_is_executable(char **paths);
 
 
 // DOMAGOJ
+int				is_builtin(char *cmd);
 t_token			*cut_token(t_token *token);
 t_cmd_table		*parse(const char *input);
 t_token			*tokenize(char *input_string);

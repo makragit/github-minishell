@@ -95,16 +95,8 @@ int	main(int argc, char **argv, char **envp)
 
 		DEBUG_printf("table->cmd: %s\n", table->cmd);
 
-		ret = try_builtin(table);
-		DEBUG_printf("try_builtin return: %d", ret);
+		ret = execute(table);// TODO how to handle last_exit_status from execve? > DOMI ANSWER: I update data->last_ex_code inside my stuff. Also note: ret != last_ex_code
 		add_history(input);
-		if(ret == -1)
-			/* test_execute(input, data->env_paths, data->mini_envp); */
-			execute(table); // doma execute
-		else
-			data->last_ex_code = ret; // TODO how to handle last_exit_status from execve?
-
-
 		free_table(get_table_reset(NULL, 0));
 		get_table_reset(NULL, 1); // needs reset, or resource can't be declared NULL again
 	}
@@ -126,3 +118,12 @@ int	main(int argc, char **argv, char **envp)
 
 
 
+/*
+To do
+make checher if builtin
+proper pipe management
+proper redir management
+error return failure vs. normal comamdn fail
+
+
+*/

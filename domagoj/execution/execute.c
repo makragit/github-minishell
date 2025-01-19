@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/05 17:12:41 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/16 20:18:45 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/19 15:04:37 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ t_err	try_execve(t_cmd_table *table)
 	{
 		while (paths[c])
 		{
-		//	execve(paths[c], table->args, NULL);
+			execve(paths[c], table->args, NULL);
 			c++;
 		}
 	}
@@ -109,8 +109,13 @@ t_err	execute(t_cmd_table *table)
 		return (ERROR);
 	while (current)
 	{
-		if (try_builtin(table) != -1)
+		if (is_builtin(current->cmd))
 		{
+			redir(current);
+			in_out_backup(table, RESTORE);
+			connect_pipes(current);
+			try_builtin(current);
+			in_out_backup(table, RESTORE);
 			current = current->next;
 			continue ;
 		}
@@ -130,3 +135,8 @@ musnt go inside func if there is !table
 change exit code for when fork fails
 add markus's builtin
 */
+
+
+
+
+
