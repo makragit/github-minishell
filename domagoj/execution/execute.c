@@ -25,7 +25,7 @@ t_err	try_execve(t_cmd_table *table)
 	{
 		while (paths[c])
 		{
-		//	execve(paths[c], table->args, NULL);
+			execve(paths[c], table->args, NULL);
 			c++;
 		}
 	}
@@ -39,13 +39,21 @@ void	child(t_cmd_table *table, t_data *data, t_cmd_table *head)
 	connect_pipes(table);
 	if (redir(table) == FAIL)
 	{
-		free(data);
+		// MAK CHANGE: free_data() fixes leaks
+		// free(data);
+		free_data();
+		(void)data;
+
 		free_table(head);
 		exit(1);
 	}
 	if (try_execve(table) == FAIL)
 	{
-		free(data);
+		// MAK CHANGE: free_data() fixes leaks
+		// free(data);
+		free_data();
+		(void)data;
+
 		free_table(head);
 		exit(1);
 	}
@@ -109,8 +117,13 @@ t_err	execute(t_cmd_table *table)
 		return (ERROR);
 	while (current)
 	{
-		if (try_builtin(table) != -1)
+	if (is_builtin(current->cmd))
 		{
+			redir(current);
+			in_out_backup(table, RESTORE);
+			connect_pipes(current);
+			try_builtin(current);
+			in_out_backup(table, RESTORE);
 			current = current->next;
 			continue ;
 		}
@@ -124,6 +137,9 @@ t_err	execute(t_cmd_table *table)
 	in_out_backup(table, RESTORE);
 	return (OK);
 }
+
+
+
 /*
 
 musnt go inside func if there is !table

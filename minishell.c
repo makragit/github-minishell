@@ -95,15 +95,17 @@ int	main(int argc, char **argv, char **envp)
 
 		DEBUG_printf("table->cmd: %s\n", table->cmd);
 
-		ret = try_builtin(table);
-		DEBUG_printf("try_builtin return: %d", ret);
 		add_history(input);
-		if(ret == -1)
-			/* test_execute(input, data->env_paths, data->mini_envp); */
-			execute(table); // doma execute
-		else
-			data->last_ex_code = ret; // TODO how to handle last_exit_status from execve?
 
+		ret = execute(table);
+		/* DEBUG_printf("try_builtin return: %d", ret); */
+
+		// TODO only way test builtins in minishell-tester? 
+		/* ret = try_builtin(table); */
+		/* if(ret == -1) */
+		/* 	execute(table); // doma execute */
+		/* else */
+		/* 	data->last_ex_code = ret; // TODO how to handle last_exit_status from execve? */
 
 		free_table(get_table_reset(NULL, 0));
 		get_table_reset(NULL, 1); // needs reset, or resource can't be declared NULL again
@@ -119,7 +121,6 @@ int	main(int argc, char **argv, char **envp)
 	return (ret);
 	/* return (0); */
 }
-
 
 
 

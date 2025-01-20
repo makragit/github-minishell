@@ -54,6 +54,7 @@ SOURCE = minishell.c \
 		  $(PIPE_DIR)/pipe_redir.c \
 		  ./domagoj/main-test.c \
 		  ./domagoj/execution/execute.c \
+			./domagoj/execution/test_builtin.c \
 		  ./domagoj/execution/cmd_path.c \
 		  ./domagoj/execution/redirect.c \
 			$(UTILS_DIR)/ft_free_array.c \

@@ -32,8 +32,22 @@ VALGRINDFLAGS+=" --trace-children-skip=$(echo $IGNORED_PATHS | sed 's/ /,/g')"
 # TODO echo 1 "2 3" 4
 # TODO echo $HOME
 test_cases=(
-    "exit"
+    "ls\n"
+    "ls"
+    "ls\nexit\n"
     "asdf\nexit\n"
+
+
+
+
+    "exit"
+    "\nexit"
+    # "\nexit\n"
+    "echo\nexit"
+    "pwd\nexit"
+    "export\nexit"
+
+
     "asdf\nexit\n"
     "/\nexit\n"
 
@@ -79,6 +93,9 @@ if [[ -z "$1" || "$1" == "-v" ]]; then
     for args in "${test_cases[@]}"; do
     echo "Running test case: $args"
     valgrind_output=$(printf "$args" | valgrind $VALGRINDFLAGS $VALGRINDFDFLAGS ./minishell 2>&1)
+
+    # Ensure the parent waits for the child process to finish before moving to the next test case
+    wait
 
     # Extract and check the LEAK SUMMARY
     leak_summary=$(echo "$valgrind_output" | sed -n '/Command:/,/ERROR SUMMARY:/p')

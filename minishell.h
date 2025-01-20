@@ -148,10 +148,8 @@ void DEBUG_print_strings(char **arr);
 void DEBUG_is_executable(char **paths);
 
 
-
-
-
 // DOMAGOJ
+int is_builtin(char *cmd);
 t_token			*cut_token(t_token *token);
 t_cmd_table		*parse(const char *input);
 t_token			*tokenize(char *input_string);
@@ -195,4 +193,11 @@ int				connect_pipes(t_cmd_table *table);
 t_err			redir(t_cmd_table *table);
 /* void			finish_redir_data_lst(t_cmd_table *table); */
 char			*fetch_test(int counter);
+
+
+
+
+
+
+
 #endif

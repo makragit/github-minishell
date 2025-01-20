@@ -55,6 +55,8 @@ void free_data()
 {
 	t_data *data;
 
+	rl_clear_history(); // TODO TEST
+
 	data = get_data(NULL);
 	if(!data)
 		return;
@@ -459,27 +461,56 @@ char *return_executable_path(const char *str, char **paths)
 
 int try_builtin(t_cmd_table *table)
 {
-	DEBUG_printf("bultin_check_table");
+	DEBUG_printf("try_builtin");
 	if (!table)
 	{
-		DEBUG_printf("builtin_check_table: !table\n");
+		DEBUG_printf("try_builtin: !table\n");
 		return (-1); // TODO -1 okay here? 1 only if execution fails
 	}
 
+
 	if (ft_strncmp(table->cmd, "cd", 2) == 0 && table->cmd[2] == '\0')
+	{
+		connect_pipes(table);
+		redir(table);
 		return (builtin_chdir(table->args));
+	}
 	else if (ft_strncmp(table->cmd, "echo", 4) == 0 && table->cmd[4] == '\0')
+	{
+		connect_pipes(table);
+		redir(table);
 		return (builtin_echo(table->args));
+	}
 	else if (ft_strncmp(table->cmd, "pwd", 3) == 0 && table->cmd[3] == '\0')
+	{
+		connect_pipes(table);
+		redir(table);
 		return (builtin_pwd(table->args));
+	}
 	else if (ft_strncmp(table->cmd, "env", 3) == 0 && table->cmd[3] == '\0')
+	{
+		connect_pipes(table);
+		redir(table);
 		return (builtin_env(table->args));
+	}
 	else if (ft_strncmp(table->cmd, "export", 6) == 0 && table->cmd[6] == '\0')
+	{
+		connect_pipes(table);
+		redir(table);
 		return (builtin_export(table->args));
+	}
 	else if (ft_strncmp(table->cmd, "unset", 5) == 0 && table->cmd[5] == '\0')
+	{
+		connect_pipes(table);
+		redir(table);
 		return (builtin_unset(table->args));
+	}
 	else if (ft_strncmp(table->cmd, "exit", 4) == 0 && table->cmd[4] == '\0')
+	{
+		connect_pipes(table);
+		redir(table);
 		return (builtin_exit(table->args));
+	}
 
 	return (-1);
 }
@@ -594,11 +625,11 @@ int builtin_echo(char **args)
 	int i;
 	int option_found = 0;
 
-	DEBUG_printf("bultin_echo_table");
+	DEBUG_printf("bultin_echo");
 
 	if (!args || !*args)
 	{
-		DEBUG_printf("builtin_echo_table: !args !*args");
+		DEBUG_printf("builtin_echo: !args !*args");
 		return (1);
 	}
 	if (MAK_arr_size(args) == 1)

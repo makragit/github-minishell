@@ -1,0 +1,13 @@
+# commented out
+exit
+pwd
+echo test
+echo 1 "2 3" 4
+export ABC
+unset HOME
+ls
+ls | grep minishell.c
+env | grep HOME
+
+
+
