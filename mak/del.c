@@ -9,6 +9,7 @@ void test_execute(char* input, char **paths, char **envp); // TODO switch to exe
 int test_fork(char* exec_path, char **input_split, char **envp);
 
 int key_search_remove(char *str);
+/* int builtin_echo_option(char *str); // switched to check_cmd_option */
 
 
 // TODO Switch to try_builtin
@@ -384,3 +385,153 @@ int key_search_remove(char *str)
 
 	return (0);
 }
+
+// S_IXUSR User has permission
+// S_ISDIR is directory
+// S_ISREG regular file
+// S_ISREG(Stat.st_mode) && (Stat.st_mode & S_IXUSR) uses bitwise operator for permission
+// TODO check file path too long?
+// TODO ??? check S_IXUSR if user has file permission?
+char *return_executable_path(const char *str, char **paths)
+{
+	int		i;
+	char	*slash_path;
+	char	*full_path;
+	struct stat Stat;
+
+	if (!str || !paths || !paths[0]) {
+		return (DEBUG_NULL("!str || !paths || !paths[0]"));
+	}
+	
+	// TODO root '/' should be executable?
+	if (str[0] == '/' && ft_strlen(str) == 1) {
+		return (DEBUG_NULL("is_executable: '/'"));
+	}
+
+	// check absolute str '/usr/bin/cat' and return copy
+	if (stat(str, &Stat) == 0)
+	{
+		if (S_ISREG(Stat.st_mode) && (Stat.st_mode & S_IXUSR))
+		{
+			full_path = ft_strdup(str);
+			if (!full_path)
+				malloc_error("ERROR: malloc failed in return_executable_path: ft_strdup");
+			return (full_path);
+		}
+	}
+
+	// check relative str './minishell' TODO not needed?
+		/* full_path = is_relative_path(str); */
+		/* if(full_path) */
+		/* 	if (stat(str, &Stat) == 0) */
+	/* 		if (S_ISREG(Stat.st_mode) && (Stat.st_mode & S_IXUSR)) */
+	/* 			return (full_path); */
+
+	// If str is not an absolute path, check in PATH directories
+	i = 0;
+	while (paths[i])
+	{
+		slash_path = ft_strjoin(paths[i++], "/");
+		if (!slash_path) {
+			malloc_error("ERROR: malloc failed in return_executable_path: ft_strjoin");
+		}
+		full_path = ft_strjoin(slash_path, str);
+		if (!full_path) {
+			free(slash_path);
+			malloc_error("ERROR: malloc failed in return_executable_path: ft_strjoin");
+		}
+		free(slash_path);
+
+		if (stat(full_path, &Stat) == 0)
+			if (S_ISREG(Stat.st_mode) && (Stat.st_mode & S_IXUSR))
+				return(full_path);
+		free(full_path);
+	}
+	return (NULL);
+}
+
+// NOT NEEDED
+// S_IXUSR User has permission
+// S_ISDIR is directory
+// S_ISREG regular file
+// S_ISREG(Stat.st_mode) && (Stat.st_mode & S_IXUSR) uses bitwise operator for permission
+// TODO check file path too long?
+// TODO ??? check S_IXUSR if user has file permission?
+int is_executable(const char *str, char **paths)
+{
+	int		i;
+	char	*slash_path;
+	char	*full_path;
+	struct stat Stat;
+
+	if (!str || !paths || !paths[0]) {
+		return (DEBUG_0("!str || !paths || !paths[0]"));
+	}
+	
+	// TODO root '/' should be executable?
+	if (str[0] == '/' && ft_strlen(str) == 1) {
+		return (DEBUG_0("is_executable: '/'"));
+	}
+
+	// check absolute str '/usr/bin/cat'
+	if (stat(str, &Stat) == 0)
+		if (S_ISREG(Stat.st_mode) && (Stat.st_mode & S_IXUSR))
+			return (1);
+
+	// check relative str './minishell' TODO not needed?
+	/* full_path = is_relative_path(str); */
+	/* if(full_path) */
+	/* 	if (stat(str, &Stat) == 0) */
+	/* 		if (S_ISREG(Stat.st_mode) && (Stat.st_mode & S_IXUSR)) */
+	/* 		{ */
+	/* 			free(full_path); */
+	/* 			return (1); */
+	/* 		} */
+
+	// If str is not an absolute path, check in PATH directories
+	i = 0;
+	while (paths[i])
+	{
+		slash_path = ft_strjoin(paths[i++], "/");
+		if (!slash_path) {
+			malloc_error("ERROR: malloc failed in is_executable: ft_strjoin");
+		}
+		full_path = ft_strjoin(slash_path, str);
+		if (!full_path) {
+			free(slash_path);
+			malloc_error("ERROR: malloc failed in is_executable: ft_strjoin");
+		}
+		free(slash_path);
+
+		if (stat(full_path, &Stat) == 0)
+			if (S_ISREG(Stat.st_mode) && (Stat.st_mode & S_IXUSR))
+			{
+				free(full_path);
+				return(1);
+			}
+		free(full_path);
+	}
+	return (0);
+}
+
+// TODO switched to check_cmd_option
+// returns 1 for -n -nnnn.., 0 for -nnnnx etc
+/* int bultin_echo_option(char *str) */
+/* { */
+/* 	int i; */
+
+/* 	if (!str) */
+/* 		return (0); */
+/* 	if (ft_strlen(str) < 2) */
+/* 		return (0); */
+/* 	if (ft_strncmp(str, "-n", 2) != 0) */
+/* 		return (0); */
+/* 	i = 1; */
+/* 	while(str[i]) */
+/* 	{ */
+/* 		if (str[i] != 'n') */
+/* 			return (0); */
+/* 		i++; */
+/* 	} */
+/* 	return(1); */
+/* } */

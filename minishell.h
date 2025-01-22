@@ -88,6 +88,8 @@ typedef struct s_data
 	char	**mini_envp;
 	int		exit_called;
 
+	char *last_cwd;
+
 }	t_data;
 
 // MAK
@@ -106,7 +108,6 @@ void malloc_error(char *s);
 char *display_prompt();
 char *prepare_prompt_string(char *user, char *prompt_path, int size);
 
-
 int is_root();
 int ft_isspace(char c);
 void signal_handler(int signum);
@@ -116,8 +117,8 @@ char *get_cwd_path();
 char **get_envp_path(char **envp);
 char *get_home_path(char **envp);
 char *is_relative_path(const char *str); // TODO not needed
-int is_executable(const char *str, char **paths); // TODO not needed
-char *return_executable_path(const char *str, char **paths);
+// int is_executable(const char *str, char **paths); // TODO not needed
+/* char *return_executable_path(const char *str, char **paths); // TODO not needed */
 
 int try_builtin(t_cmd_table *table);
 
@@ -125,7 +126,6 @@ int builtin_chdir(char **args);
 int builtin_pwd(char **args);
 int builtin_env(char **args);
 int builtin_echo(char **args);
-int builtin_echo_option(char *str);
 int builtin_export(char **args);
 int builtin_unset(char **args);
 int builtin_exit(char **args);
@@ -142,10 +142,17 @@ int bash_error_msg(char *cmd, char *arg, char *err_msg, int error_code);
 int export_handle_key_value(char **args, int *i);
 int len_to_equal_sign(char *str);
 
+int check_cmd_option(char *str, char option);
+int check_argv(int argc, char **argv);
+int run_non_interactive(char **argv);
+
 // temp.c DEBUG
 void DEBUG_print_strings(char **arr);
 void DEBUG_is_executable(char **paths);
-
+void DEBUG_key_value_tests();
+void DEBUG_bash_error_tests();
+char *MAK_fetch_test(int counter);
+void funcheck_tests();
 
 // DOMAGOJ
 int is_builtin(char *cmd);
