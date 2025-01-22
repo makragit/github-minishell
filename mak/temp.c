@@ -30,12 +30,17 @@ t_data *init_data(char **envp)
 	if (!data)
 		malloc_error("ERROR: malloc failed in init_data");
 
-	data->prompt_str = NULL;
-	data->env_paths = NULL;
-	data->home_path = NULL;
-	data->original_envp = NULL;
-	data->mini_envp = NULL;
-	data->exit_called = 0;
+	ft_memset(data, 0, sizeof(t_data));
+
+	// TODO Memset used correctly? not needed anymore?
+	/* data->prompt_str = NULL; */
+	/* data->env_paths = NULL; */
+	/* data->home_path = NULL; */
+	/* data->original_envp = NULL; */
+	/* data->mini_envp = NULL; */
+	/* data->exit_called = 0; */
+	/* data->last_cwd = NULL; */
+
 	get_data(data); // put here so copy_array free_data() can work on malloc fail
 
 	data->original_envp = envp;
@@ -60,6 +65,8 @@ void free_data()
 		return;
 	if(data->prompt_str)
 		free(data->prompt_str);
+	if(data->last_cwd)
+		free(data->last_cwd);
 	if(data->env_paths)
 		MAK_free_array(data->env_paths);
 	// if(data->home_path)
@@ -123,12 +130,26 @@ void malloc_error(char *s)
 char *display_prompt()
 {
 	char cwd[PATH_MAX];
-	char *prompt_str;
+	/* char *prompt_str; */
 	int prompt_len;
 	char *user;
 
+	// TODO function display_path_check
 	if (getcwd(cwd, sizeof(cwd)) == NULL)
-		exit_error("ERROR: getcwd failed\n");
+		/* exit_error("ERROR: getcwd failed\n"); */
+	{
+		DEBUG_printf("display_prompt: getcwd == NULL");
+		if (get_data(NULL)->prompt_str == NULL) // last prompt_str empty and cwd fail ??
+			return (readline("(no current working directory): "));
+		else
+			return (readline(get_data(NULL)->prompt_str));
+	}
+
+	// set last_pwd in case current dir is deleted and pwd is called
+	free(get_data(NULL)->last_cwd);
+	get_data(NULL)->last_cwd = get_cwd_path();
+
+
 
 	/* user = getenv("USER"); */
 	user = getenv_local("USER");
@@ -137,11 +158,14 @@ char *display_prompt()
 
 	prompt_len = ft_strlen("\033[1;36m") + ft_strlen(user) + ft_strlen(cwd) + ft_strlen("\033[0m") + 4;
 
-	prompt_str = prepare_prompt_string(user, cwd, prompt_len);
+	free(get_data(NULL)->prompt_str);
+	get_data(NULL)->prompt_str = prepare_prompt_string(user, cwd, prompt_len);
 
-	return (readline(prompt_str));
+	/* return (readline(prompt_str)); */
+		return (readline(get_data(NULL)->prompt_str));
 }
 
+// return malloced prompt_string "user:cwd$ "
 char *prepare_prompt_string(char *user, char *prompt_path, int size)
 {
 	char *str;
@@ -150,8 +174,6 @@ char *prepare_prompt_string(char *user, char *prompt_path, int size)
 	if (!str)
 		malloc_error("ERROR: malloc failed in prepare_prompt_string");
 
-	free(get_data(NULL)->prompt_str);
-	get_data(NULL)->prompt_str = str;
 
 	str[size] = '\0';
 	ft_strlcat(str, "\033[1;36m", size + 1);
@@ -237,7 +259,8 @@ char *get_cwd_path()
 	char *ret;
 	int i;
 	if (getcwd(cwd, sizeof(cwd)) == NULL)
-		exit_error("ERROR: getcwd failed\n");
+		return (NULL);
+		/* exit_error("ERROR: getcwd failed\n"); */
 	ret = (char *)malloc(sizeof(char) * (ft_strlen(cwd) + 1));
 	if (ret == NULL)
 		malloc_error("ERROR: malloc failed in get_cwd_path");
@@ -328,135 +351,6 @@ char *is_relative_path(const char *str)
 	return (NULL);
 }
 
-// NOT NEEDED
-// S_IXUSR User has permission
-// S_ISDIR is directory
-// S_ISREG regular file
-// S_ISREG(Stat.st_mode) && (Stat.st_mode & S_IXUSR) uses bitwise operator for permission
-// TODO check file path too long?
-// TODO ??? check S_IXUSR if user has file permission?
-int is_executable(const char *str, char **paths)
-{
-	int		i;
-	char	*slash_path;
-	char	*full_path;
-	struct stat Stat;
-
-	if (!str || !paths || !paths[0]) {
-		return (DEBUG_0("!str || !paths || !paths[0]"));
-	}
-
-	// TODO root '/' should be executable?
-	if (str[0] == '/' && ft_strlen(str) == 1) {
-		return (DEBUG_0("is_executable: '/'"));
-	}
-
-	// check absolute str '/usr/bin/cat'
-	if (stat(str, &Stat) == 0)
-		if (S_ISREG(Stat.st_mode) && (Stat.st_mode & S_IXUSR))
-			return (1);
-
-	// check relative str './minishell' TODO not needed?
-	/* full_path = is_relative_path(str); */
-	/* if(full_path) */
-	/* 	if (stat(str, &Stat) == 0) */
-	/* 		if (S_ISREG(Stat.st_mode) && (Stat.st_mode & S_IXUSR)) */
-	/* 		{ */
-	/* 			free(full_path); */
-	/* 			return (1); */
-	/* 		} */
-
-	// If str is not an absolute path, check in PATH directories
-	i = 0;
-	while (paths[i])
-	{
-		slash_path = ft_strjoin(paths[i++], "/");
-		if (!slash_path) {
-			malloc_error("ERROR: malloc failed in is_executable: ft_strjoin");
-		}
-		full_path = ft_strjoin(slash_path, str);
-		if (!full_path) {
-			free(slash_path);
-			malloc_error("ERROR: malloc failed in is_executable: ft_strjoin");
-		}
-		free(slash_path);
-
-		if (stat(full_path, &Stat) == 0)
-			if (S_ISREG(Stat.st_mode) && (Stat.st_mode & S_IXUSR))
-			{
-				free(full_path);
-				return(1);
-			}
-		free(full_path);
-	}
-	return (0);
-}
-
-// S_IXUSR User has permission
-// S_ISDIR is directory
-// S_ISREG regular file
-// S_ISREG(Stat.st_mode) && (Stat.st_mode & S_IXUSR) uses bitwise operator for permission
-// TODO check file path too long?
-// TODO ??? check S_IXUSR if user has file permission?
-char *return_executable_path(const char *str, char **paths)
-{
-	int		i;
-	char	*slash_path;
-	char	*full_path;
-	struct stat Stat;
-
-	if (!str || !paths || !paths[0]) {
-		return (DEBUG_NULL("!str || !paths || !paths[0]"));
-	}
-
-	// TODO root '/' should be executable?
-	if (str[0] == '/' && ft_strlen(str) == 1) {
-		return (DEBUG_NULL("is_executable: '/'"));
-	}
-
-	// check absolute str '/usr/bin/cat' and return copy
-	if (stat(str, &Stat) == 0)
-	{
-		if (S_ISREG(Stat.st_mode) && (Stat.st_mode & S_IXUSR))
-		{
-			full_path = ft_strdup(str);
-			if (!full_path)
-				malloc_error("ERROR: malloc failed in return_executable_path: ft_strdup");
-			return (full_path);
-		}
-	}
-
-	// check relative str './minishell' TODO not needed?
-		/* full_path = is_relative_path(str); */
-		/* if(full_path) */
-		/* 	if (stat(str, &Stat) == 0) */
-	/* 		if (S_ISREG(Stat.st_mode) && (Stat.st_mode & S_IXUSR)) */
-	/* 			return (full_path); */
-
-	// If str is not an absolute path, check in PATH directories
-	i = 0;
-	while (paths[i])
-	{
-		slash_path = ft_strjoin(paths[i++], "/");
-		if (!slash_path) {
-			malloc_error("ERROR: malloc failed in return_executable_path: ft_strjoin");
-		}
-		full_path = ft_strjoin(slash_path, str);
-		if (!full_path) {
-			free(slash_path);
-			malloc_error("ERROR: malloc failed in return_executable_path: ft_strjoin");
-		}
-		free(slash_path);
-
-		if (stat(full_path, &Stat) == 0)
-			if (S_ISREG(Stat.st_mode) && (Stat.st_mode & S_IXUSR))
-				return(full_path);
-		free(full_path);
-	}
-	return (NULL);
-}
-
-
 int try_builtin(t_cmd_table *table)
 {
 	DEBUG_printf("try_builtin");
@@ -465,7 +359,6 @@ int try_builtin(t_cmd_table *table)
 		DEBUG_printf("try_builtin: !table\n");
 		return (-1); // TODO -1 okay here? 1 only if execution fails
 	}
-
 
 	if (ft_strncmp(table->cmd, "cd", 2) == 0 && table->cmd[2] == '\0')
 		return (builtin_chdir(table->args));
@@ -511,6 +404,34 @@ int builtin_chdir(char **args)
 	else
 		path = args[1];
 
+
+
+
+	// TODO 'cd ..' into deleted folder CHECK Doesnt Work, can't Reproduce, Waste of Time
+	/* DEBUG_printf("!!!  .. check"); */
+	/* if (ft_strncmp(path, "..", 2) == 0) // Manualc check for 'cd ..' into deleted folder */
+	/* { */
+	/* 	printf("access check: %d\n", access("..", F_OK == -1)); */
+	/* 	if (access("..", F_OK == -1)) */
+	/* 		return(bash_error_msg("cd", NULL, "cannot access parent directories", 1)); */
+	/* } */
+	/* DEBUG_printf("!!!  .. check END"); */
+
+
+	/* DEBUG_printf("!!!  .. check"); */
+	/* struct stat statbuf; */
+	/* if (ft_strncmp(path, "..", 2) == 0) // Manualc check for 'cd ..' into deleted folder */
+	/* { */
+	/* 	printf("stat check: %d\n", stat("..", &statbuf); */
+	/* 	if (stat("..", &statbuf) == -1) */
+	/* 		return(bash_error_msg("cd", NULL, "cannot access parent directories", 1)); */
+
+	/* } */
+	/* DEBUG_printf("!!!  .. check END"); */
+
+
+
+
 	if (chdir(path) != 0)
 	{
 		/* perror("minishell: cd"); // 'minishell: cd: No such file or directory */
@@ -539,9 +460,23 @@ int builtin_pwd(char **args)
 	/* } */
 	(void)args;
 
+
+
 	cwd_path = get_cwd_path();
+	if (cwd_path == NULL) // when currently in deleted dir -> pwd needs to print last cwd
+	{
+		if (get_data(NULL)->last_cwd == NULL) // TODO fixed funcheck error
+			printf("(null)\n");
+		else
+			printf("%s\n", get_data(NULL)->last_cwd);
+		return (0);
+	}
+
+	/* free(get_data(NULL)->last_cwd); */
+
 	printf("%s\n", cwd_path);
 	free(cwd_path);
+	/* get_data(NULL)->last_pwd = cwd_path; */
 
 	return (0);
 }
@@ -565,9 +500,9 @@ int builtin_env(char **args)
 	return (0);
 }
 
-
-// returns 1 for -n -nnnn.., 0 for -nnnnx etc
-int bultin_echo_option(char *str)
+// returns 1 for -n -nnnn.., 0 for -nnnnx, ----n etc
+// returns -1 if '-' found but option invalid (for '-c' check in non-interactive shell)
+int check_cmd_option(char *str, char option)
 {
 	int i;
 
@@ -575,13 +510,14 @@ int bultin_echo_option(char *str)
 		return (0);
 	if (ft_strlen(str) < 2)
 		return (0);
-	if (ft_strncmp(str, "-n", 2) != 0)
+	/* if (ft_strncmp(str, option, 2) != 0) */
+	if (str[0] != '-')
 		return (0);
 	i = 1;
 	while(str[i])
 	{
-		if (str[i] != 'n')
-			return (0);
+		if (str[i] != option)
+			return (-1);
 		i++;
 	}
 	return(1);
@@ -607,9 +543,14 @@ int builtin_echo(char **args)
 		return (0);
 	}
 
-	DEBUG_printf("echo_parse_option: %d\n", bultin_echo_option(args[1]));
-	if (bultin_echo_option(args[1]))
-		option_found = 1;
+	/* int check_cmd_option(char *str, char option) */
+	DEBUG_printf("check_cmd_option: %d\n", check_cmd_option(args[1], 'n'));
+	if (check_cmd_option(args[1], 'n'))
+			option_found = 1;
+
+	/* DEBUG_printf("echo_parse_option: %d\n", bultin_echo_option(args[1])); */
+	/* if (bultin_echo_option(args[1])) */
+	/* 	option_found = 1; */
 
 	i = 1 + option_found; // if -n found: skip the string
 
@@ -631,6 +572,7 @@ int builtin_echo(char **args)
 // TODO what if *arr / arr[0] is NULL or size 0?
 /* Takes malloced array, frees it and creates new array with added Value using the same ptr*/
 /* 0 on fail 1 success ; exit on malloc error*/
+/* free(new_value); // TODO new_value not freed when this func fails in export_handle_key_value */
 int array_free_and_add(char ***arr, char *new_value)
 {
 	char **new_arr;
@@ -653,6 +595,7 @@ int array_free_and_add(char ***arr, char *new_value)
 		new_arr[i] = ft_strdup((*arr)[i]);
 		if (!new_arr[i])
 		{
+			/* free(new_value); // TODO new_value not freed when this func fails in export_handle_key_value */
 			MAK_free_array(new_arr);
 			malloc_error("ERROR: malloc failed in array_free_and_add: ft_strdup");
     }
@@ -661,6 +604,7 @@ int array_free_and_add(char ***arr, char *new_value)
 	new_arr[i] = ft_strdup(new_value);
 	if (!new_arr[i])
 	{
+		/* free(new_value); // TODO new_value not freed when this func fails in export_handle_key_value */
 		MAK_free_array(new_arr);
 		malloc_error("ERROR: malloc failed in array_free_and_add: ft_strdup");
   }
@@ -1062,6 +1006,7 @@ int export_handle_key_value(char **args, int *i)
 		if (!array_free_and_add(&get_data(NULL)->mini_envp, key_value)) {
 			DEBUG_printf("key_value_handling: array_free_and_add failed\n");
 			free(key_value);
+			/* free(new_value); // TODO new_value not freed when this func fails in export_handle_key_value */
 			return (1); // TODO 1 okay? only fails on !arr !*arr !new_value
 		}
 		free(key_value);
@@ -1115,6 +1060,68 @@ int len_to_equal_sign(char *str)
 //////////////////// DEBUG ////////////////////
 //////////////////// DEBUG ////////////////////
 
+char	*MAK_fetch_test(int counter)
+{
+
+	const char *test[] =
+	{
+    // TEST TEST
+	 "echo",  
+	 "echo -n",  
+	 "echo hello",  
+	 "echo -n hello",  
+	 "pwd",  
+	 "env",  
+	 "ls",  
+	 "echo hello",  
+
+    // Redirection errors
+
+	"export EMPTY_VAR='' && echo $EMPTY_VAR", // SEG FAULT
+	"export TEST=hello && echo $TEST && unset TEST",
+	"export PATH=$PATH:/bin && echo $PATH",
+	"unset PATH && echo $PATH",
+	"export VAR=test && echo $VAR && unset VAR",
+	"export TEST=test && echo \"Mixed $TEST string\"",
+	"export TEST=\"multiline value\" && echo $TEST",  // SEG FAULT
+	    NULL
+	};
+
+
+	return ((char *)test[counter]);
+}
+
+void funcheck_tests()
+{
+	int counter = 0;
+	char *input = NULL;
+	t_cmd_table *table;
+	int ret;
+
+	while(!input || get_data(NULL)->exit_called == 0)
+	{
+		input = MAK_fetch_test(counter);
+		// input = fetch_test(counter);
+		if (input == NULL)
+			break;
+		printf("Test Number: %i ON test: %s\n", counter, MAK_fetch_test(counter));
+		// printf("Test Number: %i ON test: %s\n", counter, fetch_test(counter));
+		counter++;
+		table = parse(input);
+		if (!table)
+			continue ;
+		get_table_reset(table, 0);
+		execute(table);
+
+		free_table(get_table_reset(NULL, 0));
+		get_table_reset(NULL, 1); // needs reset, or resource can't be declared NULL again
+	}
+	ret = get_data(NULL)->last_ex_code;
+	free_all();
+	printf("\nFUNCHECK TESTS DONE\n");
+	exit (ret);
+}
+
 void DEBUG_is_executable(char **paths)
 {
 	char *commands[] = {"/", "/usr/bin/cat", "cat", "/nix", "/usr/nix",
@@ -1123,7 +1130,7 @@ void DEBUG_is_executable(char **paths)
 
 	for (int i = 0; commands[i] != NULL; i++) {
 		/* char *commands[i] = commands[i]; */
-		DEBUG_printf("is_exec %s : %d\n", commands[i], is_executable(commands[i], paths));
+		/* DEBUG_printf("is_exec %s : %d\n", commands[i], is_executable(commands[i], paths)); */
 		/* char *cmd = commands[i]; */
 		/* DEBUG_printf("is_exec %s : %d\n", cmd, is_executable(cmd, paths)); */
 	}
@@ -1139,7 +1146,46 @@ void DEBUG_print_strings(char **arr)
 		printf("_%s_\n", arr[i]);
 }
 
+void DEBUG_key_value_tests()
+{
+	printf("\n");
+	printf("KEY VALUE TESTS\n");
+	printf("env_key_valid %s : %d\n", "KEY", env_key_valid("KEY"));
+	printf("env_key_valid %s : %d\n", "KEY=", env_key_valid("KEY="));
+	printf("env_key_valid %s : %d\n", "1KEY=", env_key_valid("1KEY="));
+	printf("env_key_valid %s : %d\n", "_KEY=", env_key_valid("_KEY="));
+	printf("env_key_valid %s : %d\n", "_1KEY=", env_key_valid("_1KEY="));
+	printf("env_key_valid %s : %d\n", "=", env_key_valid("="));
 
+	printf("env_key_valid %s : %d\n", "MY_VAR", env_key_valid("MY_VAR"));
+	printf("env_key_valid %s : %d\n", "123VAR", env_key_valid("123VAR"));
+	printf("env_key_valid %s : %d\n", "_MYVAR", env_key_valid("_MYVAR"));
+	printf("env_key_valid %s : %d\n", "MY_VAR_123", env_key_valid("MY_VAR_123"));
+	printf("env_key_valid %s : %d\n", "MY-VAR", env_key_valid("MY-VAR"));
+	printf("env_key_valid %s : %d\n", "MY VAR", env_key_valid("MY VAR"));
+	printf("env_key_valid %s : %d\n", "MY=VAR", env_key_valid("MY=VAR"));
+
+	printf("env_key_valid %s : %d\n", "abc", env_key_valid("abc"));
+	printf("env_key_valid %s : %d\n", "ABC", env_key_valid("ABC"));
+	printf("\n");
+}
+
+void DEBUG_bash_error_tests()
+{
+	int ret;
+
+	printf("\n");
+	ret = bash_error_msg("command", "arg", "message", 1);
+	ret = bash_error_msg("command", NULL, "message", 1);
+	ret = bash_error_msg("export", NULL, "message", 1);
+	ret = bash_error_msg("unset", NULL, "message", 1);
+	ret = bash_error_msg("export", "1KEY", "message", 1);
+	ret = bash_error_msg("unset", "1KEY", "message", 1);
+	printf("ret: %d\n", ret);
+
+	printf("\n");
+
+}
 
 
 
