@@ -13,7 +13,7 @@ t_data *get_data(t_data *data)
 t_cmd_table *get_table_reset(t_cmd_table *table, int reset)
 {
 	static t_cmd_table *resource = NULL;
-	
+
 	if (reset)
 		resource = NULL;
 	else if (table != NULL)
@@ -29,20 +29,18 @@ t_data *init_data(char **envp)
 	data = (t_data *)malloc(sizeof(t_data) * 1);
 	if (!data)
 		malloc_error("ERROR: malloc failed in init_data");
-		
+
 	data->prompt_str = NULL;
 	data->env_paths = NULL;
 	data->home_path = NULL;
 	data->original_envp = NULL;
 	data->mini_envp = NULL;
-
 	data->exit_called = 0;
-
 	get_data(data); // put here so copy_array free_data() can work on malloc fail
 
 	data->original_envp = envp;
 	data->mini_envp = copy_array(envp);
-	if (data->mini_envp == NULL) 
+	if (data->mini_envp == NULL)
     exit_error("ERROR: empty envp"); // TODO needed? envp is check in main
 	data->env_paths = get_envp_path(data->mini_envp); // NULL if PATH= not in env variables
 	data->home_path = get_home_path(data->mini_envp); // TODO not needed / updated. use get_home_path()
@@ -281,7 +279,7 @@ char *get_home_path(char **envp)
 {
 	char 	*home_dir;
 	int		i;
-	
+
 	i = 0;
 	while (envp[i] && ft_strncmp(envp[i], "HOME=", 5) != 0)
 		i++;
@@ -347,7 +345,7 @@ int is_executable(const char *str, char **paths)
 	if (!str || !paths || !paths[0]) {
 		return (DEBUG_0("!str || !paths || !paths[0]"));
 	}
-	
+
 	// TODO root '/' should be executable?
 	if (str[0] == '/' && ft_strlen(str) == 1) {
 		return (DEBUG_0("is_executable: '/'"));
@@ -410,7 +408,7 @@ char *return_executable_path(const char *str, char **paths)
 	if (!str || !paths || !paths[0]) {
 		return (DEBUG_NULL("!str || !paths || !paths[0]"));
 	}
-	
+
 	// TODO root '/' should be executable?
 	if (str[0] == '/' && ft_strlen(str) == 1) {
 		return (DEBUG_NULL("is_executable: '/'"));
@@ -470,48 +468,19 @@ int try_builtin(t_cmd_table *table)
 
 
 	if (ft_strncmp(table->cmd, "cd", 2) == 0 && table->cmd[2] == '\0')
-	{
-		connect_pipes(table);
-		redir(table);
 		return (builtin_chdir(table->args));
-	}
 	else if (ft_strncmp(table->cmd, "echo", 4) == 0 && table->cmd[4] == '\0')
-	{
-		connect_pipes(table);
-		redir(table);
 		return (builtin_echo(table->args));
-	}
 	else if (ft_strncmp(table->cmd, "pwd", 3) == 0 && table->cmd[3] == '\0')
-	{
-		connect_pipes(table);
-		redir(table);
 		return (builtin_pwd(table->args));
-	}
 	else if (ft_strncmp(table->cmd, "env", 3) == 0 && table->cmd[3] == '\0')
-	{
-		connect_pipes(table);
-		redir(table);
 		return (builtin_env(table->args));
-	}
 	else if (ft_strncmp(table->cmd, "export", 6) == 0 && table->cmd[6] == '\0')
-	{
-		connect_pipes(table);
-		redir(table);
 		return (builtin_export(table->args));
-	}
 	else if (ft_strncmp(table->cmd, "unset", 5) == 0 && table->cmd[5] == '\0')
-	{
-		connect_pipes(table);
-		redir(table);
 		return (builtin_unset(table->args));
-	}
 	else if (ft_strncmp(table->cmd, "exit", 4) == 0 && table->cmd[4] == '\0')
-	{
-		connect_pipes(table);
-		redir(table);
 		return (builtin_exit(table->args));
-	}
-
 	return (-1);
 }
 
@@ -953,10 +922,10 @@ int is_numeric(const char *str)
 {
 	if (!str || *str == '\0') // Null or empty string check
 		return (0);
-	
+
 	if (*str == '-' || *str == '+')
 		str++;
-	
+
 	while (*str)
 	{
 		if (!ft_isdigit(*str))
@@ -1000,7 +969,7 @@ int bash_error_msg(char *cmd, char *arg, char *err_msg, int error_code)
 	ret_msg = (char *)ft_calloc(sizeof(char), size + 1);
 	if (!ret_msg)
 		malloc_error("ERROR: malloc failed in bash_error_msg");
-	
+
 	ret_msg[size] = '\0';
 	ft_strlcat(ret_msg, "minishell: ", size + 1);
 	ft_strlcat(ret_msg, cmd, size + 1);
@@ -1022,7 +991,7 @@ int bash_error_msg(char *cmd, char *arg, char *err_msg, int error_code)
 	// print error
 	ft_putendl_fd(ret_msg, 2); // STDERR_FILENO is 2 ?
 	free(ret_msg);
-	
+
 	return (error_code);
 
 }
@@ -1114,7 +1083,7 @@ int export_handle_key_value(char **args, int *i)
 	}
 
 	if (ret == 3) // not ending with '=' (test=abc)
-	{	
+	{
 		DEBUG_printf("[*i] ret==3: %d\n", *i);
 		DEBUG_printf("args[*i] ret==3: %s\n", args[*i]);
 
@@ -1148,7 +1117,7 @@ int len_to_equal_sign(char *str)
 
 void DEBUG_is_executable(char **paths)
 {
-	char *commands[] = {"/", "/usr/bin/cat", "cat", "/nix", "/usr/nix", 
+	char *commands[] = {"/", "/usr/bin/cat", "cat", "/nix", "/usr/nix",
 		"usr/bin/cat", "/usr/bin/cat/", "./minishell", "./test-script/val-test.sh",
 		"./notexisting", NULL};
 
@@ -1165,7 +1134,7 @@ void DEBUG_is_executable(char **paths)
 void DEBUG_print_strings(char **arr)
 {
 	if (arr == NULL) return;
-	
+
 	for (int i = 0; arr[i] != NULL; i++)
 		printf("_%s_\n", arr[i]);
 }

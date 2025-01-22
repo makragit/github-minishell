@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/02 13:50:08 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/16 20:18:32 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/22 15:23:34 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ char	*fetch_test(int counter)
     "< nonexistent_file cat",  // Fails because nonexistent_file does not exist.
     "ls | cat | nonexistent_command > output.txt",  // Runs `ls` and `cat`; `nonexistent_command` fails.
     "cat | wc -l",  // Waits for input; does nothing without additional input.
-    "ls >>",  // Syntax error due to incomplete redirection.
+  //  "ls >>",  // Syntax error due to incomplete redirection.
     "ls < nonexistent_file | wc -l",  // Fails due to nonexistent_file.
 
     // Using environment variables

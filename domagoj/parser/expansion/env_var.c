@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/15 21:11:31 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/16 19:27:46 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/22 14:20:25 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,12 @@ static int	replace(char **arg, char *var_name, size_t start)
 	{
 		env_var = getenv_local(var_name + 1);
 		if (!env_var)
-			env_var = "";
+		{
+			if (!ft_strncmp("$", var_name, ft_strlen(var_name)))
+				env_var = "$";
+			else
+				env_var = "";
+		}
 		new_value = ft_strdup(env_var);
 	}
 	len = ft_strlen(new_value);

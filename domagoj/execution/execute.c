@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/05 17:12:41 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/16 20:18:45 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/22 16:41:04 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,6 @@ void	child(t_cmd_table *table, t_data *data, t_cmd_table *head)
 		// free(data);
 		free_data();
 		(void)data;
-
 		free_table(head);
 		exit(1);
 	}
@@ -65,6 +64,8 @@ int	execute_single(t_cmd_table *table, t_cmd_table *head)
 	int			status;
 	t_data		*data;
 
+	if (!table->cmd)
+		return (0);
 	data = get_data(NULL);
 	child_id = fork();
 	if (child_id == 0)
@@ -87,27 +88,14 @@ int	execute_single(t_cmd_table *table, t_cmd_table *head)
 	return (status);
 }
 
-void	in_out_backup(t_cmd_table *table, t_err mode)
-{
-	if (mode == CAPTURE)
-	{
-		table->stdin_backup = dup(STDERR_FILENO);
-		table->stdin_backup = dup(STDOUT_FILENO);
-	}
-	else if (mode == RESTORE)
-	{
-		dup2(table->stdin_backup, STDOUT_FILENO);
-		dup2(table->stdin_backup, STDIN_FILENO);
-	}
-}
-
 t_err	execute(t_cmd_table *table)
 {
 	t_cmd_table	*current;
 	int			status;
+	int			fd_out;
+	int			fd_in;
 
 	current = table;
-	in_out_backup(table, CAPTURE);
 	if (pipe_setup(table) == FAIL)
 	{
 		printf("fatal error! pipe setup failed!\n");
@@ -117,13 +105,18 @@ t_err	execute(t_cmd_table *table)
 		return (ERROR);
 	while (current)
 	{
-	if (is_builtin(current->cmd))
+
+		if (is_builtin(current->cmd))
 		{
+			fd_out = dup(STDOUT_FILENO);
+			fd_in = dup(STDIN_FILENO);
 			redir(current);
-			in_out_backup(table, RESTORE);
 			connect_pipes(current);
-			try_builtin(current);
-			in_out_backup(table, RESTORE);
+			try_builtin(current);//! this shoudlnt exit on its own
+			dup2(fd_out, STDOUT_FILENO);
+			dup2(fd_in, STDIN_FILENO);
+			close(fd_out);
+			close(fd_in);
 			current = current->next;
 			continue ;
 		}
@@ -134,7 +127,6 @@ t_err	execute(t_cmd_table *table)
 	while (wait(&status) > 0)
 	{
 	}
-	in_out_backup(table, RESTORE);
 	return (OK);
 }
 

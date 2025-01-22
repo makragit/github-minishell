@@ -29,6 +29,7 @@ typedef enum t_err
 	ONE,
 	S_QUOTE,
 	CAPTURE,
+	CLOSE,
 	RESTORE,
 }	t_err;
 
@@ -68,8 +69,6 @@ typedef struct t_redir_data
 typedef struct t_cmd_table
 {
 	int					index;
-	int					stdin_backup;
-	int					stdout_backup;
 	t_token				*tokens;
 	char				*cmd;
 	char				**args;
