@@ -86,7 +86,7 @@ static size_t	get_len(char *str)
 	size_t	i;
 
 	i = 1;
-	while (str[i] && ft_isalnum(str[i]))
+	while (str[i] && (ft_isalnum(str[i]) || str[i] == '_')) // MAK CHANGE: TEST_1 turns into TEST in _var_name
 		i++;
 	if (i == 1 && str[i] == '?')
 		i = 2;

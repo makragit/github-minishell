@@ -67,6 +67,8 @@ void free_data()
 		free(data->prompt_str);
 	if(data->last_cwd)
 		free(data->last_cwd);
+	if(data->input)
+		free(data->input);
 	if(data->env_paths)
 		MAK_free_array(data->env_paths);
 	// if(data->home_path)
@@ -1066,24 +1068,25 @@ char	*MAK_fetch_test(int counter)
 	const char *test[] =
 	{
     // TEST TEST
-	 "echo",  
-	 "echo -n",  
 	 "echo hello",  
-	 "echo -n hello",  
-	 "pwd",  
-	 "env",  
-	 "ls",  
-	 "echo hello",  
+	 /* "echo", */  
+	 /* "echo -n", */  
+	 /* "echo hello", */  
+	 /* "echo -n hello", */  
+	 /* "pwd", */  
+	 /* "env", */  
+	 /* "ls", */  
+	 /* "echo hello", */  
 
     // Redirection errors
 
-	"export EMPTY_VAR='' && echo $EMPTY_VAR", // SEG FAULT
-	"export TEST=hello && echo $TEST && unset TEST",
-	"export PATH=$PATH:/bin && echo $PATH",
-	"unset PATH && echo $PATH",
-	"export VAR=test && echo $VAR && unset VAR",
-	"export TEST=test && echo \"Mixed $TEST string\"",
-	"export TEST=\"multiline value\" && echo $TEST",  // SEG FAULT
+	/* "export EMPTY_VAR='' && echo $EMPTY_VAR", // SEG FAULT */
+	/* "export TEST=hello && echo $TEST && unset TEST", */
+	/* "export PATH=$PATH:/bin && echo $PATH", */
+	/* "unset PATH && echo $PATH", */
+	/* "export VAR=test && echo $VAR && unset VAR", */
+	/* "export TEST=test && echo \"Mixed $TEST string\"", */
+	/* "export TEST=\"multiline value\" && echo $TEST",  // SEG FAULT */
 	    NULL
 	};
 
@@ -1091,36 +1094,44 @@ char	*MAK_fetch_test(int counter)
 	return ((char *)test[counter]);
 }
 
-void funcheck_tests()
+void funcheck_tests(t_data *data)
 {
 	int counter = 0;
-	char *input = NULL;
+	/* char *input_temp = NULL; */
 	t_cmd_table *table;
 	int ret;
 
-	while(!input || get_data(NULL)->exit_called == 0)
+	while(get_data(NULL)->exit_called == 0)
 	{
-		input = MAK_fetch_test(counter);
-		// input = fetch_test(counter);
-		if (input == NULL)
-			break;
-		printf("Test Number: %i ON test: %s\n", counter, MAK_fetch_test(counter));
-		// printf("Test Number: %i ON test: %s\n", counter, fetch_test(counter));
-		counter++;
-		table = parse(input);
-		if (!table)
-			continue ;
-		get_table_reset(table, 0);
-		execute(table);
+		free(data->input);
 
+		data->input = ft_strdup(fetch_test(counter));
+		/* data->input = ft_strdup(MAK_fetch_test(counter)); */
+		if (data->input == NULL)
+			break;
+
+		/* printf("Test Number: %i ON test: %s\n", counter, MAK_fetch_test(counter)); */
+		printf("Test Number: %i ON test: %s\n", counter, fetch_test(counter));
+		counter++;
+			
+		table = parse(data->input);
+		if (!table)
+			malloc_error("ERROR: get_table");
+		get_table_reset(table, 0);
+		
+		/* add_history(input); // TODO add_history has leaks and cant be guarded for Funcheck ???? */
+
+		execute(table);
 		free_table(get_table_reset(NULL, 0));
 		get_table_reset(NULL, 1); // needs reset, or resource can't be declared NULL again
 	}
+
 	ret = get_data(NULL)->last_ex_code;
 	free_all();
 	printf("\nFUNCHECK TESTS DONE\n");
 	exit (ret);
 }
+
 
 void DEBUG_is_executable(char **paths)
 {

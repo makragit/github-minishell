@@ -87,6 +87,7 @@ typedef struct s_data
 	char	**original_envp;
 	char	**mini_envp;
 	int		exit_called;
+	char	*input; // used to free input on malloc_fail etc
 
 	char *last_cwd;
 
@@ -145,6 +146,7 @@ int len_to_equal_sign(char *str);
 int check_cmd_option(char *str, char option);
 int check_argv(int argc, char **argv);
 int run_non_interactive(char **argv);
+int run_interactive(t_data *data);
 
 // temp.c DEBUG
 void DEBUG_print_strings(char **arr);

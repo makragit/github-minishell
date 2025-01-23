@@ -25,7 +25,7 @@ t_err	try_execve(t_cmd_table *table)
 	{
 		while (paths[c])
 		{
-			execve(paths[c], table->args, NULL);
+			execve(paths[c], table->args, get_data(NULL)->mini_envp); // MAK CHANGE: NULL to mini_envp
 			c++;
 		}
 	}
@@ -112,7 +112,8 @@ t_err	execute(t_cmd_table *table)
 			fd_in = dup(STDIN_FILENO);
 			redir(current);
 			connect_pipes(current);
-			try_builtin(current);//! this shoudlnt exit on its own
+			// try_builtin(current);//! this shoudlnt exit on its own
+			get_data(NULL)->last_ex_code = try_builtin(current);//! this shoudlnt exit on its own
 			dup2(fd_out, STDOUT_FILENO);
 			dup2(fd_in, STDIN_FILENO);
 			close(fd_out);
