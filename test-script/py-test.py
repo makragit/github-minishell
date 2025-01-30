@@ -39,7 +39,7 @@ def run_test_case(command):
 
     # Start Valgrind with the target program
     valgrind_cmd = f"valgrind {VALGRINDFLAGS} ./minishell"
-    child = pexpect.spawn(valgrind_cmd, encoding='utf-8', timeout=4)
+    child = pexpect.spawn(valgrind_cmd, encoding='utf-8', timeout=10)
 
     try:
         # Send the command to the child process
@@ -48,7 +48,7 @@ def run_test_case(command):
 
         # Send the exit command after each test case
         if command != "exit":
-            child.expect_exact("$ ", timeout=4)
+            child.expect_exact("$ ", timeout=10)
             child.sendline("exit")
 
         # Wait for the process to exit

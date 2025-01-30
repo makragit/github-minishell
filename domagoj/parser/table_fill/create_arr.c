@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 22:50:12 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/22 14:12:21 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/29 17:55:57 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,19 +17,17 @@ static size_t	arr_size(t_token *token)
 	size_t	i;
 
 	i = 0;
-	while (token && token->type != CMD_t)
-	{
-		if (token->type == PIPE)
-			return (0);
-		token = token->next;
-	}
 	if (!token)
 		return (0);
 	while (token)
 	{
-		if (token->type != CMD_t && token->type != ARG_TOKEN)
+		if (token->type == PIPE)
+		{
+			token = token->next;
 			break ;
-		i++;
+		}
+		if (token->type == CMD_t || token->type == ARG_TOKEN)
+			i++;
 		token = token->next;
 	}
 	return (i);
@@ -47,12 +45,19 @@ static t_token	*fill_array(char **arr, t_token *token, size_t size)
 	token = token->next;
 	while (i < size)
 	{
-		while (token->type != ARG_TOKEN)
+		if (token->type == ARG_TOKEN)
+		{
+			arr[i] = token->value;
+			i++;
+		}
+		else if (token->type == PIPE)
+		{
 			token = token->next;
-		arr[i] = token->value;
+			break ;
+		}
 		token = token->next;
-		i++;
 	}
+	i = 0;
 	return (token);
 }
 
@@ -62,7 +67,7 @@ int	arr_create(t_cmd_table *table, t_token *token)
 
 	while (table)
 	{
-		if (token->type == PIPE)
+		while (token && token->type != CMD_t)
 			token = token->next;
 		size = arr_size(token);
 		if (!size)

@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 22:46:16 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/16 19:06:42 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/25 19:31:08 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,7 @@ t_err	expander(t_token *tokens)
 
 	while (tokens)
 	{
-		if (tokens->type != WORD && tokens->type != ARG_TOKEN
-			&& tokens->type != CMD_t)
+		if (tokens->type == PIPE)
 		{
 			tokens = tokens->next;
 			continue ;

@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 15:39:10 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/07 16:16:27 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/29 17:30:20 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,6 @@ void	free_table(t_cmd_table *table)
 	table->tokens = NULL;
 	while (table)
 	{
-		close_pipes(table);
 		while (table->redir_data)
 		{
 			if (table->redir_data->heredoc_file_name)
@@ -109,7 +108,7 @@ void	cmd_print(t_cmd_table *table)
 				printf("append_file: %s, ", redirs->append);
 				printf("input_file: %s, ", redirs->input);
 				printf("output_file: %s, ", redirs->output);
-				printf("heredoc_delim: %s, ", redirs->heredoc_delimiter);
+				printf("heredoc_delim: %s, ", redirs->hdoc_delim);
 				printf("\n");
 				redirs = redirs->next;
 			}

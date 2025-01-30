@@ -30,7 +30,7 @@
 //printf(CLR_BLUE"\nget_next: %s\n"CLR_END, ret);
 
 // DEBUG Flag comment out
-//# define DEBUG
+# define DEBUG
 
 // Define the DEBUG_printf macro to handle variable arguments
 #ifdef DEBUG

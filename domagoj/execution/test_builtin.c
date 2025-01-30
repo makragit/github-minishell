@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/19 14:16:40 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/22 16:40:45 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/29 17:02:06 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 int	is_builtin(char *cmd)
 {
 	size_t	len;
+
 	if (!cmd)
 		return (0);
 	len = ft_strlen(cmd);
@@ -32,5 +33,5 @@ int	is_builtin(char *cmd)
 		return (1);
 	else if (ft_strncmp(cmd, "exit", 4) == 0 && len == 4)
 		return (1);
-	return(0);
+	return (0);
 }

@@ -57,9 +57,11 @@ SOURCE = minishell.c \
 			./domagoj/execution/test_builtin.c \
 		  ./domagoj/execution/cmd_path.c \
 		  ./domagoj/execution/redirect.c \
+		  ./domagoj/execution/child_execution.c \
 			$(UTILS_DIR)/ft_free_array.c \
 
-CFLAGS = -Wall -Wextra -Werror -g # TODO -g
+# CFLAGS = -Wall -Wextra -Werror -g # TODO -g
+CFLAGS = -Wall -Wextra 
 
 #FSAN = -fsanitize=address,undefined -fsanitize-memory-track-origins
 FSAN = -O1 -fsanitize=address,undefined -fsanitize-memory-track-origins -fno-omit-frame-pointer

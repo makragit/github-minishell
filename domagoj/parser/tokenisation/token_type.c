@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 16:33:47 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/10 16:43:10 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/29 17:04:31 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,8 +52,7 @@ void	token_categorisation(t_token **head)
 		}
 		else if (tokens->prev)
 		{
-			if (tokens->type == WORD && tokens->prev->type != CMD_t
-				&& tokens->prev->type != ARG_TOKEN)
+			if (tokens->prev->type == PIPE && tokens->type == WORD)
 				tokens->type = CMD_t;
 			else if (tokens->type == WORD)
 				tokens->type = ARG_TOKEN;

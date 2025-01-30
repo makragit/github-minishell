@@ -6,25 +6,43 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/07 13:46:57 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/22 14:14:39 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/29 20:29:31 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-static void	add_tokens_to_table(t_cmd_table *table, t_token *lst)
+static t_token	*expel_bad(t_token *lst)
 {
-	while (table)
+	t_token	*head;
+
+	head = lst;
+	while (lst)
 	{
-		table->tokens = lst;
-		table = table->next;
+		if (lst->value[0] == '\0')
+		{
+			if (lst->type == CMD_t)
+			{
+				if (lst->next)
+					lst->next->type = CMD_t;
+			}
+			if (lst == head)
+				head = lst->next;
+			free(lst->value);
+			lst = cut_token(lst);
+			continue ;
+		}
+		lst = lst->next;
 	}
+	return (head);
 }
 
 static t_token	*parse_tokens(char *input)
 {
 	t_token	*tokens;
 
+	if (!input)
+		return (NULL);
 	tokens = tokenize(input);
 	if (!tokens)
 		return (NULL);
@@ -33,6 +51,7 @@ static t_token	*parse_tokens(char *input)
 		free_lst(tokens);
 		return (NULL);
 	}
+	tokens = expel_bad(tokens);
 	return (tokens);
 }
 
@@ -56,6 +75,19 @@ static t_cmd_table	*parse_table(t_token *tokens)
 	return (table);
 }
 
+char	*trim_touching_quotes(char *str)
+{
+	char	*tmp;
+
+	tmp = ft_strexpel(str, "\"\"", ALL);
+	if (tmp)
+	{
+		free(str);
+		str = tmp;
+	}
+	return (str);
+}
+
 t_cmd_table	*parse(const char *input)
 {
 	char			*input_cpy;
@@ -70,6 +102,7 @@ t_cmd_table	*parse(const char *input)
 		free(input_cpy);
 		return (NULL);
 	}
+	input_cpy = trim_touching_quotes(input_cpy);
 	token_lst = parse_tokens(input_cpy);
 	if (!token_lst)
 		return (NULL);
@@ -82,3 +115,9 @@ t_cmd_table	*parse(const char *input)
 	add_tokens_to_table(table, token_lst);
 	return (table);
 }
+
+/*
+!check if its problem ft_strlexpel returns NULL
+	! instead of nothing on failed search
+!check that trim_touching_quotes is beeing freed properly
+*/

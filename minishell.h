@@ -1,7 +1,6 @@
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
-# include "./debug/debug.h" // TODO DEBUG
 # include "libft/libft.h"
 # include <stdlib.h>
 # include <unistd.h>
@@ -16,6 +15,7 @@
 # include <ctype.h>
 # include <stdbool.h>
 # include <errno.h>
+# include <fcntl.h>
 
 typedef enum t_err
 {
@@ -31,6 +31,13 @@ typedef enum t_err
 	CAPTURE,
 	CLOSE,
 	RESTORE,
+	FILE_,
+	DIR,
+	BUILTIN,
+	NOT_FOUND,
+	PERMISSION,
+	PERRORR,
+	MISSING,
 }	t_err;
 
 typedef enum t_token_type
@@ -59,7 +66,7 @@ typedef struct t_redir_data
 	char					*input;
 	char					*output;
 	char					*append;
-	char					*heredoc_delimiter;
+	char					*hdoc_delim;
 	char                    *heredoc_file_name;
 	int                      is_quoted;
 	struct t_redir_data		*next;
@@ -69,6 +76,7 @@ typedef struct t_redir_data
 typedef struct t_cmd_table
 {
 	int					index;
+	pid_t				pid;
 	t_token				*tokens;
 	char				*cmd;
 	char				**args;
@@ -81,80 +89,89 @@ typedef struct t_cmd_table
 typedef struct s_data
 {
 	int		last_ex_code;
+	int		backup_in;
+	int		backup_out;
 	char	*prompt_str;
 	char	**env_paths;
 	char	*home_path;
 	char	**original_envp;
 	char	**mini_envp;
 	int		exit_called;
-	char	*input; // used to free input on malloc_fail etc
-
-	char *last_cwd;
-
+	char	*input;
+	char	*last_cwd;
 }	t_data;
 
 // MAK
 // temp.c
-t_data *get_data(t_data *data);
-t_cmd_table *get_table_reset(t_cmd_table *table, int reset);
-t_data *init_data(char **envp);
+t_data			*get_data(t_data *data);
+t_cmd_table		*get_table_reset(t_cmd_table *table, int reset);
+t_data			*init_data(char **envp);
 
-void free_data(); // frees only data
-void free_all(); // frees data and table
-int	MAK_free_array(char **arr);
+void			free_data(void);
+void			free_all(void);
+int				mak_free_array(char **arr);
 
-void exit_error(char *s); // TODO switch to malloc_error
-void malloc_error(char *s);
+void			exit_error(char *s);
+void			malloc_error(char *s);
 
-char *display_prompt();
-char *prepare_prompt_string(char *user, char *prompt_path, int size);
+char			*display_prompt(void);
+char			*prepare_prompt_string(char *user, char *prompt_path, int size);
 
-int is_root();
-int ft_isspace(char c);
-void signal_handler(int signum);
-int	MAK_arr_size(char **arr);
+int				is_root(void);
+int				ft_isspace(char c);
+void			signal_handler(int signum);
+int				mak_arr_size(char **arr);
 
-char *get_cwd_path();
-char **get_envp_path(char **envp);
-char *get_home_path(char **envp);
-char *is_relative_path(const char *str); // TODO not needed
-// int is_executable(const char *str, char **paths); // TODO not needed
-/* char *return_executable_path(const char *str, char **paths); // TODO not needed */
+char			*get_cwd_path(void);
 
-int try_builtin(t_cmd_table *table);
+int				try_builtin(t_cmd_table *table);
 
-int builtin_chdir(char **args);
-int builtin_pwd(char **args);
-int builtin_env(char **args);
-int builtin_echo(char **args);
-int builtin_export(char **args);
-int builtin_unset(char **args);
-int builtin_exit(char **args);
+int				builtin_chdir(char **args);
 
-char **copy_array(char **arr);
-int search_key_in_array(char **arr, char *search);
-int array_free_and_add(char ***arr, char *new_value);
-int array_free_and_remove(char ***arr, char *remove_value);
+int				builtin_pwd(void);
+int				builtin_env(char **args);
+int				builtin_echo(char **args);
+int				builtin_export(char **args);
+int				builtin_unset(char **args);
+int				builtin_exit(char **args);
 
-int is_numeric(const char *str);
-int env_key_valid(char *str);
-int bash_error_msg(char *cmd, char *arg, char *err_msg, int error_code);
+char			**copy_array(char **arr);
+int				search_key_in_array(char **arr, char *search);
+int				array_free_and_add(char ***arr, char *new_value);
+int				array_free_and_rem(char ***arr, char *rem_value);				
+int				is_numeric(const char *str);
+int				env_key_valid(char *str);
+int				bsh_err(char *cmd, char *arg, char *msg, int code);				
+int				export_handle_key_value(char **args, int *i);
+int				len_to_equal_sign(char *str);
 
-int export_handle_key_value(char **args, int *i);
-int len_to_equal_sign(char *str);
+int				check_cmd_option(char *str, char option);
+int				check_argv(int argc, char **av);
+int				run_non_interactive(char **argv);
+int				run_interactive(t_data *data);
 
-int check_cmd_option(char *str, char option);
-int check_argv(int argc, char **argv);
-int run_non_interactive(char **argv);
-int run_interactive(t_data *data);
+int				env_key_valid_helper(char c);
+char			*bsh_err_help(char *cmd, char *arg, int size, int qte);
+char			**array_rem_help(char **arr, char **new_arr, char *rem);
+int				array_add_help(char **arr, char **new_arr, char *new_v);
+char			*export_format_key_value(char **args, int *i, int ret);
+char			**create_empty_envp(void);
+void			update_env_var(char *key, char* value);
+void			builtin_chdir_update_pwd(void);
 
-// temp.c DEBUG
-void DEBUG_print_strings(char **arr);
-void DEBUG_is_executable(char **paths);
-void DEBUG_key_value_tests();
-void DEBUG_bash_error_tests();
-char *MAK_fetch_test(int counter);
-void funcheck_tests();
+// Signals
+int				set_signals(int flag);
+void			sigint_handler(int signum);
+void			sigint_handler_non_interactive(int signum);
+
+// TODO Delete DEBUG Functions
+// mak_debug.c DEBUG
+void			DEBUG_print_strings(char **arr);
+void			DEBUG_is_executable(char **paths);
+void			DEBUG_key_value_tests(void);
+void			DEBUG_bash_error_tests(void);
+char			*mak_fetch_test(int counter);
+void			funcheck_tests(t_data *data);
 
 // DOMAGOJ
 int is_builtin(char *cmd);
@@ -189,18 +206,22 @@ size_t			table_size(t_token *tokens);
 t_redir_data	*add_redir_entry(t_redir_data *data, t_token *token);
 char			*getenv_local(char *name);
 t_err			execute(t_cmd_table *table);
-int				pipe_setup(t_cmd_table *table);
-int				close_pipes(t_cmd_table *table);
 int				heredoc(t_cmd_table *table);
 int				ft_create_file(char **filename);
 int				ft_append(const char *str, int fd);
-char			**get_path(const char *cmd);
+char			*get_path(const char *cmd);
 void			ft_free_array(char **arr);
-void			syntax_error_print(char *reason);
-int				connect_pipes(t_cmd_table *table);
-t_err			redir(t_cmd_table *table);
+int	syntax_error_print(char *reason);
+int				execute_single(t_cmd_table *table, t_cmd_table *head);
+t_err	redir(t_redir_data *lst, t_redir_data *lst_head);
+void	add_tokens_to_table(t_cmd_table *table, t_token *lst);
 /* void			finish_redir_data_lst(t_cmd_table *table); */
 char			*fetch_test(int counter);
+int				close_unused_pipes(t_cmd_table *head);
+int				all_pipes_init(t_cmd_table *table);
+int				pipe_redir(t_cmd_table *table);
+void print_path_err(t_err reason, const char *cmd);
+t_err is_proper_exe(const char *path, int flag);
 
 
 

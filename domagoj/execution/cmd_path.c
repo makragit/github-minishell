@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/06 16:22:58 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/10 16:41:54 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/29 17:33:29 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,13 +48,59 @@ static char	**refill_arr(char **org, char *cmd)
 	return (org);
 }
 
-char	**get_path(const char *cmd)
+t_err	is_proper_exe(const char *path, int flag)
+{
+	struct stat	st;
+
+	if (stat(path, &st) == -1)
+	{
+		if (flag == 1)
+			return (NOT_FOUND);
+		else
+			return (MISSING);
+	}
+	if (S_ISDIR(st.st_mode))
+	{
+		return (DIR);
+	}
+	if (access(path, X_OK) != 0)
+	{
+		return (PERMISSION);
+	}
+	return (OK);
+}
+
+static char	*get_valid_path(char **arr, t_err *last_err)
+{
+	struct stat	st;
+	size_t		c;
+	char		*path;
+
+	c = 0;
+	*last_err = OK;
+	path = NULL;
+	while (arr[c])
+	{
+		*last_err = is_proper_exe(arr[c], 1);
+		if (*last_err == OK)
+			break ;
+		c++;
+	}
+	if (arr[c])
+		path = ft_strdup(arr[c]);
+	ft_free_array(arr);
+	arr = NULL;
+	return (path);
+}
+
+char	*get_path(const char *cmd)
 {
 	char	*cmd_tmp;
 	char	**arr;
+	t_err	reason;
 
 	if (is_cmd_path(cmd))
-		return (ft_split(cmd, ' '));
+		return (ft_strdup(cmd));
 	cmd_tmp = ft_strjoin("/", cmd);
 	if (!cmd_tmp)
 		return (NULL);
@@ -66,5 +112,8 @@ char	**get_path(const char *cmd)
 	}
 	arr = refill_arr(arr, cmd_tmp);
 	free(cmd_tmp);
-	return (arr);
+	cmd_tmp = get_valid_path(arr, &reason);
+	if (reason != OK)
+		print_path_err(reason, cmd);
+	return (cmd_tmp);
 }

@@ -1,13 +1,17 @@
 # commented out
+# touch xxx_test.md
 exit
 pwd
 echo test
 echo 1 "2 3" 4
 export ABC
+export ABC=test
 unset HOME
+unset XXX=test
 ls
 ls | grep minishell.c
 env | grep HOME
+
 
 
 

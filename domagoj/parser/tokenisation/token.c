@@ -6,11 +6,20 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 13:23:28 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/16 18:54:02 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/29 20:28:50 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../../minishell.h"
+
+void	add_tokens_to_table(t_cmd_table *table, t_token *lst)
+{
+	while (table)
+	{
+		table->tokens = lst;
+		table = table->next;
+	}
+}
 
 static int	break_up_str(char **token_part, char **remainder_part)
 {
@@ -43,17 +52,14 @@ int	check_token_validity(t_token *token)
 	while (token)
 	{
 		if (!token->prev && token->type == PIPE)
-		{
-			syntax_error_print(token->value);
-			return (1);
-		}
+			return (syntax_error_print(token->value));
 		if (token->prev)
 		{
+			if (token->prev->type != CMD_t && token->prev->type != WORD
+				&& token->type == PIPE)
+				return (syntax_error_print(token->value));
 			if (token->type == token->prev->type && token->type != WORD)
-			{
-				syntax_error_print(token->value);
-				return (1);
-			}
+				return (syntax_error_print(token->value));
 		}
 		if (!token->next && (token->type == PIPE || token->type == REDIRECTION))
 		{

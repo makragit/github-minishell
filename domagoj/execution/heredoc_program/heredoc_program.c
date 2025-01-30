@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/05 16:44:59 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/16 18:39:41 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/29 19:09:52 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,37 @@ int	heredoc(t_cmd_table *table)
 	char			*filename;
 	int				fd;
 
+	filename = NULL;
+	while (table)
+	{
+		current = table->redir_data;
+		while (current)
+		{
+			fd = -1;
+			if (current->hdoc_delim)
+			{
+				fd = ft_create_file(&filename);
+				if (fetch_herdoc(current->hdoc_delim, fd, current->is_quoted))
+					return (1);
+				table->redir_data->heredoc_file_name = filename;
+				close(fd);
+			}
+			current = current->next;
+		}
+		table = table->next;
+	}
+	return (0);
+}
+/*
+!fix- will this func reshuffle redir_data?
+!fix - newline doesnt print out?
+!safe cpy
+int	heredoc(t_cmd_table *table)
+{
+	t_redir_data	*current;
+	char			*filename;
+	int				fd;
+
 	fd = -1;
 	filename = NULL;
 	while (table)
@@ -75,14 +106,13 @@ int	heredoc(t_cmd_table *table)
 		current = table->redir_data;
 		while (current)
 		{
-			if (current->heredoc_delimiter)
+			if (current->hdoc_delim)
 			{
 				if (fd == -1)
 					fd = ft_create_file(&filename);
-				if (fetch_herdoc(current->heredoc_delimiter, fd, current->is_quoted))
+				if (fetch_herdoc(current->hdoc_delim, fd, current->is_quoted))
 					return (1);
 				table->redir_data->heredoc_file_name = filename;
-				printf("filename %s\n", filename);
 			}
 			if (fd != -1)
 				close(fd);
@@ -93,13 +123,4 @@ int	heredoc(t_cmd_table *table)
 	}
 	return (0);
 }
-
-/*
-	if (!line) after readline() means user activated Ctrl + D
-
-	How heredoc works
-	--> sees about what heredoc is
-	->catches lines until him
-	->
-
 */

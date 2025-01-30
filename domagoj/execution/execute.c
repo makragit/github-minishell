@@ -6,136 +6,95 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/05 17:12:41 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/22 16:41:04 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/01/29 18:58:12 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-t_err	try_execve(t_cmd_table *table)
+static t_err	single_builtin_line(t_cmd_table *table)
 {
-	char	**paths;
-	size_t	c;
-
-	if (!table->cmd)
-		return (FAIL);
-	paths = get_path(table->cmd);
-	c = 0;
-	if (paths)
+	if (!table->next && is_builtin(table->cmd))
 	{
-		while (paths[c])
+		get_data(NULL)->backup_in = dup(STDIN_FILENO);
+		get_data(NULL)->backup_out = dup(STDOUT_FILENO);
+		if (redir(table->redir_data, table->redir_data) == OK)
 		{
-			execve(paths[c], table->args, get_data(NULL)->mini_envp); // MAK CHANGE: NULL to mini_envp
-			c++;
+			get_data(NULL)->last_ex_code = try_builtin(table);
+		}
+		dup2(get_data(NULL)->backup_in, STDIN_FILENO);
+		dup2(get_data(NULL)->backup_out, STDOUT_FILENO);
+		close(get_data(NULL)->backup_out);
+		close(get_data(NULL)->backup_in);
+		get_data(NULL)->backup_out = -1;
+		get_data(NULL)->backup_in = -1;
+		return (OK);
+	}
+	return (NO);
+}
+
+static void	wait_for_finish(pid_t last_command)
+{
+	int			status;
+	pid_t		w;
+
+	while (1)
+	{
+		w = wait(&status);
+		if (w < 0)
+		{
+			if (errno == ECHILD)
+				break ;
+			else
+				perror("wait");
+		}
+		else
+		{
+			if (w == last_command)
+			{
+				if (WIFEXITED(status))
+					get_data(NULL)->last_ex_code = WEXITSTATUS(status);
+				else if (WIFSIGNALED(status))
+					get_data(NULL)->last_ex_code = 128 + WTERMSIG(status);
+			}
 		}
 	}
-	printf("%s: command not found\n", table->cmd);
-	ft_free_array(paths);
-	return (FAIL);
-}
-
-void	child(t_cmd_table *table, t_data *data, t_cmd_table *head)
-{
-	connect_pipes(table);
-	if (redir(table) == FAIL)
-	{
-		// MAK CHANGE: free_data() fixes leaks
-		// free(data);
-		free_data();
-		(void)data;
-
-		free_table(head);
-		exit(1);
-	}
-	if (try_execve(table) == FAIL)
-	{
-		// MAK CHANGE: free_data() fixes leaks
-		// free(data);
-		free_data();
-		(void)data;
-		free_table(head);
-		exit(1);
-	}
-}
-
-int	execute_single(t_cmd_table *table, t_cmd_table *head)
-{
-	pid_t		child_id;
-	int			status;
-	t_data		*data;
-
-	if (!table->cmd)
-		return (0);
-	data = get_data(NULL);
-	child_id = fork();
-	if (child_id == 0)
-	{
-		child(table, data, head);
-	}
-	else if (child_id > 0)
-	{
-		if (waitpid(child_id, &status, 0) == -1)
-			return (-1);
-		if (WIFEXITED(status))
-			data->last_ex_code = WEXITSTATUS(status);
-	}
-	else
-	{
-		status = -1;
-		perror("fork");
-	}
-	close_pipes(table);
-	return (status);
 }
 
 t_err	execute(t_cmd_table *table)
 {
 	t_cmd_table	*current;
-	int			status;
-	int			fd_out;
-	int			fd_in;
+	pid_t		last;
 
-	current = table;
-	if (pipe_setup(table) == FAIL)
-	{
-		printf("fatal error! pipe setup failed!\n");
+	if (all_pipes_init(table) == FAIL)
 		return (ERROR);
-	}
 	if (heredoc(table) == FAIL)
 		return (ERROR);
+	if (single_builtin_line(table) != NO)
+		return (OK);
+	current = table;
+	last = -1;
 	while (current)
 	{
-
-		if (is_builtin(current->cmd))
-		{
-			fd_out = dup(STDOUT_FILENO);
-			fd_in = dup(STDIN_FILENO);
-			redir(current);
-			connect_pipes(current);
-			// try_builtin(current);//! this shoudlnt exit on its own
-			get_data(NULL)->last_ex_code = try_builtin(current);//! this shoudlnt exit on its own
-			dup2(fd_out, STDOUT_FILENO);
-			dup2(fd_in, STDIN_FILENO);
-			close(fd_out);
-			close(fd_in);
-			current = current->next;
-			continue ;
-		}
-		if (execute_single(current, table) == -1)
-			return (ERROR);
+		execute_single(current, table);
+		last = current->pid;
 		current = current->next;
 	}
-	while (wait(&status) > 0)
-	{
-	}
+	close_unused_pipes(table);
+	wait_for_finish(last);
 	return (OK);
 }
 
-
-
 /*
+!!IMPORTANT
+!Check if this is true - but its also possible to revert back to originals and
+! close current
+!anyways. CEHCK THIS!
+!When Markus exits from builtin. He must if (data->fd != -1) -> CLOSE!!!
+!chatGDP say close dup() even if no used!
 
-musnt go inside func if there is !table
-change exit code for when fork fails
-add markus's builtin
+
+!redo return value of: return (OK);//redo this return value! (first function)
+!redo return value of single_builtin_line in last func
+!maybe add fprintf for error return to main.c?
 */
