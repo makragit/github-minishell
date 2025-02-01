@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/05 17:12:41 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/02/01 14:02:33 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/01 20:31:05 by mkrausho         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,8 @@ static void	wait_for_finish(pid_t last_command)
 	}
 }
 
+	//g_foreground = 1;
+	//g_foreground = 0;
 t_err	execute(t_cmd_table *table)
 {
 	t_cmd_table	*current;

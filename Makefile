@@ -25,7 +25,18 @@ HEREDOC_DIR = ./domagoj/execution/heredoc_program
 PIPE_DIR = ./domagoj/execution/pipe_redir
 
 SOURCE = minishell.c \
-		 ./mak/temp.c \
+		 ./mak/builtin_cd.c \
+		 ./mak/builtin_export.c \
+		 ./mak/builtin_general.c \
+		 ./mak/error.c \
+		 ./mak/free.c \
+		 ./mak/key_handling.c \
+		 ./mak/misc.c \
+		 ./mak/prompt.c \
+		 ./mak/signals.c \
+		 ./mak/struct.c \
+		 ./mak/utils_array.c \
+		 ./mak/utils_array_2.c \
           $(TOKEN_DIR)/token.c \
           $(TOKEN_DIR)/token_make_entry.c \
           $(TOKEN_DIR)/token_len.c \
@@ -61,7 +72,6 @@ SOURCE = minishell.c \
 			$(UTILS_DIR)/ft_free_array.c \
 
 CFLAGS = -Wall -Wextra -Werror -g # TODO -g
-#CFLAGS = -Wall -Wextra -g
 
 #FSAN = -fsanitize=address,undefined -fsanitize-memory-track-origins
 FSAN = -O1 -fsanitize=address,undefined -fsanitize-memory-track-origins -fno-omit-frame-pointer
@@ -71,15 +81,17 @@ OBJECTS = $(SOURCE:.c=.o)
 # LDFLAGS = -lreadline
 LDFLAGS = -lreadline  -lncurses # removed: -lft -Llibft-delete
 
-DEBUG = ./debug/debug.a
+# DEBUG = ./debug/debug.a
 
 RM = rm -f
 
 all: $(NAME)
 
 $(NAME): $(LIBFT) $(DEBUG) $(OBJECTS)
+		$(CC) $(OBJECTS) $(LIBFT) $(LDFLAGS) $(CFLAGS) -o $(NAME)
+#		$(CC) $(OBJECTS) $(LIBFT) $(DEBUG) $(LDFLAGS) $(CFLAGS) -o $(NAME)
+
 #		$(CC) $(OBJECTS) $(LIBFT) $(DEBUG) $(LDFLAGS) $(CFLAGS) $(FSAN) -o $(NAME)
-		$(CC) $(OBJECTS) $(LIBFT) $(DEBUG) $(LDFLAGS) $(CFLAGS) -o $(NAME)
 #		$(CC) $(CFLAGS) $(OBJECTS) -o $(NAME)
 
 # Compile source files into object files
@@ -90,21 +102,21 @@ clean:
 	$(RM) $(OBJECTS)
 	make clean -C ./libft/
 #DEBUG
-	make clean -C ./debug/
+	# make clean -C ./debug/
 
 fclean: clean
 	$(RM) $(NAME)
 	make fclean -C ./libft/
 #DEBUG
-	make fclean -C ./debug/
+	# make fclean -C ./debug/
 
 re: fclean all
 
 $(LIBFT):
 	make -C ./libft/
 
-$(DEBUG):
-	make -C ./debug/
+# $(DEBUG):
+	# make -C ./debug/
 
 run: $(NAME)
 	./minishell

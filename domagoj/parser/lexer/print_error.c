@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/10 15:58:01 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/29 18:39:09 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/01 19:03:50 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,10 @@ int	syntax_error_print(char *reason)
 	t_data		*data;
 
 	data = get_data(NULL);
-	write(STDERR_FILENO, prefix, strlen(prefix));
+	write(STDERR_FILENO, prefix, ft_strlen(prefix));
 	if (reason)
-		write(STDERR_FILENO, reason, strlen(reason));
-	write(STDERR_FILENO, suffix, strlen(suffix));
+		write(STDERR_FILENO, reason, ft_strlen(reason));
+	write(STDERR_FILENO, suffix, ft_strlen(suffix));
 	data->last_ex_code = 2;
 	return (1);
 }
