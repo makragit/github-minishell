@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/15 21:11:31 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/29 20:25:42 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/01 14:16:11 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,9 +91,9 @@ static size_t	of_len(char *str)
 
 int	expand_env(char **arg)
 {
-	char		*str_cpy;
-	char		*var_name;
-	int			c;
+	char	*str_cpy;
+	char	*var_name;
+	int		c;
 
 	str_cpy = ft_strdup(*arg);
 	if (!str_cpy)
@@ -101,17 +101,17 @@ int	expand_env(char **arg)
 	c = 0;
 	while (str_cpy[c])
 	{
-		if (str_cpy[c] == '\'')
-			while (str_cpy[++c] && str_cpy[c] != '\'')
-				c++;
-		if (str_cpy[c] == '$')
+		if (skip_s_quote(str_cpy, &c) == -1)
+			break ;
+		else if (str_cpy[c] == '$')
 		{
 			var_name = _var_name(&str_cpy, c, of_len(str_cpy + c));
 			c += replace(&str_cpy, var_name, c);
 			if (c < 0)
 				break ;
 		}
-		c++;
+		else
+			c++;
 	}
 	free(*arg);
 	*arg = str_cpy;

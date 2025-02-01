@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/07 13:46:57 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/29 20:29:31 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/01 17:01:21 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,9 +115,3 @@ t_cmd_table	*parse(const char *input)
 	add_tokens_to_table(table, token_lst);
 	return (table);
 }
-
-/*
-!check if its problem ft_strlexpel returns NULL
-	! instead of nothing on failed search
-!check that trim_touching_quotes is beeing freed properly
-*/

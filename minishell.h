@@ -1,6 +1,7 @@
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
+
 # include "libft/libft.h"
 # include <stdlib.h>
 # include <unistd.h>
@@ -138,10 +139,10 @@ int				builtin_exit(char **args);
 char			**copy_array(char **arr);
 int				search_key_in_array(char **arr, char *search);
 int				array_free_and_add(char ***arr, char *new_value);
-int				array_free_and_rem(char ***arr, char *rem_value);				
+int				array_free_and_rem(char ***arr, char *rem_value);
 int				is_numeric(const char *str);
 int				env_key_valid(char *str);
-int				bsh_err(char *cmd, char *arg, char *msg, int code);				
+int				bsh_err(char *cmd, char *arg, char *msg, int code);
 int				export_handle_key_value(char **args, int *i);
 int				len_to_equal_sign(char *str);
 
@@ -171,10 +172,8 @@ void			DEBUG_is_executable(char **paths);
 void			DEBUG_key_value_tests(void);
 void			DEBUG_bash_error_tests(void);
 char			*mak_fetch_test(int counter);
-void			funcheck_tests(t_data *data);
-
 // DOMAGOJ
-int is_builtin(char *cmd);
+int				is_builtin(char *cmd);
 t_token			*cut_token(t_token *token);
 t_cmd_table		*parse(const char *input);
 t_token			*tokenize(char *input_string);
@@ -211,22 +210,17 @@ int				ft_create_file(char **filename);
 int				ft_append(const char *str, int fd);
 char			*get_path(const char *cmd);
 void			ft_free_array(char **arr);
-int	syntax_error_print(char *reason);
+int				syntax_error_print(char *reason);
 int				execute_single(t_cmd_table *table, t_cmd_table *head);
-t_err	redir(t_redir_data *lst, t_redir_data *lst_head);
-void	add_tokens_to_table(t_cmd_table *table, t_token *lst);
-/* void			finish_redir_data_lst(t_cmd_table *table); */
+t_err			redir(t_redir_data *lst, t_redir_data *lst_head);
+void			add_tokens_to_table(t_cmd_table *table, t_token *lst);
 char			*fetch_test(int counter);
 int				close_unused_pipes(t_cmd_table *head);
 int				all_pipes_init(t_cmd_table *table);
 int				pipe_redir(t_cmd_table *table);
-void print_path_err(t_err reason, const char *cmd);
-t_err is_proper_exe(const char *path, int flag);
-
-
-
-
-
+void			print_path_err(t_err reason, const char *cmd);
+t_err			is_proper_exe(const char *path, int flag);
+int				skip_s_quote(char *str, int *c);
 
 
 #endif

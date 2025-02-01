@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/26 14:37:39 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/29 18:57:56 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/01 17:06:24 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ static int	try_execve(t_cmd_table *table)
 	return (get_data(NULL)->last_ex_code);
 }
 
-static void	child(t_cmd_table *table, t_data *data, t_cmd_table *head)
+static void	child(t_cmd_table *table, t_cmd_table *head)
 {
 	int	exit_code;
 
@@ -39,17 +39,21 @@ static void	child(t_cmd_table *table, t_data *data, t_cmd_table *head)
 	if (redir(table->redir_data, table->redir_data) == FAIL)
 	{
 		free_data();
-		(void)data;
 		free_table(head);
 		exit(1);
 	}
 	if (!table->cmd)
-		exit(get_data(NULL)->last_ex_code);
+	{
+		exit_code = get_data(NULL)->last_ex_code;
+		free_table(head);
+		free_data();
+		exit(exit_code);
+	}
 	if (is_builtin(table->cmd))
-		exit(try_builtin(table));
-	exit_code = try_execve(table);
+		exit_code = try_builtin(table);
+	else
+		exit_code = try_execve(table);
 	free_data();
-	(void)data;
 	free_table(head);
 	exit(exit_code);
 }
@@ -66,7 +70,7 @@ int	execute_single(t_cmd_table *table, t_cmd_table *head)
 	}
 	if (child_id == 0)
 	{
-		child(table, get_data(NULL), head);
+		child(table, head);
 	}
 	else
 	{

@@ -37,6 +37,7 @@ SOURCE = minishell.c \
 		  $(INPUT_CHCK)/print_error.c \
           $(UTILS_DIR)/ft_insert_str.c \
           $(UTILS_DIR)/ft_find_indexes.c \
+		  $(UTILS_DIR)/skip_s_quote.c \
 		  $(UTILS_DIR)/ft_append.c \
 		  $(UTILS_DIR)/ft_create_file.c \
 		  $(UTILS_DIR)/print_or_free.c \
@@ -52,7 +53,6 @@ SOURCE = minishell.c \
 		  $(INPUT_CHCK)/input_check.c \
 		  $(HEREDOC_DIR)/heredoc_program.c \
 		  $(PIPE_DIR)/pipe_redir.c \
-		  ./domagoj/main-test.c \
 		  ./domagoj/execution/execute.c \
 			./domagoj/execution/test_builtin.c \
 		  ./domagoj/execution/cmd_path.c \
@@ -60,8 +60,8 @@ SOURCE = minishell.c \
 		  ./domagoj/execution/child_execution.c \
 			$(UTILS_DIR)/ft_free_array.c \
 
-# CFLAGS = -Wall -Wextra -Werror -g # TODO -g
-CFLAGS = -Wall -Wextra 
+CFLAGS = -Wall -Wextra -Werror -g # TODO -g
+#CFLAGS = -Wall -Wextra -g
 
 #FSAN = -fsanitize=address,undefined -fsanitize-memory-track-origins
 FSAN = -O1 -fsanitize=address,undefined -fsanitize-memory-track-origins -fno-omit-frame-pointer

@@ -6,13 +6,13 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 16:33:47 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/29 17:04:31 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/01 17:12:19 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../../minishell.h"
 
-static t_token_type	define_redirection_type(t_token *tokens)
+static t_token	*define_redirection_type(t_token *tokens)
 {
 	char	*str;
 
@@ -20,43 +20,46 @@ static t_token_type	define_redirection_type(t_token *tokens)
 	if (ft_strlen(str) <= 1)
 	{
 		if (str[0] == '<')
-			return (INPUT);
-		return (OUTPUT);
+			tokens->next->type = INPUT;
+		tokens->next->type = OUTPUT;
 	}
 	if (str[0] == '<' && str[1] == '<')
-		return (HEREDOC);
+		tokens->next->type = HEREDOC;
 	else if (str[0] == '>' && str[1] == '>')
-		return (APPEND);
-	if (str[0] == '<')
-		return (INPUT);
-	else
-		return (OUTPUT);
+		tokens->next->type = APPEND;
+	else if (str[0] == '<')
+		tokens->next->type = INPUT;
+	else if (str[0] == '>')
+		tokens->next->type = OUTPUT;
+	free(tokens->value);
+	tokens = cut_token(tokens);
+	return (tokens);
 }
 
 void	token_categorisation(t_token **head)
 {
 	t_token	*tokens;
+	int		cmd_c;
 
 	tokens = *head;
+	cmd_c = 0;
 	while (tokens)
 	{
-		if (!tokens->prev && tokens->type != REDIRECTION)
-			tokens->type = CMD_t;
+		if (tokens->type == PIPE)
+			cmd_c = 0;
 		else if (tokens->type == REDIRECTION)
 		{
 			if (!tokens->prev)
 				*head = tokens->next;
-			tokens->next->type = define_redirection_type(tokens);
-			free(tokens->value);
-			tokens = cut_token(tokens);
+			tokens = define_redirection_type(tokens);
 		}
-		else if (tokens->prev)
+		if (cmd_c == 0 && tokens->type == WORD)
 		{
-			if (tokens->prev->type == PIPE && tokens->type == WORD)
-				tokens->type = CMD_t;
-			else if (tokens->type == WORD)
-				tokens->type = ARG_TOKEN;
+			cmd_c = 1;
+			tokens->type = CMD_t;
 		}
+		else if (tokens->type == WORD)
+			tokens->type = ARG_TOKEN;
 		tokens = tokens->next;
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/05 16:44:59 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/29 19:09:52 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/01 15:33:36 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ int	fetch_herdoc(char *heredoc_delim, int file_descriptor, int is_quoted)
 		line = readline("heredoc:");
 		if (!line)
 		{
-			printf("Unexpected end of input\n");
+			write(2, "Readline error!\n", 16);
 			return (1);
 		}
 		if (cmp_line(line, heredoc_delim) == EQUAL)

@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/06 16:35:33 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/07 19:45:04 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/01 13:58:56 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,4 +26,5 @@ void	ft_free_array(char **arr)
 		c++;
 	}
 	free(arr);
+	arr = NULL;
 }

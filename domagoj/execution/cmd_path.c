@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/06 16:22:58 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/29 17:33:29 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/01 14:32:08 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,12 +32,13 @@ static char	**refill_arr(char **org, char *cmd)
 	char	*tmp;
 
 	c = 0;
+	if (!org)
+		return (NULL);
 	while (org[c])
 	{
 		tmp = ft_strjoin(org[c], cmd);
 		if (!tmp)
 		{
-			free(tmp);
 			ft_free_array(org);
 			return (NULL);
 		}
@@ -72,7 +73,6 @@ t_err	is_proper_exe(const char *path, int flag)
 
 static char	*get_valid_path(char **arr, t_err *last_err)
 {
-	struct stat	st;
 	size_t		c;
 	char		*path;
 
@@ -112,6 +112,8 @@ char	*get_path(const char *cmd)
 	}
 	arr = refill_arr(arr, cmd_tmp);
 	free(cmd_tmp);
+	if (!arr)
+		return (NULL);
 	cmd_tmp = get_valid_path(arr, &reason);
 	if (reason != OK)
 		print_path_err(reason, cmd);

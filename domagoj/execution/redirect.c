@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/06 16:25:39 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/29 19:05:25 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/01 17:12:45 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,9 +45,13 @@ static t_err	open_fd(char *filename, t_token_type mode)
 		return (FAIL);
 	}
 	if (mode == APPEND || mode == OUTPUT)
+	{
 		dup2(fd, STDOUT_FILENO);
+	}
 	else if (mode == INPUT || mode == HEREDOC)
+	{
 		dup2(fd, STDIN_FILENO);
+	}
 	close(fd);
 	return (OK);
 }
