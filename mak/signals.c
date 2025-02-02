@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   signals.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkrausho <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:33:14 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/01 19:33:14 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/02/02 14:53:16 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,8 @@ void	sigint_handler(int signum)
 		write(1, "\n", 1);
 		rl_on_new_line();
 		rl_replace_line("", 0);
-		rl_redisplay();
+		if (!get_data(NULL)->heredoc_active)
+			rl_redisplay();
 	}
 	(void)signum;
 	return ;

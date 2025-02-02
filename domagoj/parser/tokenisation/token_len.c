@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/08 12:18:02 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/29 17:06:06 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/02 15:02:36 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,8 @@ static size_t	word_len(char *str)
 					under_quote = 0;
 			}
 		}
-		if ((is_whitespace(str[c]) || str[c] == '|') && under_quote == 0)
+		if ((is_whitespace(str[c]) || str[c] == '|' || str[c] == '<'
+				|| str[c] == '>') && under_quote == 0)
 			return (c);
 		c++;
 	}

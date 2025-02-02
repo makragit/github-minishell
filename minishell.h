@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkrausho <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:31:12 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/01 20:07:33 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/02/02 14:52:44 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,6 +113,7 @@ typedef struct s_data
 	int		exit_called;
 	char	*input;
 	char	*last_cwd;
+	int		heredoc_active;
 }	t_data;
 
 // MAK
@@ -239,5 +240,6 @@ int				pipe_redir(t_cmd_table *table);
 void			print_path_err(t_err reason, const char *cmd);
 t_err			is_proper_exe(const char *path, int flag);
 int				skip_s_quote(char *str, int *c);
+char			*read_line(void);
 
 #endif

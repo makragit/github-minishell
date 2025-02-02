@@ -6,13 +6,13 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/05 16:44:59 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/02/01 19:33:45 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/02 14:58:45 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../../minishell.h"
 
-t_err	cmp_line(const char *str1, const char *str2)
+t_err	cmp_line(char *str1, const char *str2)
 {
 	int	return_value;
 
@@ -23,7 +23,10 @@ t_err	cmp_line(const char *str1, const char *str2)
 	else
 		return_value = ft_strncmp(str1, str2, ft_strlen(str2));
 	if (return_value == 0)
+	{
+		free(str1);
 		return (EQUAL);
+	}
 	return (FAIL);
 }
 
@@ -50,7 +53,7 @@ int	fetch_herdoc(char *heredoc_delim, int file_descriptor, int is_quoted)
 
 	while (1)
 	{
-		line = readline(">");
+		line = read_line();
 		if (!line)
 		{
 			write(2, "minishell: here-doc delimited by EOF\n", 37);
