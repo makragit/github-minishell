@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 22:46:16 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/25 19:31:08 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/02 14:56:32 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,9 +24,7 @@ t_err	expander(t_token *tokens)
 			continue ;
 		}
 		current = ft_strdup(tokens->value);
-		if (!current
-			|| (tokens->type != PIPE && expand_env(&current))
-			|| ft_trim_quotes(&current))
+		if (!current || ft_trim_quotes(&current))
 		{
 			free(current);
 			return (ERROR);

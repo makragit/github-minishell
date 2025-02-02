@@ -51,6 +51,7 @@ SOURCE = minishell.c \
 		  $(UTILS_DIR)/skip_s_quote.c \
 		  $(UTILS_DIR)/ft_append.c \
 		  $(UTILS_DIR)/ft_create_file.c \
+		  $(UTILS_DIR)/read_line.c \
 		  $(UTILS_DIR)/print_or_free.c \
 		  $(UTILS_DIR)/getenv_local.c \
           $(UTILS_DIR)/ft_iswhitespace.c \

@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/07 13:46:57 by domagoj           #+#    #+#             */
-/*   Updated: 2025/02/01 17:01:21 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/02 14:53:51 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,6 +103,7 @@ t_cmd_table	*parse(const char *input)
 		return (NULL);
 	}
 	input_cpy = trim_touching_quotes(input_cpy);
+	expand_env(&input_cpy);
 	token_lst = parse_tokens(input_cpy);
 	if (!token_lst)
 		return (NULL);
