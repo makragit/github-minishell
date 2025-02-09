@@ -20,7 +20,7 @@ static int	open_heredoc(char *filename)
 	if (unlink(filename) == -1)
 	{
 		perror("unlink");
-		// free(filename); // MAK CHANGE scan-build 
+		free(filename); // MAK CHANGE scan-build (delete)
 		close(fd);
 		return (-1);
 	}
@@ -42,7 +42,7 @@ static t_err	open_fd(char *filename, t_token_type mode)
 	if (fd == -1)
 	{
 		print_path_err(PERRORR, filename);
-		free(filename); // MAK CHANGE scan-build
+		/* free(filename); // MAK CHANGE scan-build */
 		return (FAIL);
 	}
 	if (mode == APPEND || mode == OUTPUT)
@@ -54,7 +54,7 @@ static t_err	open_fd(char *filename, t_token_type mode)
 		dup2(fd, STDIN_FILENO);
 	}
 	close(fd);
-	free(filename); // MAK CHANGE scan-build
+	/* free(filename); // MAK CHANGE scan-build */
 	return (OK);
 }
 
