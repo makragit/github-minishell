@@ -6,7 +6,7 @@
 /*   By: mkrausho <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:31:22 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/01 20:09:29 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/02/02 18:23:47 by mkrausho         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ int	main(int argc, char **argv, char **envp)
 	if (non_interactive_mode == 1)
 		ret = run_non_interactive(argv);
 	else
+		/* ret = run_interactive_test(data); */
 		ret = run_interactive(data);
 	free_all();
 	return (ret);
@@ -38,11 +39,11 @@ int	main(int argc, char **argv, char **envp)
 int	run_interactive(t_data *data)
 {
 	t_cmd_table	*table;
-
 	while (data->exit_called == 0)
 	{
 		free(data->input);
 		data->input = display_prompt();
+		/* data->input = display_prompt_small(); */
 		if (data->input == NULL)
 		{
 			printf("exit\n");

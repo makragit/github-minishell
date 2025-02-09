@@ -61,7 +61,8 @@ int	builtin_env(char **args)
 	env = get_data(NULL)->mini_envp;
 	while (*env != NULL)
 	{
-		printf("%s\n", *env);
+		/* if (isatty(STDOUT_FILENO)) // Fix - env writes to closed pipe and receives SIGPIPE */
+			printf("%s\n", *env);
 		env++;
 	}
 	return (0);
@@ -81,14 +82,20 @@ int	builtin_echo(char **args)
 		return (0);
 	}
 	option_found = 0;
-	if (check_cmd_option(args[1], 'n'))
-		option_found = 1;
+
+	while (check_cmd_option(args[option_found + 1], 'n') == 1)
+		option_found++;
+	/* if (check_cmd_option(args[1], 'n')) */
+	/* 	option_found = 1; */
+
 	i = 1 + option_found;
 	if (args[i])
-		printf("%s", args[i++]);
+		printf("%s", check_tilde(args[i++]));
+		/* printf("%s", args[i++]); */
 	while (args[i])
 	{
-		printf(" %s", args[i]);
+		printf(" %s", check_tilde(args[i]));
+		/* printf(" %s", args[i]); */
 		i++;
 	}
 	if (!option_found)
@@ -109,16 +116,16 @@ int	builtin_exit(char **args)
 	if (mak_arr_size(args) > 2)
 	{
 		get_data(NULL)->exit_called = 0;
-		printf("exit\n");
+		/* printf("exit\n"); */
 		return (bsh_err("exit", args[1], "too many arguments", 1));
 	}
 	if (!is_numeric(args[1]))
 	{
-		printf("exit\n");
+		/* printf("exit\n"); */
 		return (bsh_err("exit", args[1], "numeric argument required", 2));
 	}
 	ret = ft_atoi(args[1]);
 	ret = (unsigned char)ret;
-	printf("exit\n");
+	/* write(STDOUT_FILENO, "exit\n", 5); // exit is written anyways? */
 	return (ret);
 }

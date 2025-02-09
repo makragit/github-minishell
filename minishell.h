@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:31:12 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/02 14:52:44 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/02 18:31:11 by mkrausho         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,14 @@
 # include <stdbool.h>
 # include <errno.h>
 # include <fcntl.h>
+# include "42-Get-next-line/get_next_line.h" // TODO DEBUG
+
+# ifndef PATH_MAX
+#  define PATH_MAX 4096
+# endif
+
+# define PROMPT "\001\033[1;36m\002MINI:$ \001\033[0m\002"
+# define PROMPT_ROOT "\001\033[1;36m\002MINI:# \001\033[0m\002"
 
 extern volatile sig_atomic_t	g_foreground;
 
@@ -116,6 +124,9 @@ typedef struct s_data
 	int		heredoc_active;
 }	t_data;
 
+// DEL_tester.c
+int	run_interactive_test(t_data *data); // TODO DEBUG
+
 // MAK
 
 // minishell.c
@@ -152,8 +163,10 @@ int				array_add_help(char **arr, char **new_arr, char *new_v);
 
 // prompt
 char			*display_prompt(void);
+char			*display_prompt_small(void);
 char			*prepare_prompt_string(char *user, char *prompt_path, int size);
 int				is_root(void);
+
 
 // signals.c
 int				set_signals(int flag);
@@ -176,6 +189,7 @@ void			update_env_var_help(char *key, char *key_value);
 // builtin_cd.c
 int				builtin_chdir(char **args);
 void			builtin_chdir_update_pwd(void);
+char			*check_tilde(char *str);
 
 // misc.c
 int				is_numeric(const char *str);

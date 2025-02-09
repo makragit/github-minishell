@@ -52,7 +52,10 @@ char	*prepare_prompt_string(char *user, char *prompt_path, int size)
 
 	str = (char *)ft_calloc(sizeof(char), size + 1);
 	if (!str)
+	{
 		malloc_error("ERROR: malloc failed in prepare_prompt_string");
+		return (NULL); // fix?
+	}
 	str[size] = '\0';
 	ft_strlcat(str, "\001\033[1;36m\002", size + 1);
 	ft_strlcat(str, user, size + 1);

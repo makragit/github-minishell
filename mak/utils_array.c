@@ -35,7 +35,10 @@ char	**copy_array(char **arr)
 	size = mak_arr_size(arr);
 	new_arr = malloc(sizeof(char *) * (size + 1));
 	if (!new_arr)
+	{
 		malloc_error("ERROR: malloc failed in copy_array");
+		return (NULL); // Fix?
+	}
 	i = 0;
 	while (arr[i])
 	{
@@ -44,6 +47,7 @@ char	**copy_array(char **arr)
 		{
 			mak_free_array(new_arr);
 			malloc_error("ERROR malloc failed in copy_array: ft_strdup");
+			return (NULL); //fix?
 		}
 		i++;
 	}

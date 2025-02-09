@@ -76,7 +76,10 @@ int	array_free_and_rem(char ***arr, char *rem_value)
 		return (0);
 	new_arr = malloc(sizeof(char *) * (mak_arr_size(*arr) - found + 1));
 	if (!new_arr)
+	{
 		malloc_error("ERROR: malloc failed in array_free_and_rem");
+		return (0); // Fix?
+	}
 	new_arr = array_rem_help(temp_arr, new_arr, rem_value);
 	mak_free_array(*arr);
 	*arr = new_arr;
@@ -86,6 +89,9 @@ int	array_free_and_rem(char ***arr, char *rem_value)
 char	**array_rem_help(char **arr, char **new_arr, char *rem)
 {
 	int	i;
+
+	if (!new_arr) // Fix?
+		return (NULL); // Fix?
 
 	i = 0;
 	while (*arr)
@@ -97,6 +103,7 @@ char	**array_rem_help(char **arr, char **new_arr, char *rem)
 			{
 				mak_free_array(new_arr);
 				malloc_error("ERROR: malloc fail in arr_rem_hlp: ft_strdp");
+				return (NULL); // fix?
 			}
 		}
 		arr++;
