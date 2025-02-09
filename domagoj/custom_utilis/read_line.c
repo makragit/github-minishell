@@ -26,7 +26,7 @@ static char	*ensure_capacity(char *buf, size_t *buf_size, size_t needed)
 	while (new_size < needed)
 		new_size *= 2;
 	new_buf = malloc(new_size);
-	//ft_memset(new_buf, 0, sizeof(char *));
+	/* ft_memset(new_buf, 0, sizeof(char *)); */
 	ft_memset(new_buf, 0, new_size); // MAK CHANGE LEAK
 	if (!new_buf)
 	{

@@ -92,7 +92,7 @@ void	update_env_var(char *key, char *value)
 		{
 			free(key_value);
 			malloc_error("update_env_var: malloc error");
-			return ; // fix?
+			return ;
 		}
 	}
 	if (search == 1)

@@ -18,7 +18,7 @@ int	builtin_export(char **args)
 	int	i;
 	int	ret;
 
-	ret = 1; // fix?
+	ret = 1;
 	if (mak_arr_size(args) == 1)
 	{
 		builtin_env(args);
@@ -96,7 +96,7 @@ int	export_handle_key_value(char **args, int *i)
 	{
 		free(key_value);
 		malloc_error("exprt_hndle_key malloc array_free_and_add");
-		return (0); //fix?
+		return (0);
 	}
 	free(key_value);
 	return (0);

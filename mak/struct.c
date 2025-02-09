@@ -40,7 +40,7 @@ t_data	*init_data(char **envp)
 	if (!data)
 	{
 		malloc_error("ERROR: malloc failed in init_data");
-		return (NULL); // Fix?
+		return (NULL);
 	}
 	ft_memset(data, 0, sizeof(t_data));
 	get_data(data);
@@ -59,7 +59,7 @@ char	**create_empty_envp(void)
 	if (!empty_envp)
 	{
 		malloc_error("ERROR: malloc failed in init_data");
-		return (NULL); //fix?
+		return (NULL);
 	}
 	cwd_path = get_cwd_path();
 	empty_envp[0] = ft_strjoin("PWD=", cwd_path);
@@ -68,7 +68,7 @@ char	**create_empty_envp(void)
 		free(cwd_path);
 		free(empty_envp);
 		malloc_error("ERROR: malloc failed in init_data");
-		return (NULL); //fix?
+		return (NULL);
 	}
 	empty_envp[1] = NULL;
 	free(cwd_path);

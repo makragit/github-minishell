@@ -29,8 +29,8 @@ int	main(int argc, char **argv, char **envp)
 	if (non_interactive_mode == 1)
 		ret = run_non_interactive(argv);
 	else
-		/* ret = run_interactive_test(data); */
-		ret = run_interactive(data);
+		/* ret = run_interactive(data); */
+		ret = run_interactive_test(data);
 	free_all();
 	return (ret);
 }
@@ -39,11 +39,11 @@ int	main(int argc, char **argv, char **envp)
 int	run_interactive(t_data *data)
 {
 	t_cmd_table	*table;
+
 	while (data->exit_called == 0)
 	{
 		free(data->input);
 		data->input = display_prompt();
-		/* data->input = display_prompt_small(); */
 		if (data->input == NULL)
 		{
 			printf("exit\n");

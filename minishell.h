@@ -28,7 +28,7 @@
 # include <stdbool.h>
 # include <errno.h>
 # include <fcntl.h>
-/* # include "42-Get-next-line/get_next_line.h" // TODO DEBUG */
+# include "42-Get-next-line/get_next_line.h" // TODO DEBUG
 
 # ifndef PATH_MAX
 #  define PATH_MAX 4096
@@ -125,7 +125,7 @@ typedef struct s_data
 }	t_data;
 
 // DEL_tester.c
-int	run_interactive_test(t_data *data); // TODO DEBUG
+int				run_interactive_test(t_data *data); // TODO DEBUG
 
 // MAK
 
@@ -166,7 +166,6 @@ char			*display_prompt(void);
 char			*display_prompt_small(void);
 char			*prepare_prompt_string(char *user, char *prompt_path, int size);
 int				is_root(void);
-
 
 // signals.c
 int				set_signals(int flag);
@@ -217,7 +216,6 @@ t_cmd_table		*table_init(size_t of_size);
 int				token_distribution(t_cmd_table *table, t_token *token);
 int				arr_create(t_cmd_table *table, t_token *token);
 t_err			expander(t_token *tokens);
-/* int				exit_status(char **str); */
 int				expand_env(char **arg);
 int				is_whitespace(char c);
 int				skip_whitespace(char **str);

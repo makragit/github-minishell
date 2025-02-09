@@ -59,7 +59,6 @@ static t_token	*fill_array(char **arr, t_token *token, size_t size)
 		}
 		token = token->next;
 	}
-	// i = 0; // MAK scan-build fix
 	return (token);
 }
 

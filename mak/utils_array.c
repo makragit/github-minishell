@@ -37,7 +37,6 @@ char	**copy_array(char **arr)
 	if (!new_arr)
 	{
 		malloc_error("ERROR: malloc failed in copy_array");
-		return (NULL); // Fix?
 	}
 	i = 0;
 	while (arr[i])
@@ -47,7 +46,6 @@ char	**copy_array(char **arr)
 		{
 			mak_free_array(new_arr);
 			malloc_error("ERROR malloc failed in copy_array: ft_strdup");
-			return (NULL); //fix?
 		}
 		i++;
 	}
