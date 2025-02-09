@@ -3,18 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   skip_s_quote.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: domagoj <domagoj@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 14:15:47 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/02/01 14:17:37 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/06 12:22:08 by domagoj          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-int	skip_s_quote(char *str, int *c)
+int	skip_s_quote(char *str, int *c, int flag)
 {
-	if (str[*c] == '\'')
+	if (str[*c] == '\'' && flag != 1)
 	{
 		(*c)++;
 		while (str[*c] && str[*c] != '\'')

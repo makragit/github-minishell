@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   env_var.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: domagoj <domagoj@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/15 21:11:31 by domagoj           #+#    #+#             */
-/*   Updated: 2025/02/01 14:16:11 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/06 12:24:14 by domagoj          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,14 +94,23 @@ int	expand_env(char **arg)
 	char	*str_cpy;
 	char	*var_name;
 	int		c;
+	int		d_q;
 
 	str_cpy = ft_strdup(*arg);
 	if (!str_cpy)
 		return (1);
 	c = 0;
+	d_q = 0;
 	while (str_cpy[c])
 	{
-		if (skip_s_quote(str_cpy, &c) == -1)
+		if (str_cpy[c] == '\"')
+		{
+			if (d_q == 1)
+				d_q = 0;
+			else
+				d_q = 1;
+		}
+		if (skip_s_quote(str_cpy, &c, d_q) == -1)
 			break ;
 		else if (str_cpy[c] == '$')
 		{
