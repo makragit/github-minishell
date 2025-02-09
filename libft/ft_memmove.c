@@ -37,7 +37,8 @@ void	*ft_memmove(void *dest, const void *src, size_t n)
 	dest_p = dest;
 	src_p = src;
 	dest_v = dest;
-	if (!src && !dest)
+	/* if (!src && !dest) */
+	if (!src || !dest) // Fix?
 		return (dest);
 	i = 0;
 	if (dest < src)

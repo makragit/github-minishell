@@ -50,3 +50,10 @@ void	builtin_chdir_update_pwd(void)
 	free(cwd_path);
 	return ;
 }
+
+char *check_tilde(char *str)
+{
+	if (ft_strncmp(str, "~", 1) == 0 && ft_strlen(str) == 1)
+		return(getenv_local("HOME"));
+	return (str);
+}

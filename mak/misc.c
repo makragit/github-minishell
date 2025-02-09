@@ -63,12 +63,18 @@ char	*get_cwd_path(void)
 	{
 		ret_null = ft_strdup("(null)");
 		if (!ret_null)
+		{
 			malloc_error("ERROR: malloc failed in get_cwd_path: ft_strdup");
+			return (NULL); // Fix?
+		}
 		return (ret_null);
 	}
 	ret = (char *)malloc(sizeof(char) * (ft_strlen(cwd) + 1));
 	if (ret == NULL)
+	{
 		malloc_error("ERROR: malloc failed in get_cwd_path");
+		return (NULL); // Fix?
+	}
 	i = 0;
 	while (cwd[i])
 	{

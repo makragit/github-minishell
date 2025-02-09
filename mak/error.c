@@ -28,6 +28,7 @@ void	malloc_error(char *s)
 	if (errno == 0)
 		errno = 1;
 	exit(errno);
+	return ; // fix?
 }
 
 int	bsh_err(char *cmd, char *arg, char *msg, int code)

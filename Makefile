@@ -2,6 +2,7 @@
 
 # CC = cc
 CC = gcc
+# CC = clang
 
 NAME = minishell
 LIBFT = ./libft/libft.a
@@ -65,12 +66,14 @@ SOURCE = minishell.c \
 		  $(INPUT_CHCK)/input_check.c \
 		  $(HEREDOC_DIR)/heredoc_program.c \
 		  $(PIPE_DIR)/pipe_redir.c \
-		  ./domagoj/execution/execute.c \
-			./domagoj/execution/test_builtin.c \
-		  ./domagoj/execution/cmd_path.c \
-		  ./domagoj/execution/redirect.c \
-		  ./domagoj/execution/child_execution.c \
-			$(UTILS_DIR)/ft_free_array.c \
+		 ./domagoj/execution/execute.c \
+		 ./domagoj/execution/test_builtin.c \
+		 ./domagoj/execution/cmd_path.c \
+		 ./domagoj/execution/redirect.c \
+		 ./domagoj/execution/child_execution.c \
+		 $(UTILS_DIR)/ft_free_array.c \
+		 ./42-Get-next-line/get_next_line.c \
+		 ./mak/DEL_tester.c						
 
 CFLAGS = -Wall -Wextra -Werror -g # TODO -g
 
@@ -90,6 +93,10 @@ all: $(NAME)
 
 $(NAME): $(LIBFT) $(DEBUG) $(OBJECTS)
 		$(CC) $(OBJECTS) $(LIBFT) $(LDFLAGS) $(CFLAGS) -o $(NAME)
+#		$(CC) $(OBJECTS) $(LIBFT) $(LDFLAGS) $(CFLAGS) $(FSAN) -o $(NAME)
+
+
+
 #		$(CC) $(OBJECTS) $(LIBFT) $(DEBUG) $(LDFLAGS) $(CFLAGS) -o $(NAME)
 
 #		$(CC) $(OBJECTS) $(LIBFT) $(DEBUG) $(LDFLAGS) $(CFLAGS) $(FSAN) -o $(NAME)
