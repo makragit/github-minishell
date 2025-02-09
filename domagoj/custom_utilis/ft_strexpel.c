@@ -62,7 +62,7 @@ static char	*expel_single(char *str, const char *expel)
 	str_cpy = cut_connect(str_cpy, result - str_cpy, len2);
 	if (!str_cpy)
 		return (NULL);
-	len1 = ft_strlen(str_cpy);
+	/* len1 = ft_strlen(str_cpy); // MAK scan-build fix */
 	return (str_cpy);
 }
 

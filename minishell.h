@@ -28,7 +28,7 @@
 # include <stdbool.h>
 # include <errno.h>
 # include <fcntl.h>
-# include "42-Get-next-line/get_next_line.h" // TODO DEBUG
+/* # include "42-Get-next-line/get_next_line.h" // TODO DEBUG */
 
 # ifndef PATH_MAX
 #  define PATH_MAX 4096
@@ -253,7 +253,7 @@ int				all_pipes_init(t_cmd_table *table);
 int				pipe_redir(t_cmd_table *table);
 void			print_path_err(t_err reason, const char *cmd);
 t_err			is_proper_exe(const char *path, int flag);
-int				skip_s_quote(char *str, int *c);
+int				skip_s_quote(char *str, int *c, int flag);
 char			*read_line(void);
 
 #endif

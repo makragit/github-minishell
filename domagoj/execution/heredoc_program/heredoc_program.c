@@ -93,6 +93,7 @@ int	heredoc(t_cmd_table *table)
 				if (fetch_herdoc(current->hdoc_delim, fd, current->is_quoted))
 				{
 					unlink(filename);
+					free(filename); // MAK CHANGE
 					return (FAIL);
 				}
 				table->redir_data->heredoc_file_name = filename;

@@ -40,6 +40,8 @@ static t_token	*fill_array(char **arr, t_token *token, size_t size)
 	i = 0;
 	while (token && token->type != CMD_t)
 		token = token->next;
+	if (!token) // MAK CHANGE scan-build
+		return (NULL); // MAK CHANGE scan-build
 	arr[i] = token->value;
 	i++;
 	token = token->next;
@@ -57,7 +59,7 @@ static t_token	*fill_array(char **arr, t_token *token, size_t size)
 		}
 		token = token->next;
 	}
-	i = 0;
+	// i = 0; // MAK scan-build fix
 	return (token);
 }
 
