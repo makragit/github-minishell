@@ -1,42 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_create_file.c                                   :+:      :+:    :+:   */
+/*   compress_str.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/05 18:09:54 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/02/11 15:14:25 by dbogovic         ###   ########.fr       */
+/*   Created: 2025/02/10 09:34:15 by dbogovic          #+#    #+#             */
+/*   Updated: 2025/02/10 09:34:34 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-char	*generate_filename(void)
+void	compress_str(char *str, size_t str_size)
 {
-	char		*str_pid;
-	static int	counter = 0;
+	size_t	src;
+	size_t	dst;
 
-	str_pid = ft_itoa(counter);
-	if (!str_pid)
-		return (NULL);
-	counter++;
-	return (str_pid);
-}
-
-int	ft_create_file(char **filename)
-{
-	int			fd;
-
-	*filename = generate_filename();
-	if (!*filename)
-		return (-1);
-	fd = open((*filename), O_CREAT | O_EXCL | O_RDWR | O_APPEND, 0600);
-	if (fd == -1)
+	src = 0;
+	dst = 0;
+	while (src < str_size)
 	{
-		free(*filename);
-		*filename = NULL;
-		return (-1);
+		if (str[src] != '\0')
+		{
+			str[dst] = str[src];
+			dst++;
+		}
+		src++;
 	}
-	return (fd);
+	str[dst] = '\0';
 }

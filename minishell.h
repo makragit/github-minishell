@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:31:12 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/02 18:31:11 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/02/10 15:03:11 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,16 +28,12 @@
 # include <stdbool.h>
 # include <errno.h>
 # include <fcntl.h>
-# include "42-Get-next-line/get_next_line.h" // TODO DEBUG
-
 # ifndef PATH_MAX
 #  define PATH_MAX 4096
 # endif
 
 # define PROMPT "\001\033[1;36m\002MINI:$ \001\033[0m\002"
 # define PROMPT_ROOT "\001\033[1;36m\002MINI:# \001\033[0m\002"
-
-extern volatile sig_atomic_t	g_foreground;
 
 typedef enum t_err
 {
@@ -79,6 +75,7 @@ typedef struct t_token
 {
 	char			*value;
 	t_token_type	type;
+	int				is_quoted;
 	struct t_token	*next;
 	struct t_token	*prev;
 }	t_token;
@@ -124,11 +121,6 @@ typedef struct s_data
 	int		heredoc_active;
 }	t_data;
 
-// DEL_tester.c
-int				run_interactive_test(t_data *data); // TODO DEBUG
-
-// MAK
-
 // minishell.c
 int				run_non_interactive(char **argv);
 int				run_interactive(t_data *data);
@@ -154,6 +146,7 @@ int				mak_free_array(char **arr);
 // utils_array.c
 int				mak_arr_size(char **arr);
 char			**copy_array(char **arr);
+void			mak_arr_sort(char **arr, int size);
 
 // utils_array_2.c
 int				array_free_and_add(char ***arr, char *new_value);
@@ -171,12 +164,17 @@ int				is_root(void);
 int				set_signals(int flag);
 void			sigint_handler(int signum);
 void			sigint_handler_non_interactive(int signum);
+int				set_signals_default(void);
 
 // builtin_export.c
 int				builtin_export(char **args);
-int				builtin_unset(char **args);
-char			*export_format_key_value(char **args, int *i, int ret);
 int				export_handle_key_value(char **args, int *i);
+void			builtin_export_print(char *arr[], int size);
+int				export_update_no_equal(char *arg);
+int				export_update_with_value(char *arg);
+
+// builtin_unset.c
+int				builtin_unset(char **args);
 
 // key_handling.c
 int				search_key_in_array(char **arr, char *search);
@@ -216,7 +214,7 @@ t_cmd_table		*table_init(size_t of_size);
 int				token_distribution(t_cmd_table *table, t_token *token);
 int				arr_create(t_cmd_table *table, t_token *token);
 t_err			expander(t_token *tokens);
-int				expand_env(char **arg);
+int				expand_env(char **arg, int d_q, int c);
 int				is_whitespace(char c);
 int				skip_whitespace(char **str);
 void			free_table(t_cmd_table *table);
@@ -236,7 +234,7 @@ size_t			table_size(t_token *tokens);
 t_redir_data	*add_redir_entry(t_redir_data *data, t_token *token);
 char			*getenv_local(char *name);
 t_err			execute(t_cmd_table *table);
-int				heredoc(t_cmd_table *table);
+int				heredoc(t_cmd_table *table, char *filename);
 int				ft_create_file(char **filename);
 int				ft_append(const char *str, int fd);
 char			*get_path(const char *cmd);
@@ -253,5 +251,7 @@ void			print_path_err(t_err reason, const char *cmd);
 t_err			is_proper_exe(const char *path, int flag);
 int				skip_s_quote(char *str, int *c, int flag);
 char			*read_line(void);
+void			compress_str(char *str, size_t str_size);
+char			*_var_name(char **str, size_t start, size_t len);
 
 #endif

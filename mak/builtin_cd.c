@@ -6,7 +6,7 @@
 /*   By: mkrausho <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:32:48 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/01 19:32:49 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/02/10 15:10:01 by mkrausho         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,8 @@ void	builtin_chdir_update_pwd(void)
 	char	*cwd_path;
 
 	cwd_path = get_cwd_path();
+	if (cwd_path == NULL)
+		return ;
 	update_env_var("PWD=", cwd_path);
 	free(cwd_path);
 	return ;

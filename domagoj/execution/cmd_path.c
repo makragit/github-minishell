@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/06 16:22:58 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/02/01 14:32:08 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/11 15:07:20 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,6 +97,7 @@ char	*get_path(const char *cmd)
 {
 	char	*cmd_tmp;
 	char	**arr;
+	char	*env;
 	t_err	reason;
 
 	if (is_cmd_path(cmd))
@@ -104,7 +105,15 @@ char	*get_path(const char *cmd)
 	cmd_tmp = ft_strjoin("/", cmd);
 	if (!cmd_tmp)
 		return (NULL);
-	arr = ft_split(getenv_local("PATH"), ':');
+	env = getenv_local("PATH");
+	if (!env)
+		env = get_data(NULL)->last_cwd;
+	if (!env)
+	{
+		print_path_err(NOT_FOUND, cmd);
+		return (NULL);
+	}
+	arr = ft_split(env, ':');
 	if (!arr)
 	{
 		free(cmd_tmp);

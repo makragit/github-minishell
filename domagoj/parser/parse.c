@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: domagoj <domagoj@student.42.fr>            +#+  +:+       +#+        */
+/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/07 13:46:57 by domagoj           #+#    #+#             */
-/*   Updated: 2025/02/06 16:39:36 by domagoj          ###   ########.fr       */
+/*   Updated: 2025/02/11 15:59:37 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,55 +75,30 @@ static t_cmd_table	*parse_table(t_token *tokens)
 	return (table);
 }
 
-static void	compress_str(char *str, size_t str_size)
+char	*trim_touching_quotes(char *str, size_t size, size_t i)
 {
-	size_t	src;
-	size_t	dst;
-
-	src = 0;
-	dst = 0;
-	while (src < str_size)
-	{
-		if (str[src] != '\0')
-		{
-			str[dst] = str[src];
-			dst++;
-		}
-		src++;
-	}
-	str[dst] = '\0';
-}
-
-char	*trim_touching_quotes(char *str)
-{
-	size_t		str_size;
-	size_t		i;
 	size_t		start;
 	char		q_flag;
 
-	str_size = ft_strlen(str);
-	i = 0;
+	if (str && ft_strlen(str) == 2)
+		return (str);
 	while (str[i])
 	{
 		if (str[i] == '\'' || str[i] == '\"')
 		{
 			q_flag = str[i];
-			start = i;
-			i++;
+			start = i++;
 			while (str[i] && str[i] != q_flag)
 				i++;
-			if (str[i] == q_flag)
+			if (str[i] == q_flag && start + 1 == i)
 			{
-				if (start + 1 == i)
-				{
-					str[start] = '\0';
-					str[i] = '\0';
-				}
+				str[start] = '\0';
+				str[i] = '\0';
 			}
 		}
 		i++;
 	}
-	compress_str(str, str_size);
+	compress_str(str, size);
 	return (str);
 }
 
@@ -141,8 +116,9 @@ t_cmd_table	*parse(const char *input)
 		free(input_cpy);
 		return (NULL);
 	}
-	input_cpy = trim_touching_quotes(input_cpy);
-	expand_env(&input_cpy);
+	input_cpy = trim_touching_quotes(input_cpy, ft_strlen(input_cpy), 0);
+	expand_env(&input_cpy, 0, 0);
+	input_cpy = trim_touching_quotes(input_cpy, ft_strlen(input_cpy), 0);
 	token_lst = parse_tokens(input_cpy);
 	if (!token_lst)
 		return (NULL);

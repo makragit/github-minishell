@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/06 16:25:39 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/02/01 17:12:45 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/11 16:07:46 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,16 @@ static int	open_heredoc(char *filename)
 {
 	int	fd;
 
+
 	fd = open (filename, O_RDONLY);
+	if (fd == -1)
+	{
+		perror("");
+		return (-1);
+	}
 	if (unlink(filename) == -1)
 	{
 		perror("unlink");
-		free(filename);
-		close(fd);
 		return (-1);
 	}
 	return (fd);
@@ -32,7 +36,9 @@ static t_err	open_fd(char *filename, t_token_type mode)
 	int	fd;
 
 	if (mode == HEREDOC)
+	{
 		fd = open_heredoc(filename);
+	}
 	if (mode == APPEND)
 		fd = open(filename, O_WRONLY | O_CREAT | O_APPEND, 0644);
 	else if (mode == INPUT)

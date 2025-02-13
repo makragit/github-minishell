@@ -3,14 +3,23 @@
 /*                                                        :::      ::::::::   */
 /*   expander.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: domagoj <domagoj@student.42.fr>            +#+  +:+       +#+        */
+/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 22:46:16 by domagoj           #+#    #+#             */
-/*   Updated: 2025/02/06 16:40:34 by domagoj          ###   ########.fr       */
+/*   Updated: 2025/02/11 15:44:01 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../../minishell.h"
+
+static int	check_quoted(char *str)
+{
+	if (ft_strchr(str, '\''))
+		return (1);
+	if (ft_strchr(str, '\"'))
+		return (1);
+	return (0);
+}
 
 t_err	expander(t_token *tokens)
 {
@@ -23,6 +32,8 @@ t_err	expander(t_token *tokens)
 			tokens = tokens->next;
 			continue ;
 		}
+		if (tokens->type == HEREDOC)
+			tokens->is_quoted = check_quoted(tokens->value);
 		current = ft_strdup(tokens->value);
 		if (!current || ft_trim_quotes(&current))
 		{

@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/05 16:44:59 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/02/02 14:58:45 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/11 15:32:31 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,10 +36,11 @@ char	*expand_line(char *line, char *delim, int is_quoted)
 
 	if (!line || !delim)
 		return (NULL);
-	if (is_quoted == 1)
-		return (line);
-	if (expand_env(&line))
-		return (NULL);
+	if (is_quoted != 1)
+	{
+		if (expand_env(&line, 0, 0))
+			return (NULL);
+	}
 	tmp = ft_strjoin(line, "\n");
 	free(line);
 	line = tmp;
@@ -75,13 +76,11 @@ int	fetch_herdoc(char *heredoc_delim, int file_descriptor, int is_quoted)
 	return (0);
 }
 
-int	heredoc(t_cmd_table *table)
+int	heredoc(t_cmd_table *table, char *filename)
 {
 	t_redir_data	*current;
-	char			*filename;
 	int				fd;
 
-	filename = NULL;
 	while (table)
 	{
 		current = table->redir_data;
@@ -93,10 +92,11 @@ int	heredoc(t_cmd_table *table)
 				if (fetch_herdoc(current->hdoc_delim, fd, current->is_quoted))
 				{
 					unlink(filename);
-					free(filename); // MAK CHANGE
+					free(filename);
+					filename = NULL;
 					return (FAIL);
 				}
-				table->redir_data->heredoc_file_name = filename;
+				current->heredoc_file_name = filename;
 			}
 			current = current->next;
 		}

@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/12 20:32:28 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/29 18:10:00 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/10 11:58:51 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ int	ft_trim_quotes(char **str)
 	strr = *str;
 	if (!*str || !str)
 		return (-1);
-	if (ft_strlen(*str) < 2)
+	if (ft_strlen(*str) <= 2)
 		return (0);
 	c = 0;
 	while (strr[c])

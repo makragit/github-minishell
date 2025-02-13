@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 22:50:12 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/29 17:55:57 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/10 09:33:38 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,8 +40,8 @@ static t_token	*fill_array(char **arr, t_token *token, size_t size)
 	i = 0;
 	while (token && token->type != CMD_t)
 		token = token->next;
-	if (!token) // MAK CHANGE scan-build
-		return (NULL); // MAK CHANGE scan-build
+	if (!token)
+		return (NULL);
 	arr[i] = token->value;
 	i++;
 	token = token->next;

@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/15 13:06:52 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/08 20:33:25 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/10 09:32:38 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,6 @@ static char	*expel_single(char *str, const char *expel)
 	str_cpy = cut_connect(str_cpy, result - str_cpy, len2);
 	if (!str_cpy)
 		return (NULL);
-	/* len1 = ft_strlen(str_cpy); // MAK scan-build fix */
 	return (str_cpy);
 }
 

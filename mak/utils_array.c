@@ -52,3 +52,27 @@ char	**copy_array(char **arr)
 	new_arr[i] = NULL;
 	return (new_arr);
 }
+
+void	mak_arr_sort(char **arr, int size)
+{
+	int		i;
+	int		j;
+	char	*temp;
+
+	i = 0;
+	while (i < size - 1)
+	{
+		j = 0;
+		while (j < size - i - 1)
+		{
+			if (ft_strncmp(arr[j], arr[j + 1], ft_strlen(arr[j])) > 0)
+			{
+				temp = arr[j];
+				arr[j] = arr[j + 1];
+				arr[j + 1] = temp;
+			}
+			j++;
+		}
+		i++;
+	}
+}

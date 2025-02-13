@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/05 17:12:41 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/02/02 14:59:59 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/10 20:41:12 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ t_err	execute(t_cmd_table *table)
 	if (all_pipes_init(table) == FAIL)
 		return (ERROR);
 	get_data(NULL)->heredoc_active = 1;
-	if (heredoc(table) == FAIL)
+	if (heredoc(table, NULL) == FAIL)
 	{
 		get_data(NULL)->heredoc_active = 0;
 		return (ERROR);

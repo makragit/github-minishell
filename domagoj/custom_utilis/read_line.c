@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/02 13:44:43 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/02/02 14:46:01 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/11 15:01:38 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,15 +26,14 @@ static char	*ensure_capacity(char *buf, size_t *buf_size, size_t needed)
 	while (new_size < needed)
 		new_size *= 2;
 	new_buf = malloc(new_size);
-	/* ft_memset(new_buf, 0, sizeof(char *)); */
-	ft_memset(new_buf, 0, new_size); // MAK CHANGE LEAK
+	ft_memset(new_buf, 0, new_size);
 	if (!new_buf)
 	{
 		free(buf);
 		return (NULL);
 	}
 	if (buf && *buf_size > 0)
-		memcpy(new_buf, buf, *buf_size);
+		ft_memcpy(new_buf, buf, *buf_size);
 	free(buf);
 	*buf_size = new_size;
 	return (new_buf);

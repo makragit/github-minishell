@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/03 18:31:16 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/01/29 17:56:13 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/10 14:45:49 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ t_redir_data	*add_redir_entry(t_redir_data *data, t_token *token)
 	else if (type == HEREDOC)
 	{
 		new->hdoc_delim = token->value;
-		if ((token->value)[0] == '\'' || (token->value)[0] == '\"')
+		if (token->is_quoted == 1)
 			new->is_quoted = 1;
 	}
 	new->next = data;

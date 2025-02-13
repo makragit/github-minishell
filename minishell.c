@@ -3,16 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkrausho <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:31:22 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/02 18:23:47 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/02/11 16:10:50 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-volatile sig_atomic_t	g_foreground = 0;
 
 int	main(int argc, char **argv, char **envp)
 {
@@ -29,8 +27,7 @@ int	main(int argc, char **argv, char **envp)
 	if (non_interactive_mode == 1)
 		ret = run_non_interactive(argv);
 	else
-		/* ret = run_interactive(data); */
-		ret = run_interactive_test(data);
+		ret = run_interactive(data);
 	free_all();
 	return (ret);
 }
@@ -46,7 +43,7 @@ int	run_interactive(t_data *data)
 		data->input = display_prompt();
 		if (data->input == NULL)
 		{
-			printf("exit\n");
+			write(2, "exit\n", 5);
 			break ;
 		}
 		if (*(data->input) == '\0')
@@ -73,7 +70,6 @@ int	run_non_interactive(char **argv)
 	if (!table)
 		malloc_error("ERROR: get_table");
 	get_table_reset(table, 0);
-	g_foreground = 1;
 	execute(table);
 	return (get_data(NULL)->last_ex_code);
 }
@@ -94,3 +90,25 @@ int	check_argv(int argc, char **av)
 		exit(bsh_err("minishell", av[1], "command not found", 127));
 	return (1);
 }
+
+/*
+!FIXED!
+
+!PATH - when deleted, now minishell acts like bash would
+!getppid expelled from the project
+!memcpy expelled from the project
+!when open() fails, it shouldnt crash based on double free anymore - This should be rechecked just in case!
+!exit -> keeps last_ex_code now
+!exit -> prints now on stderr and not stdout
+!when executable is empty it now prints (Permission denied; same as bash would)
+!expansion doesnt occur with heredoc delimiter names anymore
+!echo "$HOMER" problem fixed
+!removing permission from parent folder no longer crashes heredoc execution (now its infinite hold; which is better I guess)
+*new problem-> heredoc temp file isnt deleted properly when multiple heredocs present ->FIXED
+*/
+
+
+/*
+Fixes to do
+<<eof"" problem
+*/

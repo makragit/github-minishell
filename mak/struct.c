@@ -6,7 +6,7 @@
 /*   By: mkrausho <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:31:33 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/01 19:31:34 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/02/10 15:11:00 by mkrausho         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,10 @@ char	**create_empty_envp(void)
 		return (NULL);
 	}
 	cwd_path = get_cwd_path();
-	empty_envp[0] = ft_strjoin("PWD=", cwd_path);
+	if (cwd_path == NULL)
+		empty_envp[0] = ft_strdup("PWD=");
+	else
+		empty_envp[0] = ft_strjoin("PWD=", cwd_path);
 	if (!empty_envp[0])
 	{
 		free(cwd_path);

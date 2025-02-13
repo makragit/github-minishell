@@ -1,21 +1,9 @@
 # MAKEFILE minishell
 
-# CC = cc
-CC = gcc
-# CC = clang
+CC = cc
 
 NAME = minishell
 LIBFT = ./libft/libft.a
-
-
-# Directories
-# UTILS_DIR = ./custom_utilis
-# INPUT_CHCK = ./parser/lexer
-# TOKEN_DIR = ./parser/tokenisation
-# TABLE_DIR = ./parser/table_fill
-# EXPANDER_DIR = ./parser/expansion
-# HEREDOC_DIR = ./execution/heredoc_program
-# PIPE_DIR = ./execution/pipe_redir
 
 UTILS_DIR = ./domagoj/custom_utilis
 INPUT_CHCK = ./domagoj/parser/lexer
@@ -28,6 +16,7 @@ PIPE_DIR = ./domagoj/execution/pipe_redir
 SOURCE = minishell.c \
 		 ./mak/builtin_cd.c \
 		 ./mak/builtin_export.c \
+		 ./mak/builtin_unset.c \
 		 ./mak/builtin_general.c \
 		 ./mak/error.c \
 		 ./mak/free.c \
@@ -42,6 +31,8 @@ SOURCE = minishell.c \
           $(TOKEN_DIR)/token_make_entry.c \
           $(TOKEN_DIR)/token_len.c \
           $(TOKEN_DIR)/token_type.c \
+          $(UTILS_DIR)/compress_str.c \
+		  $(UTILS_DIR)/var_name.c \
           ./domagoj/parser/parse.c \
           $(UTILS_DIR)/lst_functions.c \
 		  $(UTILS_DIR)/cmd_table_funcs.c \
@@ -72,21 +63,13 @@ SOURCE = minishell.c \
 		 ./domagoj/execution/redirect.c \
 		 ./domagoj/execution/child_execution.c \
 		 $(UTILS_DIR)/ft_free_array.c \
-		 ./42-Get-next-line/get_next_line.c \
-		 ./mak/DEL_tester.c
-		 # TODO DEBUG
 
-CFLAGS = -Wall -Wextra -Werror -g # TODO -g
-
-#FSAN = -fsanitize=address,undefined -fsanitize-memory-track-origins
-FSAN = -O1 -fsanitize=address,undefined -fsanitize-memory-track-origins -fno-omit-frame-pointer
+CFLAGS = -Wall -Wextra -Werror -g # TODO
+# CFLAGS = -Wall -Wextra -Werror
 
 OBJECTS = $(SOURCE:.c=.o)
 
-# LDFLAGS = -lreadline
-LDFLAGS = -lreadline  -lncurses # removed: -lft -Llibft-delete
-
-# DEBUG = ./debug/debug.a
+LDFLAGS = -lreadline  -lncurses
 
 RM = rm -f
 
@@ -94,45 +77,25 @@ all: $(NAME)
 
 $(NAME): $(LIBFT) $(DEBUG) $(OBJECTS)
 		$(CC) $(OBJECTS) $(LIBFT) $(LDFLAGS) $(CFLAGS) -o $(NAME)
-#		$(CC) $(OBJECTS) $(LIBFT) $(LDFLAGS) $(CFLAGS) $(FSAN) -o $(NAME)
-
-
-
-#		$(CC) $(OBJECTS) $(LIBFT) $(DEBUG) $(LDFLAGS) $(CFLAGS) -o $(NAME)
-
-#		$(CC) $(OBJECTS) $(LIBFT) $(DEBUG) $(LDFLAGS) $(CFLAGS) $(FSAN) -o $(NAME)
-#		$(CC) $(CFLAGS) $(OBJECTS) -o $(NAME)
-
-# Compile source files into object files
-#%.o: %.c
-#	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	$(RM) $(OBJECTS)
 	make clean -C ./libft/
-#DEBUG
-	# make clean -C ./debug/
 
 fclean: clean
 	$(RM) $(NAME)
 	make fclean -C ./libft/
-#DEBUG
-	# make fclean -C ./debug/
 
 re: fclean all
 
 $(LIBFT):
 	make -C ./libft/
 
-# $(DEBUG):
-	# make -C ./debug/
 
 run: $(NAME)
 	./minishell
 
-# Build and clean up after
 exe: re
 	$(MAKE) clean
 
 .PHONY: all clean fclean run re exe
-#.PHONY: all clean fclean

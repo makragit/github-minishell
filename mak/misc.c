@@ -6,7 +6,7 @@
 /*   By: mkrausho <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:32:55 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/01 19:32:56 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/02/10 15:09:12 by mkrausho         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,15 +57,9 @@ char	*get_cwd_path(void)
 	char	cwd[PATH_MAX];
 	char	*ret;
 	int		i;
-	char	*ret_null;
 
 	if (getcwd(cwd, sizeof(cwd)) == NULL)
-	{
-		ret_null = ft_strdup("(null)");
-		if (!ret_null)
-			malloc_error("ERROR: malloc failed in get_cwd_path: ft_strdup");
-		return (ret_null);
-	}
+		return (NULL);
 	ret = (char *)malloc(sizeof(char) * (ft_strlen(cwd) + 1));
 	if (ret == NULL)
 		malloc_error("ERROR: malloc failed in get_cwd_path");

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_general.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkrausho <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:33:03 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/01 19:33:04 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/02/11 16:10:09 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,10 +40,7 @@ int	builtin_pwd(void)
 	cwd_path = get_cwd_path();
 	if (cwd_path == NULL)
 	{
-		if (get_data(NULL)->last_cwd == NULL)
-			printf("(null)\n");
-		else
-			printf("%s\n", get_data(NULL)->last_cwd);
+		printf("%s\n", getenv_local("PWD"));
 		return (0);
 	}
 	printf("%s\n", cwd_path);
@@ -103,17 +100,17 @@ int	builtin_exit(char **args)
 	get_data(NULL)->exit_called = 1;
 	if (mak_arr_size(args) == 1)
 	{
-		printf("exit\n");
-		return (errno);
+		write(2, "exit\n", 5);
+		return (get_data(NULL)->last_ex_code);
+	}
+	if (!is_numeric(args[1]))
+	{
+		return (bsh_err("exit", args[1], "numeric argument required", 2));
 	}
 	if (mak_arr_size(args) > 2)
 	{
 		get_data(NULL)->exit_called = 0;
 		return (bsh_err("exit", args[1], "too many arguments", 1));
-	}
-	if (!is_numeric(args[1]))
-	{
-		return (bsh_err("exit", args[1], "numeric argument required", 2));
 	}
 	ret = ft_atoi(args[1]);
 	ret = (unsigned char)ret;
