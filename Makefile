@@ -64,8 +64,7 @@ SOURCE = minishell.c \
 		 ./domagoj/execution/child_execution.c \
 		 $(UTILS_DIR)/ft_free_array.c \
 
-CFLAGS = -Wall -Wextra -Werror -g # TODO
-# CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror
 
 OBJECTS = $(SOURCE:.c=.o)
 
