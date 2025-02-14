@@ -27,7 +27,8 @@ int	main(int argc, char **argv, char **envp)
 	if (non_interactive_mode == 1)
 		ret = run_non_interactive(argv);
 	else
-		ret = run_interactive(data);
+		ret = run_interactive_test(data);
+		/* ret = run_interactive(data); */
 	free_all();
 	return (ret);
 }

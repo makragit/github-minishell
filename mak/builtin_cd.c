@@ -21,34 +21,50 @@ int	builtin_chdir(char **args)
 		return (1);
 	if (mak_arr_size(args) > 2)
 		return (bsh_err("cd", NULL, "too many arguments", 1));
-	if (mak_arr_size(args) == 1)
+	if ((mak_arr_size(args) == 1) || (ft_strlen(args[1]) == 1 && args[1][0] == '~'))
 	{
 		path = getenv_local("HOME");
-		if (path == NULL)
-			return (bsh_err("cd", NULL, "HOME not set", 1));
+    if (path == NULL)
+        return (bsh_err("cd", NULL, "HOME not set", 1));
 	}
-	else if (ft_strlen(args[1]) == 1 && args[1][0] == '~')
+	else if (ft_strlen(args[1]) == 1 && args[1][0] == '-')
 	{
-		path = getenv_local("HOME");
-		if (path == NULL)
-			return (bsh_err("cd", NULL, "HOME not set", 1));
+		path = getenv_local("OLDPWD");
+		if (!path)
+        return (bsh_err("cd", NULL, "OLDPWD not set", 1));
 	}
 	else
 		path = args[1];
 	if (chdir(path) != 0)
 		return (bsh_err("cd", NULL, "No such file or directory", 1));
 	builtin_chdir_update_pwd();
+	return (cwd_deleted());
+}
+
+int cwd_deleted(void)
+{
+	char	cwd[PATH_MAX];
+
+	if (getcwd(cwd, sizeof(cwd)) == NULL)
+		return (bsh_err("cd", "getcd", "cannot access parent directories", 0));
 	return (0);
 }
 
 void	builtin_chdir_update_pwd(void)
 {
 	char	*cwd_path;
+	char	*last_cwd_cpy;
 
 	cwd_path = get_cwd_path();
 	if (cwd_path == NULL)
 		return ;
 	update_env_var("PWD=", cwd_path);
+	update_env_var("OLDPWD=", get_data(NULL)->last_cwd);
+	free(get_data(NULL)->last_cwd);
+	last_cwd_cpy = ft_strdup(cwd_path);
+	if (last_cwd_cpy == NULL)
+		malloc_error("builtin_chdir_update_pwd malloc error");
+	get_data(NULL)->last_cwd = last_cwd_cpy;
 	free(cwd_path);
 	return ;
 }

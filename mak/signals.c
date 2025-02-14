@@ -15,6 +15,7 @@
 int	set_signals(int flag)
 {
 	struct sigaction	sig_action;
+	/* struct sigaction default_action; // NEW */
 
 	ft_memset(&sig_action, 0, sizeof(sig_action));
 	sigemptyset(&sig_action.sa_mask);
@@ -26,6 +27,42 @@ int	set_signals(int flag)
 		sig_action.sa_handler = SIG_IGN;
 		sigaction(SIGQUIT, &sig_action, NULL);
 	}
+
+	// NEW
+	/* if (flag == 3) */
+	/* { */
+
+	/* 	    // Clear out the struct (important to reset all fields!) */
+    /* ft_memset(&default_action, 0, sizeof(default_action)); */
+    /* sigemptyset(&default_action.sa_mask); */
+
+    /* // Restore SIGINT to default */
+    /* default_action.sa_handler = SIG_DFL; */
+    /* sigaction(SIGINT, &default_action, NULL); */
+
+    /* // Restore SIGQUIT to default */
+    /* sigaction(SIGQUIT, &default_action, NULL); */
+
+
+
+
+		/* sig_action.sa_handler = SIG_DFL; */
+		/* sigaction(SIGINT, &sig_action, NULL); */
+		/* sigaction(SIGQUIT, &sig_action, NULL); */
+
+			/* ft_memset(&sig_action, 0, sizeof(sig_action)); */
+	/* sigemptyset(&sig_action.sa_mask); */
+	/* sig_action.sa_handler = SIG_DFL; */
+	/* sig_action.sa_flags = 0; */
+	/* sigaction(SIGINT, &sig_action, NULL); */
+	/* sig_action.sa_handler = SIG_DFL; */
+	/* sig_action.sa_flags = 0; */
+	/* sigaction(SIGQUIT, &sig_action, NULL); */
+
+	/* } */
+	// NEW
+
+
 	return (0);
 }
 
@@ -62,3 +99,34 @@ int	set_signals_default(void)
 	sigaction(SIGQUIT, &sig_action, NULL);
 	return (0);
 }
+
+/* void set_signals_default(int signum) */
+/* { */
+/*     struct sigaction sig_action; */
+
+/*     ft_memset(&sig_action, 0, sizeof(sig_action)); */
+/*     sigemptyset(&sig_action.sa_mask); */
+/*     sig_action.sa_handler = SIG_DFL; */
+/*     sig_action.sa_flags = 0; */
+
+/*     sigaction(SIGINT, &sig_action, NULL); */
+/*     sigaction(SIGQUIT, &sig_action, NULL); */
+/* 		(void)signum; */
+/* 		return ; */
+/* } */
+
+
+///// TEST
+
+
+void sigquit_handler(int signum)
+{
+		write(1, "QUIT1\n", 6);
+		write(2, "QUIT2\n", 6);
+
+    signal(SIGQUIT, SIG_DFL);
+		(void)signum;
+		return ;
+}
+
+    /* signal(SIGQUIT, sigquit_handler);  // Set custom handler */

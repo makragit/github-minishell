@@ -63,8 +63,13 @@ SOURCE = minishell.c \
 		 ./domagoj/execution/redirect.c \
 		 ./domagoj/execution/child_execution.c \
 		 $(UTILS_DIR)/ft_free_array.c \
+		 ./42-Get-next-line/get_next_line.c \
+		 ./DEL_tester.c \
 
-CFLAGS = -Wall -Wextra -Werror
+# TODO DELETE DEL_tester
+
+CFLAGS = -Wall -Wextra -Werror -g # TODO
+# CFLAGS = -Wall -Wextra -Werror
 
 OBJECTS = $(SOURCE:.c=.o)
 

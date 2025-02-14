@@ -21,7 +21,7 @@ int	try_builtin(t_cmd_table *table)
 	else if (ft_strncmp(table->cmd, "echo", 4) == 0 && table->cmd[4] == '\0')
 		return (builtin_echo(table->args));
 	else if (ft_strncmp(table->cmd, "pwd", 3) == 0 && table->cmd[3] == '\0')
-		return (builtin_pwd());
+		return (builtin_pwd(table->args));
 	else if (ft_strncmp(table->cmd, "env", 3) == 0 && table->cmd[3] == '\0')
 		return (builtin_env(table->args));
 	else if (ft_strncmp(table->cmd, "export", 6) == 0 && table->cmd[6] == '\0')
@@ -33,14 +33,18 @@ int	try_builtin(t_cmd_table *table)
 	return (-1);
 }
 
-int	builtin_pwd(void)
+int	builtin_pwd(char **args)
 {
 	char	*cwd_path;
 
+	if (mak_arr_size(args) > 1)
+		if (args[1][0] == '-' && args[1][1] != '\0')
+			return (bsh_err("pwd", args[1], "invalid option", 2));
 	cwd_path = get_cwd_path();
 	if (cwd_path == NULL)
 	{
-		printf("%s\n", getenv_local("PWD"));
+		if (get_data(NULL)->last_cwd)
+			printf("%s\n", get_data(NULL)->last_cwd);
 		return (0);
 	}
 	printf("%s\n", cwd_path);
@@ -95,7 +99,7 @@ int	builtin_echo(char **args)
 
 int	builtin_exit(char **args)
 {
-	int	ret;
+	long	ret;
 
 	get_data(NULL)->exit_called = 1;
 	if (mak_arr_size(args) == 1)
@@ -112,7 +116,34 @@ int	builtin_exit(char **args)
 		get_data(NULL)->exit_called = 0;
 		return (bsh_err("exit", args[1], "too many arguments", 1));
 	}
-	ret = ft_atoi(args[1]);
+	ret = mak_atol(args[1]);
 	ret = (unsigned char)ret;
 	return (ret);
+}
+
+long	mak_atol(const char *str)
+{
+	long result;
+	int sign;
+	int i;
+	
+	result = 0;
+	sign = 1;
+	i = 0;
+	while (isspace(str[i]))
+		i++;
+	if (str[i] == '-')
+	{
+		sign = -1;
+		i++;
+	} 
+	else if (str[i] == '+')
+		i++;
+	
+	while (str[i] >= '0' && str[i] <= '9')
+	{
+		result = result * 10 + (str[i] - '0');
+		i++;
+	}
+	return (sign * result);
 }

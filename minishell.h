@@ -13,6 +13,8 @@
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
+# include "42-Get-next-line/get_next_line.h" // TODO DEBUG
+
 # include "libft/libft.h"
 # include <stdlib.h>
 # include <unistd.h>
@@ -34,6 +36,8 @@
 
 # define PROMPT "\001\033[1;36m\002MINI:$ \001\033[0m\002"
 # define PROMPT_ROOT "\001\033[1;36m\002MINI:# \001\033[0m\002"
+
+
 
 typedef enum t_err
 {
@@ -121,6 +125,17 @@ typedef struct s_data
 	int		heredoc_active;
 }	t_data;
 
+// TODO DEL TESTER
+int	run_interactive_test(t_data *data);
+char	*get_next_line(int fd);
+
+int cwd_deleted(void);
+long	mak_atol(const char *str);
+void sigquit_handler(int signum);
+/* void				set_signals_default(int signum); */
+int	set_signals_default(void);
+
+
 // minishell.c
 int				run_non_interactive(char **argv);
 int				run_interactive(t_data *data);
@@ -164,7 +179,7 @@ int				is_root(void);
 int				set_signals(int flag);
 void			sigint_handler(int signum);
 void			sigint_handler_non_interactive(int signum);
-int				set_signals_default(void);
+/* int				set_signals_default(void); */
 
 // builtin_export.c
 int				builtin_export(char **args);
@@ -197,7 +212,7 @@ int				ft_isspace(char c);
 
 // builtin_general.c
 int				try_builtin(t_cmd_table *table);
-int				builtin_pwd(void);
+int				builtin_pwd(char **args);
 int				builtin_env(char **args);
 int				builtin_echo(char **args);
 int				builtin_exit(char **args);

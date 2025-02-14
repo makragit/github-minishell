@@ -34,8 +34,8 @@ char	*display_prompt(void)
 		else
 			return (readline(get_data(NULL)->prompt_str));
 	}
-	free(get_data(NULL)->last_cwd);
-	get_data(NULL)->last_cwd = get_cwd_path();
+	/* free(get_data(NULL)->last_cwd); */
+	/* get_data(NULL)->last_cwd = get_cwd_path(); */
 	user = getenv_local("USER");
 	if (user == NULL)
 		user = "(null)";

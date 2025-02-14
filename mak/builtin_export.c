@@ -108,14 +108,21 @@ int	export_handle_key_value(char **args, int *i)
 		return (bsh_err("export", args[*i], "not a valid identifier", 1));
 	if (ret == 1)
 		return (export_update_no_equal(args[*i]));
-	else if (ret == 2 && args[*i + 1] == NULL)
-		value = "";
+	/* else if (ret == 2 && args[*i + 1] == NULL) */
+	/* 	value = ""; */
+	/* else if (ret == 2) */
+	/* { */
+	/* 	update_env_var(args[*i], args[*i + 1]); */
+	/* 	(*i)++; */
+	/* 	return (0); */
+	/* } */
+
 	else if (ret == 2)
-	{
-		update_env_var(args[*i], args[*i + 1]);
-		(*i)++;
-		return (0);
-	}
+		value = "";
+
+
+
+
 	else if (ret == 3)
 		return (export_update_with_value(args[*i]));
 	update_env_var(args[*i], value);

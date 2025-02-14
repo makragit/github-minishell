@@ -20,7 +20,11 @@ static int	try_execve(t_cmd_table *table)
 	path = get_path(table->cmd);
 	if (!path)
 		return (get_data(NULL)->last_ex_code);
+
 	set_signals_default(); // MAK CHANGE
+	//set_signals(3);
+	//signal(SIGQUIT, sigquit_handler);  // MAK CHANGE
+
 	execve(path, table->args, get_data(NULL)->mini_envp);
 	if (ft_strncmp(path, table->cmd, ft_strlen(path)) == 0)
 	{

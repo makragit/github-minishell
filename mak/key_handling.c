@@ -14,16 +14,36 @@
 
 // returns how many times 'search' was found using in array
 // New: now only compares until '='
+/* int	search_key_in_array(char **arr, char *search) */
+/* { */
+/* 	int	i; */
+/* 	int	found; */
+
+/* 	found = 0; */
+/* 	i = 0; */
+/* 	while (arr[i]) */
+/* 	{ */
+/* 		if (ft_strncmp(arr[i], search, len_to_equal_sign(search) + 1) == 0) */
+/* 			found++; */
+/* 		i++; */
+/* 	} */
+/* 	return (found); */
+/* } */
+
+// returns how many times 'search' was found using in array
+// New: now only compares until '='
 int	search_key_in_array(char **arr, char *search)
 {
 	int	i;
-	int	found;
+	int	search_len;
+	int found;
 
 	found = 0;
+	search_len = len_to_equal_sign(search);
 	i = 0;
 	while (arr[i])
 	{
-		if (ft_strncmp(arr[i], search, len_to_equal_sign(search)) == 0)
+		if (ft_strncmp(arr[i], search, search_len) == 0 && arr[i][search_len] == '=')
 			found++;
 		i++;
 	}

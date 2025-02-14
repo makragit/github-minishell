@@ -47,6 +47,7 @@ t_data	*init_data(char **envp)
 	data->mini_envp = copy_array(envp);
 	if (data->mini_envp == NULL)
 		data->mini_envp = create_empty_envp();
+	data->last_cwd = get_cwd_path(); // NEW
 	return (data);
 }
 
