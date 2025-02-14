@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:33:03 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/14 17:47:27 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/02/14 22:21:01 by mkrausho         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ int	builtin_env(char **args)
 	char	**env;
 
 	if (mak_arr_size(args) > 1)
-		return (bsh_err("env", args[1], "No such file or directory", 0));
+		return (bsh_err("env", args[1], "No such file or directory", 127));
 	env = get_data(NULL)->mini_envp;
 	while (*env != NULL)
 	{

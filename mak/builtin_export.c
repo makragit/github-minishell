@@ -6,7 +6,7 @@
 /*   By: mkrausho <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:32:24 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/14 18:24:21 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/02/14 22:23:18 by mkrausho         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,10 +22,7 @@ void	builtin_export_print(char **arr, int size)
 
 	temp = malloc(size * sizeof(char *));
 	if (!temp)
-	{
 		malloc_error("builtin_export_print malloc error");
-		return ; // NEW
-	}
 	i = 0;
 	while (i < size)
 	{
@@ -58,6 +55,8 @@ int	builtin_export(char **args)
 		builtin_export_print(get_envp, mak_arr_size(get_envp));
 		return (0);
 	}
+	if (args[1][0] == '-' && args[1][1] != '\0')
+		return (bsh_err("export", args[1], "invalid option", 2));
 	i = 1;
 	while (args[i])
 	{

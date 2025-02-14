@@ -6,7 +6,7 @@
 /*   By: mkrausho <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:32:55 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/14 18:18:59 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/02/14 22:26:45 by mkrausho         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ char	*get_cwd_path(void)
 	if (ret == NULL)
 	{
 		malloc_error("ERROR: malloc failed in get_cwd_path");
-		return (NULL); // NEW
+		return (NULL);
 	}
 	i = 0;
 	while (cwd[i])

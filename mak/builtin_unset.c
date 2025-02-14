@@ -6,7 +6,7 @@
 /*   By: mkrausho <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/14 17:47:06 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/14 17:47:11 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/02/14 22:20:38 by mkrausho         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,8 @@ int	builtin_unset(char **args)
 
 	if (mak_arr_size(args) == 1)
 		return (0);
+	if (args[1][0] == '-' && args[1][1] != '\0')
+		return (bsh_err("unset", args[1], "invalid option", 2));
 	i = 1;
 	while (args[i])
 	{
