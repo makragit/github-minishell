@@ -27,6 +27,7 @@ SOURCE = minishell.c \
 		 ./mak/struct.c \
 		 ./mak/utils_array.c \
 		 ./mak/utils_array_2.c \
+		 ./mak/new.c \
           $(TOKEN_DIR)/token.c \
           $(TOKEN_DIR)/token_make_entry.c \
           $(TOKEN_DIR)/token_len.c \

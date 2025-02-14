@@ -6,7 +6,7 @@
 /*   By: mkrausho <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:32:00 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/01 19:32:01 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/02/14 18:19:45 by mkrausho         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ char	**copy_array(char **arr)
 	if (!new_arr)
 	{
 		malloc_error("ERROR: malloc failed in copy_array");
+		return (NULL); // NEW
 	}
 	i = 0;
 	while (arr[i])
@@ -46,6 +47,7 @@ char	**copy_array(char **arr)
 		{
 			mak_free_array(new_arr);
 			malloc_error("ERROR malloc failed in copy_array: ft_strdup");
+			return (NULL); // NEW
 		}
 		i++;
 	}

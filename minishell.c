@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:31:22 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/11 16:10:50 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/14 18:15:39 by mkrausho         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,8 @@ int	main(int argc, char **argv, char **envp)
 	if (non_interactive_mode == 1)
 		ret = run_non_interactive(argv);
 	else
-		ret = run_interactive_test(data);
-		/* ret = run_interactive(data); */
+		ret = run_interactive(data);
+		/* ret = run_interactive_test(data); */
 	free_all();
 	return (ret);
 }
@@ -107,7 +107,6 @@ int	check_argv(int argc, char **av)
 !removing permission from parent folder no longer crashes heredoc execution (now its infinite hold; which is better I guess)
 *new problem-> heredoc temp file isnt deleted properly when multiple heredocs present ->FIXED
 */
-
 
 /*
 Fixes to do

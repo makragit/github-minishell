@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/26 14:37:39 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/02/01 17:06:24 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/14 17:58:37 by mkrausho         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,11 +20,7 @@ static int	try_execve(t_cmd_table *table)
 	path = get_path(table->cmd);
 	if (!path)
 		return (get_data(NULL)->last_ex_code);
-
-	set_signals_default(); // MAK CHANGE
-	//set_signals(3);
-	//signal(SIGQUIT, sigquit_handler);  // MAK CHANGE
-
+	set_signals_default();
 	execve(path, table->args, get_data(NULL)->mini_envp);
 	if (ft_strncmp(path, table->cmd, ft_strlen(path)) == 0)
 	{

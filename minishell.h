@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:31:12 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/10 15:03:11 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/14 17:53:45 by mkrausho         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,6 @@
 
 # define PROMPT "\001\033[1;36m\002MINI:$ \001\033[0m\002"
 # define PROMPT_ROOT "\001\033[1;36m\002MINI:# \001\033[0m\002"
-
-
 
 typedef enum t_err
 {
@@ -126,15 +124,12 @@ typedef struct s_data
 }	t_data;
 
 // TODO DEL TESTER
-int	run_interactive_test(t_data *data);
-char	*get_next_line(int fd);
+int				run_interactive_test(t_data *data);
+char			*get_next_line(int fd);
 
-int cwd_deleted(void);
-long	mak_atol(const char *str);
-void sigquit_handler(int signum);
-/* void				set_signals_default(int signum); */
-int	set_signals_default(void);
-
+// new.c
+int				cwd_deleted(void);
+long			mak_atol(const char *str);
 
 // minishell.c
 int				run_non_interactive(char **argv);
@@ -179,7 +174,7 @@ int				is_root(void);
 int				set_signals(int flag);
 void			sigint_handler(int signum);
 void			sigint_handler_non_interactive(int signum);
-/* int				set_signals_default(void); */
+int				set_signals_default(void);
 
 // builtin_export.c
 int				builtin_export(char **args);

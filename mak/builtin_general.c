@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:33:03 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/11 16:10:09 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/14 17:47:27 by mkrausho         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,31 +119,4 @@ int	builtin_exit(char **args)
 	ret = mak_atol(args[1]);
 	ret = (unsigned char)ret;
 	return (ret);
-}
-
-long	mak_atol(const char *str)
-{
-	long result;
-	int sign;
-	int i;
-	
-	result = 0;
-	sign = 1;
-	i = 0;
-	while (isspace(str[i]))
-		i++;
-	if (str[i] == '-')
-	{
-		sign = -1;
-		i++;
-	} 
-	else if (str[i] == '+')
-		i++;
-	
-	while (str[i] >= '0' && str[i] <= '9')
-	{
-		result = result * 10 + (str[i] - '0');
-		i++;
-	}
-	return (sign * result);
 }

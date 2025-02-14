@@ -80,6 +80,8 @@ char	*trim_touching_quotes(char *str, size_t size, size_t i)
 	size_t		start;
 	char		q_flag;
 
+	// if (!str) // MAK scan-build
+	// 	return (NULL); // MAK scan-build
 	if (str && ft_strlen(str) == 2)
 		return (str);
 	while (str[i])

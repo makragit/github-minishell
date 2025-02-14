@@ -6,7 +6,7 @@
 /*   By: mkrausho <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:31:33 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/10 15:11:00 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/02/14 17:41:36 by mkrausho         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ t_data	*init_data(char **envp)
 	data->mini_envp = copy_array(envp);
 	if (data->mini_envp == NULL)
 		data->mini_envp = create_empty_envp();
-	data->last_cwd = get_cwd_path(); // NEW
+	data->last_cwd = get_cwd_path();
 	return (data);
 }
 

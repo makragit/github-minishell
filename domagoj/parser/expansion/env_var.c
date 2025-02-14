@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/15 21:11:31 by domagoj           #+#    #+#             */
-/*   Updated: 2025/02/11 15:57:20 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/14 19:04:20 by mkrausho         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,6 +117,8 @@ int	expand_env(char **arg, int d_q, int c)
 		if (skip_s_quote(str_cpy, &c, d_q) == -1)
 			break ;
 		c = skip_heredoc(str_cpy, c);
+		if (str_cpy[c] == '\0')
+			break;
 		if (str_cpy[c] == '$')
 		{
 			var_name = _var_name(&str_cpy, c, of_len(str_cpy + c));

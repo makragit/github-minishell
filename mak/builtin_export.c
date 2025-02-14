@@ -6,7 +6,7 @@
 /*   By: mkrausho <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:32:24 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/01 19:32:25 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/02/14 18:24:21 by mkrausho         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,10 @@ void	builtin_export_print(char **arr, int size)
 
 	temp = malloc(size * sizeof(char *));
 	if (!temp)
+	{
 		malloc_error("builtin_export_print malloc error");
+		return ; // NEW
+	}
 	i = 0;
 	while (i < size)
 	{
@@ -108,21 +111,8 @@ int	export_handle_key_value(char **args, int *i)
 		return (bsh_err("export", args[*i], "not a valid identifier", 1));
 	if (ret == 1)
 		return (export_update_no_equal(args[*i]));
-	/* else if (ret == 2 && args[*i + 1] == NULL) */
-	/* 	value = ""; */
-	/* else if (ret == 2) */
-	/* { */
-	/* 	update_env_var(args[*i], args[*i + 1]); */
-	/* 	(*i)++; */
-	/* 	return (0); */
-	/* } */
-
 	else if (ret == 2)
 		value = "";
-
-
-
-
 	else if (ret == 3)
 		return (export_update_with_value(args[*i]));
 	update_env_var(args[*i], value);

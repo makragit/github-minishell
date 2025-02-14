@@ -6,7 +6,7 @@
 /*   By: mkrausho <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:32:34 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/01 20:06:55 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/02/14 17:46:36 by mkrausho         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,36 +14,19 @@
 
 // returns how many times 'search' was found using in array
 // New: now only compares until '='
-/* int	search_key_in_array(char **arr, char *search) */
-/* { */
-/* 	int	i; */
-/* 	int	found; */
-
-/* 	found = 0; */
-/* 	i = 0; */
-/* 	while (arr[i]) */
-/* 	{ */
-/* 		if (ft_strncmp(arr[i], search, len_to_equal_sign(search) + 1) == 0) */
-/* 			found++; */
-/* 		i++; */
-/* 	} */
-/* 	return (found); */
-/* } */
-
-// returns how many times 'search' was found using in array
-// New: now only compares until '='
 int	search_key_in_array(char **arr, char *search)
 {
 	int	i;
 	int	search_len;
-	int found;
+	int	found;
 
 	found = 0;
 	search_len = len_to_equal_sign(search);
 	i = 0;
 	while (arr[i])
 	{
-		if (ft_strncmp(arr[i], search, search_len) == 0 && arr[i][search_len] == '=')
+		if ((ft_strncmp(arr[i], search, search_len) == 0)
+			&& arr[i][search_len] == '=')
 			found++;
 		i++;
 	}

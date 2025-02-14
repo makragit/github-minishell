@@ -6,7 +6,7 @@
 /*   By: mkrausho <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:32:48 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/10 15:10:01 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/02/14 17:52:34 by mkrausho         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,17 +21,18 @@ int	builtin_chdir(char **args)
 		return (1);
 	if (mak_arr_size(args) > 2)
 		return (bsh_err("cd", NULL, "too many arguments", 1));
-	if ((mak_arr_size(args) == 1) || (ft_strlen(args[1]) == 1 && args[1][0] == '~'))
+	if ((mak_arr_size(args) == 1)
+		|| (ft_strlen(args[1]) == 1 && args[1][0] == '~'))
 	{
 		path = getenv_local("HOME");
-    if (path == NULL)
-        return (bsh_err("cd", NULL, "HOME not set", 1));
+		if (path == NULL)
+			return (bsh_err("cd", NULL, "HOME not set", 1));
 	}
 	else if (ft_strlen(args[1]) == 1 && args[1][0] == '-')
 	{
 		path = getenv_local("OLDPWD");
 		if (!path)
-        return (bsh_err("cd", NULL, "OLDPWD not set", 1));
+			return (bsh_err("cd", NULL, "OLDPWD not set", 1));
 	}
 	else
 		path = args[1];
@@ -39,15 +40,6 @@ int	builtin_chdir(char **args)
 		return (bsh_err("cd", NULL, "No such file or directory", 1));
 	builtin_chdir_update_pwd();
 	return (cwd_deleted());
-}
-
-int cwd_deleted(void)
-{
-	char	cwd[PATH_MAX];
-
-	if (getcwd(cwd, sizeof(cwd)) == NULL)
-		return (bsh_err("cd", "getcd", "cannot access parent directories", 0));
-	return (0);
 }
 
 void	builtin_chdir_update_pwd(void)

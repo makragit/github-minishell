@@ -6,7 +6,7 @@
 /*   By: mkrausho <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:32:14 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/02 18:16:05 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/02/14 17:44:36 by mkrausho         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,6 @@ char	*display_prompt(void)
 		else
 			return (readline(get_data(NULL)->prompt_str));
 	}
-	/* free(get_data(NULL)->last_cwd); */
-	/* get_data(NULL)->last_cwd = get_cwd_path(); */
 	user = getenv_local("USER");
 	if (user == NULL)
 		user = "(null)";
