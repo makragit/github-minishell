@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/10 13:27:10 by domagoj           #+#    #+#             */
-/*   Updated: 2025/01/25 19:19:51 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/14 19:39:58 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,12 +33,15 @@ static int	check_quotes(const char *input)
 	return (open_quote != '\0');
 }
 
-int	input_check(const char *input)
+char	*input_check(char *input)
 {
+	if (!input)
+		return (NULL);
 	if (check_quotes(input) == 1)
 	{
 		syntax_error_print("quote");
-		return (1);
+		free(input);
+		return (NULL);
 	}
-	return (0);
+	return (input);
 }

@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/05 16:44:59 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/02/11 15:32:31 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/14 20:02:40 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ char	*expand_line(char *line, char *delim, int is_quoted)
 		return (NULL);
 	if (is_quoted != 1)
 	{
-		if (expand_env(&line, 0, 0))
+		if (expand_env(&line, 0, 0, ft_strdup(line)))
 			return (NULL);
 	}
 	tmp = ft_strjoin(line, "\n");

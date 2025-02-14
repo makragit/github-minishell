@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/26 14:37:39 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/02/14 17:58:37 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/02/14 19:57:39 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ static int	try_execve(t_cmd_table *table)
 	char	*path;
 	t_err	reason;
 
-	path = get_path(table->cmd);
+	path = get_path(table->cmd, OK, NULL);
 	if (!path)
 		return (get_data(NULL)->last_ex_code);
 	set_signals_default();

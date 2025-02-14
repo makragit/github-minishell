@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/07 13:46:57 by domagoj           #+#    #+#             */
-/*   Updated: 2025/02/11 15:59:37 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/14 20:02:25 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,8 +80,6 @@ char	*trim_touching_quotes(char *str, size_t size, size_t i)
 	size_t		start;
 	char		q_flag;
 
-	// if (!str) // MAK scan-build
-	// 	return (NULL); // MAK scan-build
 	if (str && ft_strlen(str) == 2)
 		return (str);
 	while (str[i])
@@ -110,16 +108,11 @@ t_cmd_table	*parse(const char *input)
 	t_token			*token_lst;
 	t_cmd_table		*table;
 
-	input_cpy = ft_strdup(input);
+	input_cpy = input_check(ft_strdup(input));
 	if (!input_cpy)
 		return (NULL);
-	if (input_check(input_cpy) == 1)
-	{
-		free(input_cpy);
-		return (NULL);
-	}
 	input_cpy = trim_touching_quotes(input_cpy, ft_strlen(input_cpy), 0);
-	expand_env(&input_cpy, 0, 0);
+	expand_env(&input_cpy, 0, 0, ft_strdup(input_cpy));
 	input_cpy = trim_touching_quotes(input_cpy, ft_strlen(input_cpy), 0);
 	token_lst = parse_tokens(input_cpy);
 	if (!token_lst)
@@ -133,3 +126,10 @@ t_cmd_table	*parse(const char *input)
 	add_tokens_to_table(table, token_lst);
 	return (table);
 }
+
+/*
+export path=
+
+should report on errors
+
+*/

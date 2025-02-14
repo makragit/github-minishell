@@ -56,6 +56,7 @@ SOURCE = minishell.c \
 		  $(EXPANDER_DIR)/del_quotes.c \
 		  $(EXPANDER_DIR)/env_var.c \
 		  $(INPUT_CHCK)/input_check.c \
+		  $(UTILS_DIR)/replace.c \
 		  $(HEREDOC_DIR)/heredoc_program.c \
 		  $(PIPE_DIR)/pipe_redir.c \
 		 ./domagoj/execution/execute.c \

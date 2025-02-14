@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/06 16:22:58 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/02/11 15:07:20 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/14 20:19:38 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,12 +93,10 @@ static char	*get_valid_path(char **arr, t_err *last_err)
 	return (path);
 }
 
-char	*get_path(const char *cmd)
+char	*get_path(const char *cmd, t_err reason, char *env)
 {
 	char	*cmd_tmp;
 	char	**arr;
-	char	*env;
-	t_err	reason;
 
 	if (is_cmd_path(cmd))
 		return (ft_strdup(cmd));
@@ -106,7 +104,7 @@ char	*get_path(const char *cmd)
 	if (!cmd_tmp)
 		return (NULL);
 	env = getenv_local("PATH");
-	if (!env)
+	if (!env || env[0] == '\0')
 		env = get_data(NULL)->last_cwd;
 	if (!env)
 	{
@@ -114,11 +112,6 @@ char	*get_path(const char *cmd)
 		return (NULL);
 	}
 	arr = ft_split(env, ':');
-	if (!arr)
-	{
-		free(cmd_tmp);
-		return (NULL);
-	}
 	arr = refill_arr(arr, cmd_tmp);
 	free(cmd_tmp);
 	if (!arr)

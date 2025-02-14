@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:31:12 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/14 17:53:45 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/02/14 20:02:11 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -224,7 +224,7 @@ t_cmd_table		*table_init(size_t of_size);
 int				token_distribution(t_cmd_table *table, t_token *token);
 int				arr_create(t_cmd_table *table, t_token *token);
 t_err			expander(t_token *tokens);
-int				expand_env(char **arg, int d_q, int c);
+int				expand_env(char **arg, int d_q, int c, char *cpy);
 int				is_whitespace(char c);
 int				skip_whitespace(char **str);
 void			free_table(t_cmd_table *table);
@@ -239,7 +239,7 @@ t_redir_data	*reverse_data_lst(t_redir_data *data);
 t_token			*reverse_lst(t_token *lst);
 void			free_lst(t_token *lst);
 void			add_previous(t_token *lst);
-int				input_check(const char *input);
+char			*input_check(char *input);
 size_t			table_size(t_token *tokens);
 t_redir_data	*add_redir_entry(t_redir_data *data, t_token *token);
 char			*getenv_local(char *name);
@@ -247,7 +247,7 @@ t_err			execute(t_cmd_table *table);
 int				heredoc(t_cmd_table *table, char *filename);
 int				ft_create_file(char **filename);
 int				ft_append(const char *str, int fd);
-char			*get_path(const char *cmd);
+char			*get_path(const char *cmd, t_err reason, char *env);
 void			ft_free_array(char **arr);
 int				syntax_error_print(char *reason);
 int				execute_single(t_cmd_table *table, t_cmd_table *head);
@@ -263,5 +263,6 @@ int				skip_s_quote(char *str, int *c, int flag);
 char			*read_line(void);
 void			compress_str(char *str, size_t str_size);
 char			*_var_name(char **str, size_t start, size_t len);
+int				replace(char **arg, char *var_name, size_t start);
 
 #endif
