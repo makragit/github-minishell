@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/06 16:25:39 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/02/14 19:44:06 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/15 12:57:31 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ static t_err	open_fd(char *filename, t_token_type mode)
 	return (OK);
 }
 
-t_err	redir(t_redir_data *lst, t_redir_data *lst_head)
+t_err	redir(t_redir_data *lst)
 {
 	t_err			result;
 
@@ -82,6 +82,5 @@ t_err	redir(t_redir_data *lst, t_redir_data *lst_head)
 	}
 	if (result == FAIL)
 		get_data(NULL)->last_ex_code = 1;
-	lst = lst_head;
 	return (result);
 }

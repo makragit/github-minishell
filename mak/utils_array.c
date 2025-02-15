@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils_array.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkrausho <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:32:00 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/14 22:26:18 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/02/15 15:01:08 by mkrausho         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,16 +39,17 @@ char	**copy_array(char **arr)
 	i = 0;
 	while (arr[i])
 	{
-		new_arr[i] = ft_strdup(arr[i]);
-		if (!new_arr[i])
+		if (new_arr)
+			new_arr[i] = ft_strdup(arr[i]);
+		if (new_arr && !new_arr[i])
 		{
 			mak_free_array(new_arr);
 			malloc_error("ERROR malloc failed in copy_array: ft_strdup");
-			return (NULL);
 		}
 		i++;
 	}
-	new_arr[i] = NULL;
+	if (new_arr)
+		new_arr[i] = NULL;
 	return (new_arr);
 }
 

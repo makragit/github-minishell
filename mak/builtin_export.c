@@ -3,14 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_export.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkrausho <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:32:24 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/14 22:23:18 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/02/15 15:21:17 by mkrausho         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
+
+	/* while (i < size) */
+	/* { */
+	/* 	temp[i] = arr[i]; */
+	/* 	i++; */
+	/* } */
 
 // Function to sort and print an array of strings without modifying the original
 void	builtin_export_print(char **arr, int size)

@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 22:50:12 by domagoj           #+#    #+#             */
-/*   Updated: 2025/02/10 09:33:38 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/15 13:03:53 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,10 +22,7 @@ static size_t	arr_size(t_token *token)
 	while (token)
 	{
 		if (token->type == PIPE)
-		{
-			token = token->next;
 			break ;
-		}
 		if (token->type == CMD_t || token->type == ARG_TOKEN)
 			i++;
 		token = token->next;

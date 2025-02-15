@@ -6,22 +6,49 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/05 18:09:54 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/02/11 15:14:25 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/15 12:53:09 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-char	*generate_filename(void)
+static void	fill_str(char **str, int fd)
 {
-	char		*str_pid;
-	static int	counter = 0;
+	size_t			count;
+	unsigned char	c;
 
-	str_pid = ft_itoa(counter);
-	if (!str_pid)
+	count = 0;
+	while (count < 8)
+	{
+		if (read(fd, &c, 1) != 1)
+		{
+			free(*str);
+			*str = NULL;
+			break ;
+		}
+		if (ft_isalnum(c))
+			(*str)[count++] = c;
+	}
+}
+
+static char	*generate_filename(void)
+{
+	char			*filename;
+	int				fd;
+
+	fd = open("/dev/urandom", O_RDONLY);
+	if (fd < 0)
 		return (NULL);
-	counter++;
-	return (str_pid);
+	filename = malloc(9 * sizeof(char));
+	if (!filename)
+	{
+		close(fd);
+		return (NULL);
+	}
+	ft_memset(filename, 0, ft_strlen(filename));
+	fill_str(&filename, fd);
+	close(fd);
+	return (filename);
 }
 
 int	ft_create_file(char **filename)

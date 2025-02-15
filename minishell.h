@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:31:12 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/14 20:02:11 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/15 12:58:02 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -251,7 +251,7 @@ char			*get_path(const char *cmd, t_err reason, char *env);
 void			ft_free_array(char **arr);
 int				syntax_error_print(char *reason);
 int				execute_single(t_cmd_table *table, t_cmd_table *head);
-t_err			redir(t_redir_data *lst, t_redir_data *lst_head);
+t_err			redir(t_redir_data *lst);
 void			add_tokens_to_table(t_cmd_table *table, t_token *lst);
 char			*fetch_test(int counter);
 int				close_unused_pipes(t_cmd_table *head);

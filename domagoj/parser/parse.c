@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/07 13:46:57 by domagoj           #+#    #+#             */
-/*   Updated: 2025/02/14 20:02:25 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/15 13:06:00 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,8 @@ char	*trim_touching_quotes(char *str, size_t size, size_t i)
 	size_t		start;
 	char		q_flag;
 
+	if (!str)
+		return (NULL);
 	if (str && ft_strlen(str) == 2)
 		return (str);
 	while (str[i])

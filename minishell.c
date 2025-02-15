@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:31:22 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/14 22:43:19 by mkrausho         ###   ########.fr       */
+/*   Updated: 2025/02/15 14:10:58 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,22 +93,20 @@ int	check_argv(int argc, char **av)
 }
 
 /*
-!FIXED!
+Fixed made by domagoj Feb 15:::
 
-!PATH - when deleted, now minishell acts like bash would
-!getppid expelled from the project
-!memcpy expelled from the project
-!when open() fails, it shouldnt crash based on double free anymore - This should be rechecked just in case!
-!exit -> keeps last_ex_code now
-!exit -> prints now on stderr and not stdout
-!when executable is empty it now prints (Permission denied; same as bash would)
-!expansion doesnt occur with heredoc delimiter names anymore
-!echo "$HOMER" problem fixed
-!removing permission from parent folder no longer crashes heredoc execution (now its infinite hold; which is better I guess)
-*new problem-> heredoc temp file isnt deleted properly when multiple heredocs present ->FIXED
-*/
+-------random names for temp files -> IMPLEMENTED
+-------scan build buggs - domi bugs fixed
+						- markus bugs fixed half (do norminette /mak to see where and to check if u approve)
 
-/*
-Fixes to do
-<<eof"" problem
+-----no forbidden functions in project (except files to be deleted before eval)
+-----norminette /domagoj -> FIXED
+eval sheet really check proper
+
+TO-DO
+eval sheet tests
+memory leak tests
+test code to delete
+recheck norminette
+make sure flags are correct and -g removed
 */

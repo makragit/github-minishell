@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/05 17:12:41 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/02/10 20:41:12 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/15 12:58:44 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ static t_err	single_builtin_line(t_cmd_table *table)
 	{
 		get_data(NULL)->backup_in = dup(STDIN_FILENO);
 		get_data(NULL)->backup_out = dup(STDOUT_FILENO);
-		if (redir(table->redir_data, table->redir_data) == OK)
+		if (redir(table->redir_data) == OK)
 		{
 			get_data(NULL)->last_ex_code = try_builtin(table);
 		}

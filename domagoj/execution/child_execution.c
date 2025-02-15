@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/26 14:37:39 by dbogovic          #+#    #+#             */
-/*   Updated: 2025/02/14 19:57:39 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/15 12:58:56 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ static void	child(t_cmd_table *table, t_cmd_table *head)
 
 	pipe_redir(table);
 	close_unused_pipes(head);
-	if (redir(table->redir_data, table->redir_data) == FAIL)
+	if (redir(table->redir_data) == FAIL)
 	{
 		free_data();
 		free_table(head);
