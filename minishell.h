@@ -13,8 +13,6 @@
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
-# include "42-Get-next-line/get_next_line.h" // TODO DEBUG
-
 # include "libft/libft.h"
 # include <stdlib.h>
 # include <unistd.h>
@@ -122,10 +120,6 @@ typedef struct s_data
 	char	*last_cwd;
 	int		heredoc_active;
 }	t_data;
-
-// TODO DEL TESTER
-int				run_interactive_test(t_data *data);
-char			*get_next_line(int fd);
 
 // new.c
 int				cwd_deleted(void);

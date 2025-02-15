@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/01 19:31:22 by mkrausho          #+#    #+#             */
-/*   Updated: 2025/02/15 14:10:58 by dbogovic         ###   ########.fr       */
+/*   Updated: 2025/02/15 15:34:36 by mkrausho         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ int	main(int argc, char **argv, char **envp)
 		ret = run_non_interactive(argv);
 	else
 		ret = run_interactive(data);
-		/* ret = run_interactive_test(data); */
 	free_all();
 	return (ret);
 }
@@ -91,22 +90,3 @@ int	check_argv(int argc, char **av)
 		exit(bsh_err("minishell", av[1], "command not found", 127));
 	return (1);
 }
-
-/*
-Fixed made by domagoj Feb 15:::
-
--------random names for temp files -> IMPLEMENTED
--------scan build buggs - domi bugs fixed
-						- markus bugs fixed half (do norminette /mak to see where and to check if u approve)
-
------no forbidden functions in project (except files to be deleted before eval)
------norminette /domagoj -> FIXED
-eval sheet really check proper
-
-TO-DO
-eval sheet tests
-memory leak tests
-test code to delete
-recheck norminette
-make sure flags are correct and -g removed
-*/
